@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balansmetoden – lös ekvationer steg för steg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbfaf5;
+    --grid:#dfe7ef;
+    --ink:#1d2433;
+    --muted:#6b7385;
+    --pen:#c8402a;
+    --pen-soft:#fbe7e2;
+    --blue:#2457c5;
+    --blue-soft:#e6eefc;
+    --green:#1f8a53;
+    --green-soft:#e2f4ea;
+    --line:#d9dce3;
+    --card:#ffffff;
+    --shadow:0 1px 2px rgba(20,30,50,.06),0 8px 24px rgba(20,30,50,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Atkinson Hyperlegible",system-ui,sans-serif;
+    color:var(--ink);
+    background:#f1efe8;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+  header{display:flex;align-items:center;gap:18px;margin-bottom:22px}
+  header h1{font-family:Fraunces,serif;font-weight:800;font-size:clamp(28px,4.4vw,42px);margin:0;letter-spacing:-.02em;line-height:1}
+  header p{margin:6px 0 0;color:var(--muted);font-size:16px}
+  .scale{width:84px;height:64px;flex:none}
+  .beam{transform-origin:42px 18px;transition:transform .3s}
+  .scale.wobble .beam{animation:wob .9s ease-out}
+  @keyframes wob{0%{transform:rotate(0)}20%{transform:rotate(-9deg)}45%{transform:rotate(6deg)}70%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
+
+  .levels{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:8px;margin-bottom:16px}
+  .lvl{
+    text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:12px;
+    padding:10px 12px;cursor:pointer;font:inherit;color:inherit;transition:border-color .15s,background .15s,transform .1s;
+  }
+  .lvl:hover{border-color:#b9bfcc}
+  .lvl:active{transform:translateY(1px)}
+  .lvl .n{font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  .lvl .d{font-family:"STIX Two Text",serif;font-size:16px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lvl .stars{font-size:12px;color:var(--pen);font-weight:700}
+  .lvl[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+  .lvl[aria-pressed="true"] .d{color:#c9cfdb}
+  .lvl[aria-pressed="true"] .stars{color:#ffb4a3}
+
+  .sheet{
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:24px 24px;
+    background-position:-1px -1px;
+    border-radius:16px;box-shadow:var(--shadow);
+    padding:22px 18px 18px;position:relative;
+  }
+  .sheet-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+  .tag{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper);padding:2px 6px;border-radius:6px}
+  .steps{
+    display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) minmax(90px,auto);
+    column-gap:14px;align-items:center;
+    font-family:"STIX Two Text",serif;font-size:clamp(20px,3.2vw,28px);
+    overflow-x:auto;padding:4px 2px 8px;
+  }
+  .steps .l{justify-self:end;text-align:right;white-space:nowrap;padding:6px 0}
+  .steps .r{justify-self:start;white-space:nowrap;padding:6px 0}
+  .steps .eq{color:var(--ink);padding:0 2px}
+  .steps .note{
+    font-family:"Atkinson Hyperlegible",sans-serif;font-size:15px;color:var(--pen);font-weight:700;
+    border-left:2px solid var(--pen);padding:2px 0 2px 10px;white-space:nowrap;align-self:center;
+  }
+  .steps .note.soft{color:var(--muted);border-left-color:#c3c8d2;font-weight:400}
+  .steps .note.empty{border-left-color:transparent}
+  .row-old{color:#5c6476}
+  .row-cur{font-weight:600}
+  .row-cur.l,.row-cur.r,.row-cur.eq{animation:pop .35s ease-out}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .row-solved{color:var(--green)}
+  .steps .first{padding-top:2px}
+  i.v{font-style:italic;font-family:"STIX Two Text",serif}
+  .opx{margin:0 .22em}
+  .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.72em;line-height:1.05;margin:0 .1em}
+  .fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+  .bigfr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15}
+  .bigfr>span:first-child{border-bottom:2px solid currentColor;padding:0 .2em .05em}
+  .bigfr>span:last-child{padding-top:.05em}
+  sup{font-size:.62em;line-height:0}
+
+  .panel{margin-top:16px;display:grid;gap:12px}
+  .opbox{
+    background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px;
+    display:grid;gap:10px;
+  }
+  .opbox label{font-weight:700;font-size:15px}
+  .opbox label span{font-weight:400;color:var(--muted)}
+  .inrow{display:flex;gap:8px;flex-wrap:wrap}
+  .inrow input{
+    flex:1 1 200px;min-width:0;font-family:"STIX Two Text",serif;font-size:24px;padding:8px 12px;
+    border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);outline:none;
+  }
+  .inrow input:focus{border-color:var(--blue)}
+  .keys{display:flex;gap:6px;flex-wrap:wrap}
+  .key{
+    min-width:44px;height:40px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer;
+    font-family:"STIX Two Text",serif;font-size:20px;color:var(--ink);
+  }
+  .key:hover{background:#f4f5f8}
+  .btn{
+    font:inherit;font-weight:700;font-size:15px;border-radius:10px;padding:10px 14px;cursor:pointer;
+    border:1.5px solid var(--line);background:#fff;color:var(--ink);transition:background .15s,transform .08s;
+  }
+  .btn:hover{background:#f4f5f8}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.primary:hover{background:#1c47a6}
+  .btn.ghost{background:transparent}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .actions .spacer{flex:1}
+
+  .msg{border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.45;display:none}
+  .msg.show{display:block;animation:pop .25s ease-out}
+  .msg.hint{background:var(--blue-soft);color:#1b3f8f}
+  .msg.err{background:var(--pen-soft);color:#8f2a17}
+  .msg.ok{background:var(--green-soft);color:#14623a}
+  .msg b{font-weight:700}
+  .msg .m{font-family:"STIX Two Text",serif;font-size:1.1em}
+
+  .done{
+    display:none;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:18px;
+    border:2px solid var(--green);
+  }
+  .done.show{display:block;animation:pop .35s ease-out}
+  .done h2{margin:0 0 6px;font-family:Fraunces,serif;font-size:26px;color:var(--green)}
+  .done p{margin:6px 0;line-height:1.5}
+  .done .m{font-family:"STIX Two Text",serif;font-size:1.15em}
+
+  .gradebar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .gradebar .gnote{color:var(--muted);font-size:14px}
+  .grade{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:7px 14px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:8px}
+  .grade .box{width:16px;height:16px;border:2px solid currentColor;border-radius:4px;display:inline-grid;place-items:center;font-size:12px;line-height:1}
+  .grade[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .expq{display:none;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px;border:2px solid var(--blue)}
+  .expq.show{display:block;animation:pop .25s ease-out}
+  .expq h3{margin:0 0 4px;font-size:16px}
+  .expq p{margin:0 0 10px;color:var(--muted);font-size:15px}
+  .expq .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .expq .opt{font-family:"STIX Two Text",serif;font-size:21px;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--ink);overflow-x:auto;white-space:nowrap}
+  .expq .opt:hover{background:#f4f5f8}
+  .expq .opt.wrong{background:var(--pen-soft);border-color:var(--pen);color:#8f2a17;cursor:default}
+  .expq .opt.right{background:var(--green-soft);border-color:var(--green);color:#14623a}
+  .expq .fb{margin-top:10px;font-size:15px;line-height:1.45;display:none;border-radius:10px;padding:10px 12px}
+  .expq .fb.show{display:block}
+  .expq .fb.err{background:var(--pen-soft);color:#8f2a17}
+  .expq .row{display:flex;justify-content:flex-end;margin-top:10px}
+  @media (max-width:680px){.expq .opts{grid-template-columns:1fr}}
+
+  .help{margin-top:22px;color:var(--muted);font-size:15px;line-height:1.55}
+  .help summary{cursor:pointer;font-weight:700;color:var(--ink)}
+  .help ul{padding-left:20px;margin:8px 0}
+  .help code{font-family:"STIX Two Text",serif;font-size:1.1em;color:var(--ink);background:#fff;padding:0 5px;border-radius:5px}
+
+  @media (max-width:680px){
+    .levels{grid-template-columns:repeat(2,1fr)}
+    header .scale{display:none}
+    .steps{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);row-gap:0}
+    .steps .note{grid-column:1/-1;justify-self:center;font-size:13px;margin:0 0 4px}
+    .steps .note.empty{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="scale" id="scale" viewBox="0 0 84 64" aria-hidden="true">
+      <rect x="40" y="18" width="4" height="38" rx="2" fill="#1d2433"/>
+      <rect x="26" y="56" width="32" height="5" rx="2.5" fill="#1d2433"/>
+      <g class="beam">
+        <rect x="6" y="15" width="72" height="5" rx="2.5" fill="#1d2433"/>
+        <circle cx="42" cy="17.5" r="4.5" fill="#c8402a"/>
+        <path d="M12 20 L4 38 M12 20 L20 38" stroke="#1d2433" stroke-width="1.5"/>
+        <path d="M2 38 h20 a10 6 0 0 1 -20 0z" fill="#2457c5"/>
+        <path d="M72 20 L64 38 M72 20 L80 38" stroke="#1d2433" stroke-width="1.5"/>
+        <path d="M62 38 h20 a10 6 0 0 1 -20 0z" fill="#2457c5"/>
+      </g>
+    </svg>
+    <div>
+      <h1>Balansmetoden</h1>
+      <p>Gör alltid samma sak i båda leden – då väger vågen jämnt och likheten gäller.</p>
+    </div>
+  </header>
+
+  <div class="gradebar">
+    <span class="gnote" id="gradeNote">Nivå 1–2 för åk 7. Går du i 8A? Då får du även nivå 3 och 4.</span>
+    <button class="grade" id="gradeBtn" aria-pressed="false"><span class="box" id="gradeBox"></span>Jag går i 8A</button>
+  </div>
+  <nav class="levels" id="levels" aria-label="Välj nivå"></nav>
+
+  <section class="sheet">
+    <div class="sheet-top">
+      <span class="tag" id="lvlTag">Nivå 1</span>
+      <button class="btn ghost" id="newBtn" title="Ny ekvation på samma nivå">↻ Ny ekvation</button>
+    </div>
+    <div class="steps" id="steps" aria-live="polite"></div>
+  </section>
+
+  <section class="panel">
+    <div class="opbox" id="opbox">
+      <label for="opInput">Vad gör du i båda leden? <span>t.ex. −4, +2x, −x², ·3 eller /5</span></label>
+      <div class="inrow">
+        <input id="opInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="−4" inputmode="text">
+        <button class="btn primary" id="applyBtn">Gör i båda leden</button>
+      </div>
+      <div class="keys" id="keys"></div>
+      <div class="actions">
+        <button class="btn" id="expandBtn">Multiplicera in i parentesen</button>
+        <button class="btn" id="simplifyBtn">Förenkla</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="hintBtn">💡 Ledtråd</button>
+        <button class="btn ghost" id="autoBtn">Visa nästa steg</button>
+        <button class="btn ghost" id="undoBtn">↶ Ångra</button>
+      </div>
+    </div>
+    <div class="expq" id="expq" aria-live="polite"></div>
+    <div class="msg" id="msg" role="status"></div>
+    <div class="done" id="done"></div>
+  </section>
+
+  <details class="help">
+    <summary>Hur fungerar appen?</summary>
+    <ul>
+      <li>Skriv vad du vill göra i <b>båda leden</b> och tryck <i>Gör i båda leden</i> (eller Enter). Exempel: <code>−4</code> drar bort 4, <code>+3x</code> lägger till 3x, <code>−x²</code> tar bort x², <code>·2</code> multiplicerar och <code>/5</code> delar med 5.</li>
+      <li><b>Multiplicera in i parentesen</b> när det finns en parentes. Då får du välja vilken utveckling som är rätt, t.ex. att 4(2 + x) blir 8 + 4x och (x − 4)(x + 2) blir x² + 2x − 4x − 8.</li>
+      <li>Nivå 1–2 är för åk 7. Tryck på <b>Jag går i 8A</b> för att även få nivå 3 och 4.</li>
+      <li><b>Förenkla</b> slår ihop termer av samma sort: x²-termer för sig, x-termer för sig och tal för sig.</li>
+      <li>Målet är att få <i>x</i> ensamt i ena ledet. Fastnar du – tryck på <b>Ledtråd</b>.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+/* ---------- Rationella tal ---------- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;}
+function Q(n,d=1){if(d<0){n=-n;d=-d;}const g=gcd(n,d);n=n/g;d=d/g;if(n===0)n=0;return {n,d};}
+const add=(a,b)=>Q(a.n*b.d+b.n*a.d,a.d*b.d);
+const mul=(a,b)=>Q(a.n*b.n,a.d*b.d);
+const dv=(a,b)=>Q(a.n*b.d,a.d*b.n);
+const neg=a=>Q(-a.n,a.d);
+const absQ=a=>Q(Math.abs(a.n),a.d);
+const isZ=a=>a.n===0;
+const isOne=a=>a.n===1&&a.d===1;
+const eqQ=(a,b)=>a.n===b.n&&a.d===b.d;
+const cmpQ=(a,b)=>a.n*b.d-b.n*a.d;
+const toQ=x=>typeof x==='number'?Q(x):x;
+
+/* ---------- Uttryck ---------- */
+// term: {k:'m', c:Q, p:0|1|2}  eller  {k:'prod', f:[[monom...],[monom...]]}
+// led:  {terms:[...], op:null|{t:'div'|'mul', n:Q}}
+const m=(c,p=0)=>({k:'m',c:toQ(c),p});
+const X=(c=1)=>m(c,1);
+const prod=(...f)=>({k:'prod',f});
+const bin=(a,b)=>[X(a),m(b)];          // (ax + b)
+const side=terms=>({terms,op:null});
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function polyMul(a,b){const r=[Q(0),Q(0),Q(0),Q(0),Q(0)];for(let i=0;i<a.length;i++)for(let j=0;j<b.length&&i+j<5;j++)r[i+j]=add(r[i+j],mul(a[i],b[j]));return r;}
+function polyOfMonos(ms){const r=[Q(0),Q(0),Q(0),Q(0),Q(0)];ms.forEach(t=>{r[t.p]=add(r[t.p],t.c);});return r;}
+function polyOfTerms(terms){
+  let r=[Q(0),Q(0),Q(0),Q(0),Q(0)];
+  terms.forEach(t=>{
+    let p;
+    if(t.k==='m'){p=polyOfMonos([t]);}
+    else{p=polyOfMonos(t.f[0]);for(let i=1;i<t.f.length;i++)p=polyMul(p,polyOfMonos(t.f[i]));}
+    r=r.map((v,i)=>add(v,p[i]));
+  });
+  return r;
+}
+function polyOfSide(s){
+  let p=polyOfTerms(s.terms);
+  if(s.op){p=p.map(c=>s.op.t==='div'?dv(c,s.op.n):mul(c,s.op.n));}
+  return p;
+}
+const evalPoly=(p,x)=>p.reduce((acc,c,i)=>add(acc,mul(c,Q(Math.pow(x,i)))),Q(0));
+const hasProd=s=>s.terms.some(t=>t.k==='prod');
+function isSimplified(s){
+  if(s.op||hasProd(s))return false;
+  const seen={};
+  for(const t of s.terms){
+    if(seen[t.p])return false;seen[t.p]=1;
+    if(isZ(t.c)&&s.terms.length>1)return false;
+  }
+  return true;
+}
+function expandProd(f){
+  let acc=f[0].map(t=>m(t.c,t.p));
+  for(let i=1;i<f.length;i++){
+    const nx=[];
+    acc.forEach(a=>f[i].forEach(b=>nx.push(m(mul(a.c,b.c),a.p+b.p))));
+    acc=nx;
+  }
+  return acc;
+}
+function expandSide(s){
+  const out=[];
+  s.terms.forEach(t=>{if(t.k==='prod')out.push(...expandProd(t.f));else out.push(t);});
+  return {terms:out,op:s.op};
+}
+function simplifySide(s){
+  const p=polyOfSide(s);
+  const terms=[];
+  for(let i=4;i>=0;i--)if(!isZ(p[i]))terms.push(m(p[i],i));
+  if(!terms.length)terms.push(m(0));
+  return side(terms);
+}
+
+/* ---------- Visning ---------- */
+const MINUS='−';
+function fq(q,signed=true){
+  const s=(signed&&q.n<0)?MINUS:'';const n=Math.abs(q.n);
+  if(q.d===1)return s+n;
+  return s+`<span class="fr"><span>${n}</span><span>${q.d}</span></span>`;
+}
+function varHTML(p){return p===0?'':p===1?'<i class="v">x</i>':`<i class="v">x</i><sup>${p}</sup>`;}
+function monoBody(c,p){ // c >= 0
+  if(p===0)return fq(c);
+  return (isOne(c)?'':fq(c))+varHTML(p);
+}
+function termSignBody(t){
+  if(t.k==='m')return [t.c.n<0,monoBody(absQ(t.c),t.p)];
+  let negSign=false,html='';
+  t.f.forEach((fac,j)=>{
+    if(j===0&&fac.length===1){
+      const mo=fac[0];negSign=mo.c.n<0;
+      html+=(mo.p===0&&isOne(absQ(mo.c)))?'':monoBody(absQ(mo.c),mo.p);
+    }else{
+      html+='('+termsHTML(fac)+')';
+    }
+  });
+  return [negSign,html];
+}
+function termsHTML(terms){
+  return terms.map((t,i)=>{
+    const [n,b]=termSignBody(t);
+    if(i===0)return (n?MINUS:'')+b;
+    return `<span class="opx">${n?MINUS:'+'}</span>`+b;
+  }).join('');
+}
+function sideHTML(s){
+  const inner=termsHTML(s.terms);
+  if(!s.op)return inner;
+  if(s.op.t==='div')return `<span class="bigfr"><span>${inner}</span><span>${fq(s.op.n)}</span></span>`;
+  const nn=s.op.n.n<0?'('+fq(s.op.n)+')':fq(s.op.n);
+  return `${nn}<span class="opx">·</span>${s.terms.length>1?'('+inner+')':inner}`;
+}
+function monoSigned(mo){return (mo.c.n<0?MINUS:'+')+monoBody(absQ(mo.c),mo.p);}
+function eqText(eq){return sideHTML(eq.L)+' = '+sideHTML(eq.R);}
+
+/* ---------- Slumptal & generatorer ---------- */
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const nz=(a,b)=>{let v=0;while(v===0)v=ri(a,b);return v;};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+function solutionOf(eq){
+  const l=polyOfSide(eq.L),r=polyOfSide(eq.R);
+  const d=l.map((c,i)=>add(c,neg(r[i])));
+  if(!isZ(d[2])||!isZ(d[3])||!isZ(d[4])||isZ(d[1]))return null;
+  return dv(neg(d[0]),d[1]);
+}
+function maxConst(eq){
+  let mx=0;
+  const scan=ts=>ts.forEach(t=>{if(t.k==='m')mx=Math.max(mx,Math.abs(t.c.n));else t.f.forEach(scan);});
+  scan(eq.L.terms);scan(eq.R.terms);return mx;
+}
+function generate(level){
+  for(let tries=0;tries<2000;tries++){
+    const eq=GEN[level]();
+    const s=solutionOf(eq);
+    if(!s||s.d!==1||s.n===0)continue;
+    const lim=LIMITS[level];
+    if(Math.abs(s.n)>lim.sol||maxConst(eq)>lim.c)continue;
+    if(lim.pos&&s.n<0)continue;
+    return eq;
+  }
+  return {L:side([X(),m(4)]),R:side([m(35)])};
+}
+const LIMITS={1:{sol:60,c:99,pos:true},2:{sol:15,c:99,pos:false},3:{sol:12,c:60,pos:false},4:{sol:12,c:80,pos:false}};
+const GEN={
+  1:()=>{
+    const s=ri(1,45),a=ri(2,30);
+    return pick([
+      ()=>({L:side([X(),m(a)]),R:side([m(s+a)])}),
+      ()=>({L:side([X(),m(-a)]),R:side([m(s-a)])}),
+      ()=>({L:side([m(a),X()]),R:side([m(s+a)])}),
+      ()=>({L:side([m(s+a)]),R:side([X(),m(a)])}),
+    ])();
+  },
+  2:()=>{
+    const s=nz(-6,12),a=ri(2,7),b=ri(2,6),c=nz(-9,9);
+    const eq=pick([
+      ()=>({L:side([X(a),prod([m(b)],[m(Math.abs(c)),X()])]),R:side([])}),   // ax + b(c + x)
+      ()=>({L:side([prod([m(b)],bin(1,c)),X(a)]),R:side([])}),               // b(x + c) + ax
+      ()=>({L:side([prod([m(b)],bin(1,c))]),R:side([])}),                    // b(x + c)
+      ()=>({L:side([X(a+b),prod([m(-b)],bin(1,c))]),R:side([])}),            // ax − b(x + c)
+      ()=>({L:side([prod([m(b)],bin(a,c)),X(1)]),R:side([])}),               // b(ax + c) + x
+    ])();
+    const v=evalPoly(polyOfSide(eq.L),s);eq.R=side([m(v)]);return eq;
+  },
+  3:()=>{
+    const a=ri(1,9),c=ri(1,9),b=nz(-15,15),s=nz(-10,12);
+    if(a===c)return {L:side([X()]),R:side([X()])};
+    const variant=ri(0,3);
+    if(variant===0){ // ax + b = cx + d
+      const d=a*s+b-c*s;return {L:side([X(a),m(b)]),R:side([X(c),m(d)])};
+    }
+    if(variant===1){ // ax + b = d − cx
+      const d=a*s+b+c*s;return {L:side([X(a),m(b)]),R:side([m(d),X(-c)])};
+    }
+    if(variant===2){ // b + ax = cx + d   (x störst till höger ibland)
+      const d=a*s+b-c*s;return {L:side([m(b),X(a)]),R:side([X(c),m(d)])};
+    }
+    // a(x + k) = cx + d
+    const k=nz(-6,6),aa=ri(2,6);if(aa===c)return {L:side([X()]),R:side([X()])};
+    const d=aa*(s+k)-c*s;return {L:side([prod([m(aa)],bin(1,k))]),R:side([X(c),m(d)])};
+  },
+  4:()=>{
+    const a=nz(-7,7),b=nz(-7,7),s=nz(-10,10);
+    const L=prod(bin(1,a),bin(1,b));
+    const variant=ri(0,4);
+    if(variant===0){ // (x+a)(x+b) = x² + mx + n
+      const mm=nz(-9,9);const n=a*b+(a+b-mm)*s;
+      return {L:side([L]),R:side([m(1,2),X(mm),m(n)])};
+    }
+    if(variant===1){ // (x+a)(x+b) = x(x+c) + n
+      const c=nz(-9,9);const n=a*b+(a+b-c)*s;
+      return {L:side([L]),R:side([prod([X()],bin(1,c)),m(n)])};
+    }
+    if(variant===2){ // (x+a)(x+b) = (x+c)(x+d)
+      const c=nz(-7,7),d=nz(-7,7);
+      return {L:side([L]),R:side([prod(bin(1,c),bin(1,d))])};
+    }
+    if(variant===3){ // (x+a)(x+b) + kx = x² + n   (x i båda led efter förenkling)
+      const k=nz(-6,6),c=nz(-8,8);const n=(s+a)*(s+b)+k*s-s*s-c*s;
+      return {L:side([L,X(k)]),R:side([m(1,2),X(c),m(n)])};
+    }
+    // x² + mx + n = (x+a)(x+b) + kx
+    const k=nz(-5,5),mm=nz(-9,9);const n=(s+a)*(s+b)+k*s-s*s-mm*s;
+    return {L:side([m(1,2),X(mm),m(n)]),R:side([L,X(k)])};
+  },
+};
+
+/* ---------- Strategi (ledtråd) ---------- */
+function nextAction(eq){
+  const L=eq.L,R=eq.R;
+  if(hasProd(L)||hasProd(R))return {type:'expand',text:'Börja med att <b>multiplicera in i parentesen</b> så att alla termer står fritt.'};
+  if(!isSimplified(L)||!isSimplified(R)){
+    if(L.op||R.op)return {type:'simplify',text:'Räkna ut divisionen/multiplikationen genom att <b>förenkla</b>.'};
+    return {type:'simplify',text:'<b>Förenkla</b>: slå ihop termer av samma sort – x²-termer för sig, x-termer för sig och tal för sig.'};
+  }
+  const l=polyOfSide(L),r=polyOfSide(R);
+  if(!isZ(l[2])||!isZ(r[2])){
+    if(eqQ(l[2],r[2])){const t=m(neg(l[2]),2);return {type:'add',term:t,text:`Båda leden har <span class="m">${monoBody(absQ(l[2]),2)}</span>. Gör <span class="m">${monoSigned(t)}</span> i båda leden så tar x²-termerna ut varandra.`};}
+    return null;
+  }
+  if(!isZ(l[1])&&!isZ(r[1])){
+    const sub=cmpQ(l[1],r[1])<=0?l[1]:r[1];const t=m(neg(sub),1);
+    return {type:'add',term:t,text:`Det finns x i båda leden. Samla x i ett led genom att göra <span class="m">${monoSigned(t)}</span> i båda leden.`};
+  }
+  const xp=!isZ(l[1])?l:r;
+  if(!isZ(xp[0])){
+    const t=m(neg(xp[0]),0);
+    return {type:'add',term:t,text:`Nu ska x-termen bli ensam. Bli av med <span class="m">${fq(xp[0])}</span> genom att göra <span class="m">${monoSigned(t)}</span> i båda leden.`};
+  }
+  if(!isOne(xp[1])){
+    return {type:'div',n:xp[1],text:`Dela båda leden med <span class="m">${fq(xp[1])}</span> så att det står ett ensamt <i class="v">x</i>.`};
+  }
+  return null;
+}
+function solvedValue(eq){
+  const isX=s=>!s.op&&s.terms.length===1&&s.terms[0].k==='m'&&s.terms[0].p===1&&isOne(s.terms[0].c);
+  const isC=s=>isSimplified(s)&&s.terms.length===1&&s.terms[0].p===0;
+  if(isX(eq.L)&&isC(eq.R))return eq.R.terms[0].c;
+  if(isX(eq.R)&&isC(eq.L))return eq.L.terms[0].c;
+  return null;
+}
+function optimalSteps(eq){
+  let e=clone(eq),n=0;
+  while(n<30){const a=nextAction(e);if(!a)break;e=applyAction(e,a).eq;n++;}
+  return n;
+}
+
+/* ---------- Tillämpa operationer ---------- */
+function applyAction(eq,a){
+  const e=clone(eq);
+  if(a.type==='expand'){
+    if(!hasProd(e.L)&&!hasProd(e.R))return {err:'Det finns ingen parentes att multiplicera in i.'};
+    return {eq:{L:expandSide(e.L),R:expandSide(e.R)},label:'multiplicera in',soft:true};
+  }
+  if(a.type==='simplify'){
+    if(hasProd(e.L)||hasProd(e.R))return {err:'Multiplicera först in i parentesen – sedan kan du förenkla.'};
+    if(isSimplified(e.L)&&isSimplified(e.R))return {err:'Båda leden är redan förenklade. Bestäm vad du ska göra i båda leden.'};
+    return {eq:{L:simplifySide(e.L),R:simplifySide(e.R)},label:'förenkla',soft:true};
+  }
+  if(e.L.op||e.R.op)return {err:'Förenkla först, innan du gör något nytt i båda leden.'};
+  if(a.type==='add'){
+    [e.L,e.R].forEach(s=>{
+      if(s.terms.length===0||(s.terms.length===1&&s.terms[0].k==='m'&&isZ(s.terms[0].c)))s.terms=[clone(a.term)];
+      else s.terms.push(clone(a.term));
+    });
+    return {eq:e,label:monoSigned(a.term)};
+  }
+  if(a.type==='div'||a.type==='mul'){
+    if(isZ(a.n))return {err:a.type==='div'?'Man kan inte dela med 0!':'Multiplicerar du med 0 blir båda leden 0 – då försvinner all information om x.'};
+    if(a.type==='div'&&isOne(a.n))return {err:'Att dela med 1 ändrar ingenting.'};
+    if(a.type==='mul'&&isOne(a.n))return {err:'Att multiplicera med 1 ändrar ingenting.'};
+    e.L.op={t:a.type,n:a.n};e.R.op={t:a.type,n:a.n};
+    const nn=a.n.n<0?'('+fq(a.n)+')':fq(a.n);
+    return {eq:e,label:(a.type==='div'?'/':'·')+nn};
+  }
+  return {err:'Okänd operation.'};
+}
+
+/* ---------- Tolka elevens inmatning ---------- */
+function parseNumber(str){
+  str=str.replace(',','.');
+  let mm=str.match(/^(-?\d+)\/(\d+)$/);
+  if(mm)return Q(parseInt(mm[1]),parseInt(mm[2]));
+  mm=str.match(/^(-?)(\d*)\.?(\d*)$/);
+  if(!mm||(mm[2]===''&&mm[3]===''))return null;
+  const dec=mm[3]||'';const n=parseInt((mm[2]||'0')+dec);const d=Math.pow(10,dec.length);
+  return Q(mm[1]?-n:n,d);
+}
+function parseOp(raw){
+  let s=raw.trim().replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/[×*⋅]/g,'·').replace(/÷|:/g,'/')
+           .replace(/\^2|²/g,'²').replace(/X/g,'x');
+  if(!s)return {err:'Skriv vad du vill göra i båda leden, t.ex. <span class="m">−4</span> eller <span class="m">/2</span>.'};
+  let op=s[0];
+  if(/[\dx]/.test(op)){op='+';s='+'+s;}
+  if(!'+-·/'.includes(op))return {err:'Börja med ett räknesätt: + − · eller /.'};
+  let rest=s.slice(1);
+  if(op==='+'||op==='-'){
+    let sign=op==='-'?-1:1;
+    if(rest[0]==='-'){sign*=-1;rest=rest.slice(1);} else if(rest[0]==='+')rest=rest.slice(1);
+    const mm=rest.match(/^([\d.,\/]*)(x²|x)?$/);
+    if(!mm||(mm[1]===''&&!mm[2]))return {err:'Jag förstår inte termen. Skriv t.ex. <span class="m">−4</span>, <span class="m">+3x</span> eller <span class="m">−x²</span>.'};
+    let c=mm[1]===''?Q(1):parseNumber(mm[1]);
+    if(!c)return {err:'Jag förstår inte talet.'};
+    if(isZ(c))return {err:'Att lägga till eller dra bort 0 ändrar ingenting.'};
+    const p=mm[2]==='x²'?2:mm[2]==='x'?1:0;
+    return {type:'add',term:m(sign<0?neg(c):c,p)};
+  }
+  rest=rest.replace(/^\((.*)\)$/,'$1');
+  if(/x/.test(rest))return {err:'Med balansmetoden multiplicerar och delar vi bara med tal – inte med x.'};
+  const n=parseNumber(rest);
+  if(!n)return {err:`Skriv ett tal efter ${op==='/'?'/':'·'}, t.ex. <span class="m">${op==='/'?'/3':'·2'}</span>.`};
+  return {type:op==='/'?'div':'mul',n};
+}
+
+/* ---------- Tillstånd & UI ---------- */
+const LEVELS=[
+  {n:1,title:'Nivå 1',desc:'<i class="v">x</i> + 4 = 35',tag:'Nivå 1 · ett steg'},
+  {n:2,title:'Nivå 2',desc:'2<i class="v">x</i> + 4(2 + <i class="v">x</i>) = 45',tag:'Nivå 2 · parenteser'},
+  {n:3,title:'Nivå 3',desc:'<i class="v">x</i> i båda leden',tag:'Nivå 3 · x i båda leden'},
+  {n:4,title:'Nivå 4',desc:'(<i class="v">x</i> − 4)(<i class="v">x</i> + 2)',tag:'Nivå 4 · x²-termer tar ut varandra'},
+];
+let progress={1:0,2:0,3:0,4:0};
+try{const p=JSON.parse(localStorage.getItem('balans-progress')||'null');if(p)progress=Object.assign(progress,p);}catch(e){}
+function saveProgress(){try{localStorage.setItem('balans-progress',JSON.stringify(progress));}catch(e){}}
+
+const state={level:1,history:[],original:null,solved:false,optimal:0,usedAuto:false,asking:false};
+let is8A=false;
+try{is8A=localStorage.getItem('balans-8a')==='1';}catch(e){}
+const maxLevel=()=>is8A?4:2;
+const $=id=>document.getElementById(id);
+
+function renderLevels(){
+  if(state.level>maxLevel())state.level=1;
+  $('levels').style.setProperty('--cols',maxLevel());
+  $('gradeBtn').setAttribute('aria-pressed',is8A);$('gradeBox').textContent=is8A?'✓':'';
+  $('gradeNote').textContent=is8A?'8A: du har alla fyra nivåerna.':'Nivå 1–2 för åk 7. Går du i 8A? Då får du även nivå 3 och 4.';
+  $('levels').innerHTML=LEVELS.filter(l=>l.n<=maxLevel()).map(l=>`
+    <button class="lvl" data-l="${l.n}" aria-pressed="${state.level===l.n}">
+      <div class="n">${l.title}<span class="stars">${progress[l.n]?'★ '+progress[l.n]:''}</span></div>
+      <div class="d">${l.desc}</div>
+    </button>`).join('');
+  $('levels').querySelectorAll('.lvl').forEach(b=>b.onclick=()=>{state.level=+b.dataset.l;newEquation();});
+  $('lvlTag').textContent=LEVELS[state.level-1].tag;
+}
+
+function newEquation(){
+  const eq=generate(state.level);
+  state.original=clone(eq);
+  state.history=[{eq,label:null}];
+  state.solved=false;state.usedAuto=false;
+  state.optimal=optimalSteps(eq);
+  hideMsg();hideExpq();$('done').classList.remove('show');
+  $('opInput').value='';
+  renderLevels();render();
+  wobble();
+}
+
+function render(){
+  const H=state.history;let html='';
+  H.forEach((h,i)=>{
+    const last=i===H.length-1;
+    const cls=last?(state.solved?'row-cur row-solved':'row-cur'):'row-old';
+    const nxt=H[i+1];
+    const note=nxt?`<div class="note ${nxt.soft?'soft':''}">${nxt.label}</div>`:'<div class="note empty"></div>';
+    html+=`<div class="l ${cls}">${sideHTML(h.eq.L)}</div><div class="eq ${cls}">=</div><div class="r ${cls}">${sideHTML(h.eq.R)}</div>${note}`;
+  });
+  $('steps').innerHTML=html;
+  const cur=H[H.length-1].eq;
+  $('expandBtn').disabled=state.solved||state.asking||!(hasProd(cur.L)||hasProd(cur.R));
+  $('simplifyBtn').disabled=state.solved||hasProd(cur.L)||hasProd(cur.R)||(isSimplified(cur.L)&&isSimplified(cur.R));
+  $('undoBtn').disabled=H.length<2;
+  ['applyBtn','hintBtn','autoBtn','opInput'].forEach(id=>$(id).disabled=state.solved||state.asking);
+  if(state.asking)$('simplifyBtn').disabled=true;
+  document.querySelectorAll('.key').forEach(k=>k.disabled=state.solved);
+}
+
+function showMsg(kind,html){const el=$('msg');el.className='msg show '+kind;el.innerHTML=html;}
+function hideMsg(){$('msg').className='msg';}
+function wobble(){const s=$('scale');s.classList.remove('wobble');void s.getBoundingClientRect();s.classList.add('wobble');}
+
+function doAction(a,{auto=false}={}){
+  if(state.solved)return;
+  if(a.err){showMsg('err',a.err);return;}
+  const cur=state.history[state.history.length-1].eq;
+  const res=applyAction(cur,a);
+  if(res.err){showMsg('err',res.err);return;}
+  state.history.push({eq:res.eq,label:res.label,soft:!!res.soft});
+  if(auto)state.usedAuto=true;
+  hideMsg();
+  if(!res.soft)wobble();
+  checkSolved();
+  render();
+  if(!state.solved&&!res.soft){
+    const s=res.eq;
+    if(!isSimplified(s.L)||!isSimplified(s.R))showMsg('hint','Bra! Vågen är i balans. Tryck på <b>Förenkla</b> för att räkna ihop leden.');
+  }
+}
+
+function checkSolved(){
+  const cur=state.history[state.history.length-1].eq;
+  const v=solvedValue(cur);
+  if(v===null){
+    // Specialfall: x har försvunnit
+    const l=polyOfSide(cur.L),r=polyOfSide(cur.R);
+    if(isSimplified(cur.L)&&isSimplified(cur.R)&&l.slice(1).every(isZ)&&r.slice(1).every(isZ)){
+      showMsg('err','Hoppsan – nu finns inget <i class="v">x</i> kvar. Tryck på <b>Ångra</b> och försök på ett annat sätt.');
+    }
+    return;
+  }
+  state.solved=true;
+  const lv=evalPoly(polyOfSide(state.original.L),v.n/v.d),rv=evalPoly(polyOfSide(state.original.R),v.n/v.d);
+  const steps=state.history.length-1;
+  if(!state.usedAuto){progress[state.level]++;saveProgress();}
+  const xs=v.n<0?'('+fq(v)+')':fq(v);
+  let verdict;
+  if(state.usedAuto)verdict='Du fick hjälp med några steg – testa en ny ekvation och lös den helt själv!';
+  else if(steps<=state.optimal)verdict=`Du löste den på <b>${steps} steg</b> – kortaste möjliga vägen. Snyggt!`;
+  else verdict=`Du löste den på <b>${steps} steg</b>. Det går att göra på ${state.optimal} steg – ser du hur?`;
+  $('done').innerHTML=`
+    <h2>Rätt! <span class="m"><i class="v">x</i> = ${fq(v)}</span></h2>
+    <p>${verdict}</p>
+    <p><b>Kontroll:</b> sätt in <span class="m"><i class="v">x</i> = ${xs}</span> i ursprungsekvationen
+      <span class="m">${eqText(state.original)}</span>.<br>
+      Vänster led blir <span class="m">${fq(lv)}</span> och höger led blir <span class="m">${fq(rv)}</span> ${eqQ(lv,rv)?'✓ – lika!':'✗'}</p>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn primary" id="nextBtn">Nästa ekvation →</button>
+      ${state.level<maxLevel()?`<button class="btn" id="upBtn">Gå till nivå ${state.level+1}</button>`:''}
+    </div>`;
+  $('done').classList.add('show');
+  $('nextBtn').onclick=newEquation;
+  if($('upBtn'))$('upBtn').onclick=()=>{state.level++;newEquation();};
+  setTimeout(()=>$('nextBtn').focus({preventScroll:true}),50);
+}
+
+/* ---------- Kopplingar ---------- */
+const KEYS=['+','−','·','/','x','x²','(',')'];
+$('keys').innerHTML=KEYS.map(k=>`<button class="key" data-k="${k}">${k==='x'?'<i>x</i>':k==='x²'?'<i>x</i>²':k}</button>`).join('')+
+  '<button class="key" data-k="⌫" title="Sudda">⌫</button>';
+$('keys').querySelectorAll('.key').forEach(b=>b.onclick=()=>{
+  const inp=$('opInput');const k=b.dataset.k;
+  if(k==='⌫')inp.value=inp.value.slice(0,-1);else inp.value+=k;
+  inp.focus();
+});
+$('applyBtn').onclick=()=>{
+  const a=parseOp($('opInput').value);
+  doAction(a);
+  if(!a.err&&!$('msg').classList.contains('err'))$('opInput').value='';
+};
+$('opInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('applyBtn').click();}});
+// ---------- Fråga: vilken utveckling är rätt? ----------
+function negM(t){return m(neg(t.c),t.p);}
+function prodKind(f){
+  if(f.length===2&&f[0].length===1)return f[0][0].p===0?(f[0][0].c.n<0?'negk':'k'):'xk';
+  if(f.length===2&&f[0].length===2&&f[1].length===2)return 'bin';
+  return 'other';
+}
+function wrongProd(f,kind){
+  const ok=expandProd(f);const pk=prodKind(f);
+  if(pk==='k'||pk==='negk'||pk==='xk'){
+    const k=f[0][0],inner=f[1];
+    if(kind==='first')return [m(mul(k.c,inner[0].c),k.p+inner[0].p),...inner.slice(1).map(t=>m(t.c,t.p))];
+    if(kind==='flip'){const r=ok.map(t=>m(t.c,t.p));r[r.length-1]=negM(r[r.length-1]);return r;}
+    if(kind==='ign'){
+      if(pk==='negk')return inner.map((b,j)=>m(j===0?mul(k.c,b.c):mul(absQ(k.c),b.c),b.p)); // minus bara på första termen
+      if(pk==='k')return inner.map(t=>m(t.c,t.p));                                        // glömt talet framför
+      return inner.map(b=>b.p===1?m(mul(Q(2),mul(k.c,b.c)),1):m(mul(k.c,b.c),b.p+1));   // x·x blir 2x
+    }
+    return null;
+  }
+  if(pk==='bin'){
+    const A=f[0],B=f[1];
+    if(kind==='first')return [m(mul(A[0].c,B[0].c),A[0].p+B[0].p),m(mul(A[1].c,B[1].c),A[1].p+B[1].p)];
+    if(kind==='flip'){const r=ok.map(t=>m(t.c,t.p));r[r.length-1]=negM(r[r.length-1]);return r;}
+    if(kind==='ign')return ok.filter((t,i)=>i!==2).map(t=>m(t.c,t.p));
+    if(kind==='xx'){const r=ok.map(t=>m(t.c,t.p));r[0]=m(mul(Q(2),r[0].c),1);return r;}
+  }
+  return null;
+}
+function variantSide(s,kind){
+  const out=[];let changed=false;
+  s.terms.forEach(t=>{
+    if(t.k==='prod'){const w=kind==='ok'?expandProd(t.f):wrongProd(t.f,kind);if(w){out.push(...w);if(kind!=='ok')changed=true;}else out.push(...expandProd(t.f));}
+    else out.push(t);
+  });
+  return {s:{terms:out,op:s.op},changed};
+}
+function fbFor(kind,pk){
+  if(kind==='first')return pk==='bin'?'Varje term i den första parentesen ska multipliceras med <b>varje</b> term i den andra – det blir fyra produkter.':'Det som står framför parentesen ska multipliceras med <b>alla</b> termer i parentesen.';
+  if(kind==='flip')return 'Kolla tecknen! Plus gånger minus blir minus, och minus gånger minus blir plus.';
+  if(kind==='ign'){
+    if(pk==='negk')return 'Minustecknet framför parentesen gäller <b>alla</b> termer i parentesen, inte bara den första.';
+    if(pk==='k')return 'Du har glömt att multiplicera med talet framför parentesen.';
+    if(pk==='xk')return '<i class="v">x</i> · <i class="v">x</i> blir <i class="v">x</i><sup>2</sup>, inte 2<i class="v">x</i>.';
+    return 'Det saknas en term – det ska bli fyra produkter innan du förenklar.';
+  }
+  if(kind==='xx')return '<i class="v">x</i> · <i class="v">x</i> blir <i class="v">x</i><sup>2</sup>, inte 2<i class="v">x</i>.';
+  return 'Inte riktigt. Försök igen!';
+}
+function expansionOptions(eq){
+  const first=[...eq.L.terms,...eq.R.terms].find(t=>t.k==='prod');const pk=prodKind(first.f);
+  const okEq={L:variantSide(eq.L,'ok').s,R:variantSide(eq.R,'ok').s};
+  const okP=[polyOfSide(okEq.L),polyOfSide(okEq.R)];
+  const opts=[{eq:okEq,ok:true}];const seen=new Set([eqText(okEq)]);
+  ['first','flip','ign','xx'].forEach(kind=>{
+    if(opts.length>=4)return;
+    const a=variantSide(eq.L,kind),b=variantSide(eq.R,kind);
+    if(!a.changed&&!b.changed)return;
+    const e={L:a.s,R:b.s};const h=eqText(e);
+    if(seen.has(h))return;
+    const p=[polyOfSide(e.L),polyOfSide(e.R)];
+    if(p[0].every((c,i)=>eqQ(c,okP[0][i]))&&p[1].every((c,i)=>eqQ(c,okP[1][i])))return;
+    seen.add(h);opts.push({eq:e,ok:false,fb:fbFor(kind,pk)});
+  });
+  for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+  return opts;
+}
+function hideExpq(){state.asking=false;const q=$('expq');q.className='expq';q.innerHTML='';}
+function askExpansion(){
+  if(state.solved)return;
+  const cur=state.history[state.history.length-1].eq;
+  if(!hasProd(cur.L)&&!hasProd(cur.R)){showMsg('err','Det finns ingen parentes att multiplicera in i.');return;}
+  hideMsg();state.asking=true;
+  const opts=expansionOptions(cur);
+  const q=$('expq');
+  q.innerHTML=`<h3>Multiplicera in i parentesen</h3><p>Vilken utveckling är rätt?</p><div class="opts"></div><div class="fb" id="expFb"></div><div class="row"><button class="btn ghost" id="expCancel">Avbryt</button></div>`;
+  const box=q.querySelector('.opts');
+  opts.forEach(o=>{
+    const b=document.createElement('button');b.className='opt';b.innerHTML=eqText(o.eq);
+    b.onclick=()=>{
+      if(b.disabled)return;
+      if(!o.ok){b.classList.add('wrong');b.disabled=true;const f=$('expFb');f.className='fb show err';f.innerHTML='<b>Inte riktigt.</b> '+o.fb;return;}
+      b.classList.add('right');
+      setTimeout(()=>{hideExpq();doAction({type:'expand'});},350);
+    };
+    box.appendChild(b);
+  });
+  $('expCancel').onclick=()=>{hideExpq();render();};
+  q.classList.add('show');render();
+  q.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+$('expandBtn').onclick=askExpansion;
+$('gradeBtn').onclick=()=>{
+  is8A=!is8A;try{localStorage.setItem('balans-8a',is8A?'1':'0');}catch(e){}
+  if(state.level>maxLevel()){state.level=1;newEquation();}else renderLevels();
+};
+$('simplifyBtn').onclick=()=>doAction({type:'simplify'});
+$('undoBtn').onclick=()=>{
+  if(state.history.length<2)return;
+  state.history.pop();state.solved=false;hideExpq();
+  $('done').classList.remove('show');hideMsg();render();
+};
+$('hintBtn').onclick=()=>{
+  const cur=state.history[state.history.length-1].eq;
+  const a=nextAction(cur);
+  if(a)showMsg('hint','💡 '+a.text);else showMsg('hint','Du är nästan klar – förenkla så att det står <i class="v">x</i> = ett tal.');
+};
+$('autoBtn').onclick=()=>{
+  const cur=state.history[state.history.length-1].eq;
+  const a=nextAction(cur);
+  if(a){hideExpq();doAction(a,{auto:true});}
+};
+$('newBtn').onclick=newEquation;
+
+newEquation();
+</script>
+</body>
+</html>
