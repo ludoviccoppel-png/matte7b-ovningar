@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f7fb;--grid:#dfe6f2;--card:#ffffff;--ink:#18223d;--muted:#56627f;
+  --pen:#1f4fd1;--pen-soft:#e4ebff;--marker:#ffe24d;--on-marker:#18223d;
+  --good:#17824a;--good-soft:#e2f4e8;--bad:#c2352b;--bad-soft:#fbe7e4;--line:#cdd6e8;
+  --alg:#6a3fc8;--alg-soft:#eee8fb;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px}
+.wrap{max-width:820px;margin:0 auto;padding:28px 16px 56px;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,7vw,52px);line-height:1;margin:0;letter-spacing:-.02em}
+h1 mark,.hl{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+
+/* sticky area nav */
+.nav{position:sticky;top:0;z-index:5;display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;
+  background:linear-gradient(var(--paper) 80%,transparent)}
+.nav a{font-family:var(--display);font-weight:700;font-size:14px;text-decoration:none;color:var(--ink);
+  background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px}
+.nav a.t{border-color:var(--pen);color:var(--pen)}
+.nav a.g{border-color:var(--good);color:var(--good)}
+.nav a.a{border-color:var(--alg);color:var(--alg)}
+.nav a.top{margin-left:auto;color:var(--muted)}
+
+/* table of contents */
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.toc .box{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
+.toc h3{font-family:var(--display);font-size:18px;margin:0 0 8px;display:flex;align-items:center;gap:10px}
+.toc .ic{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:9px;font-size:14px;font-weight:800}
+.toc ol{margin:0;padding-left:20px}
+.toc li{margin:3px 0}
+.toc a{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--line)}
+.toc a:hover{border-color:currentColor}
+.t .ic{background:var(--pen-soft);color:var(--pen)}
+.g .ic{background:var(--good-soft);color:var(--good)}
+.a .ic{background:var(--alg-soft);color:var(--alg)}
+
+/* area banners */
+.area{display:flex;align-items:center;gap:14px;border-radius:16px;padding:16px 20px;color:#fff;margin-top:14px}
+.area h2{font-family:var(--display);font-weight:800;font-size:32px;margin:0;letter-spacing:-.01em}
+.area p{margin:2px 0 0;opacity:.9}
+.area .ic{display:grid;place-items:center;width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-family:var(--display);font-weight:800;font-size:20px}
+.area.t{background:var(--pen)}
+.area.g{background:var(--good)}
+.area.a{background:var(--alg)}
+
+/* section cards */
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;border-left-width:6px}
+.card.t{border-left-color:var(--pen)}
+.card.g{border-left-color:var(--good)}
+.card.a{border-left-color:var(--alg)}
+.card h3{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 8px}
+.card p{margin:8px 0}
+
+table{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0;font-size:14px;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:7px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--display);font-weight:700}
+.t th{background:var(--pen-soft);color:var(--pen)}
+.g th{background:var(--good-soft);color:var(--good)}
+.a th{background:var(--alg-soft);color:var(--alg)}
+tbody tr:nth-child(even) td{background:#f8faff}
+td.c,th.c{text-align:center}
+.place td,.place th{text-align:center}
+.scroll{overflow-x:auto}
+
+.ex{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);white-space:nowrap}
+.note{border-radius:10px;padding:10px 14px;margin:10px 0}
+.note.tip{background:var(--good-soft);border:1.5px solid #b9e3c8}
+.note.warn{background:#fff6c7;border:1.5px solid #f2dc6b}
+.note b:first-child{font-family:var(--display)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:6px}
+.steps li{counter-increment:s;display:flex;gap:10px;align-items:flex-start}
+.steps li::before{content:counter(s);flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:var(--marker);color:var(--on-marker);font-weight:800;font-size:13px}
+.calc{display:inline-block;background:var(--paper);border:1.5px dashed var(--line);border-radius:10px;padding:8px 14px;
+  font-weight:700;line-height:1.8}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+.start{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:18px 20px;box-shadow:5px 5px 0 var(--marker)}
+.start-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.start-tag{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;background:var(--marker);color:var(--on-marker);border-radius:999px;padding:4px 12px}
+.start-topic{font-family:var(--display);font-weight:700;font-size:13px;border-radius:999px;padding:4px 12px;border:1.5px solid currentColor}
+.start-topic.t{color:var(--pen)}.start-topic.g{color:var(--good)}.start-topic.a{color:var(--alg)}.start-topic.b{color:#b0550f}
+.start-q{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.3;margin:12px 0}
+.start-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.start-row input{font:600 18px var(--body);color:var(--ink);padding:9px 12px;border:2px solid var(--line);border-radius:10px;min-width:0;width:220px;background:#fff}
+.start-row input:focus{outline:none;border-color:var(--pen)}
+.start-row .unit{font-weight:700;color:var(--muted)}
+.btn{font:700 15px var(--display);border-radius:10px;padding:9px 16px;cursor:pointer;border:2px solid var(--ink);background:var(--ink);color:#fff}
+.btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line)}
+.btn.choice{background:var(--card);color:var(--ink);border-color:var(--line);font-weight:700}
+.btn.choice.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.btn.choice.wrong{background:#fbe7e4;border-color:#c2352b;color:#c2352b}
+.btn:disabled{opacity:.7;cursor:default}
+.start-fb{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:700}
+.start-fb.ok{background:var(--good-soft);color:var(--good)}
+.start-fb.no{background:#fbe7e4;color:#c2352b}
+.start-fb.hint{background:#fff6c7;color:#6b5600}
+.start-sol{margin-top:10px;background:var(--paper);border:1.5px dashed var(--line);border-radius:10px;padding:10px 14px;line-height:1.7}
+.start-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.start-more{margin-left:auto;color:var(--muted);font-size:14px}
+.area.b{background:#b0550f}
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+
+<header>
+  <h1>Matte 7B <mark>begrepp</mark></h1>
+  <p class="sub">Sammanfattning av Tal, Geometri och Algebra. Börja med dagens startuppgift. Klicka sedan i innehållsförteckningen för att hoppa till ett område.</p>
+</header>
+
+<section class="start" id="startuppgift" aria-live="polite">
+<div class="start-head">
+<span class="start-tag">Startuppgift</span>
+<span class="start-topic" id="su-topic"></span>
+</div>
+<p class="start-q" id="su-q"></p>
+<div id="su-answer"></div>
+<div class="start-fb" id="su-fb" hidden></div>
+<div class="start-sol" id="su-sol" hidden></div>
+<div class="start-actions">
+<button type="button" class="btn ghost" id="su-show" hidden>Visa lösning</button>
+<button type="button" class="btn ghost" id="su-new">Ny uppgift ↻</button>
+<a class="start-more" id="su-more" href="#top">Läs mer</a>
+</div>
+</section>
+
+<nav class="nav">
+  <a class="t" href="#tal">Tal</a>
+  <a class="g" href="#geometri">Geometri</a>
+  <a class="a" href="#algebra">Algebra</a>
+  <a class="top" href="#top">↑ Till början</a>
+</nav>
+
+<section class="toc" aria-label="Innehållsförteckning">
+  <div class="box t">
+    <h3><span class="ic">12</span>Tal</h3>
+    <ol>
+      <li><a href="#positioner">Positionssystemet och 10, 100, 1000</a></li>
+      <li><a href="#decimaltal">Räkna med decimaltal</a></li>
+      <li><a href="#avrundning">Avrundning och överslagsräkning</a></li>
+      <li><a href="#delbarhet">Delbarhet och primtal</a></li>
+      <li><a href="#potenser">Potenser</a></li>
+    </ol>
+  </div>
+  <div class="box g">
+    <h3><span class="ic">△</span>Geometri</h3>
+    <ol>
+      <li><a href="#figurer">Figurer och kroppar</a></li>
+      <li><a href="#vinklar">Vinklar och trianglar</a></li>
+      <li><a href="#area">Omkrets, area och areaenheter</a></li>
+      <li><a href="#ba">Begränsningsarea</a></li>
+    </ol>
+  </div>
+  <div class="box a">
+    <h3><span class="ic">x</span>Algebra</h3>
+    <ol>
+      <li><a href="#uttryck">Variabel och uttryck</a></li>
+      <li><a href="#forenkla">Förenkla uttryck</a></li>
+      <li><a href="#parenteser">Utveckla parenteser</a></li>
+      <li><a href="#ekvationer">Ekvationer</a></li>
+      <li><a href="#problem">Problemlösning</a></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= TAL ================= -->
+<div class="area t" id="tal"><span class="ic">12</span><div><h2>Tal</h2><p>Positionssystemet, decimaltal, avrundning, delbarhet och potenser</p></div></div>
+
+<section class="card t" id="positioner">
+  <h3>Positionssystemet och 10, 100, 1000</h3>
+  <p>Varje siffra har ett värde som beror på var den står. Varje position är 10 gånger större än den till höger.</p>
+  <div class="scroll"><table class="place">
+    <thead><tr><th>Tusental</th><th>Hundratal</th><th>Tiotal</th><th>Ental</th><th>,</th><th>Tiondelar</th><th>Hundradelar</th><th>Tusendelar</th></tr></thead>
+    <tbody><tr><td>3</td><td>4</td><td>5</td><td>6</td><td>,</td><td>7</td><td>8</td><td>9</td></tr></tbody>
+  </table></div>
+  <p>I talet 3 456,789 betyder 7 alltså 7 tiondelar (0,7) och 8 betyder 8 hundradelar (0,08).</p>
+  <table>
+    <thead><tr><th>Begrepp</th><th>Förklaring</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Siffra</b></td><td>Tecknen 0–9 som vi skriver tal med</td><td>Talet 52 har siffrorna 5 och 2</td></tr>
+      <tr><td><b>Decimaltecken</b></td><td>Kommat som skiljer heltalsdelen från decimaldelen</td><td class="ex">12,5</td></tr>
+      <tr><td><b>Gånger 10, 100, 1000</b></td><td>Decimaltecknet flyttas 1, 2 eller 3 steg åt höger. Talet blir större.</td><td class="ex">3,45 · 100 = 345</td></tr>
+      <tr><td><b>Delat med 10, 100, 1000</b></td><td>Decimaltecknet flyttas 1, 2 eller 3 steg åt vänster. Talet blir mindre.</td><td class="ex">45 / 1000 = 0,045</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Tips:</b> Räkna nollorna i 10, 100 eller 1000. Antalet nollor visar hur många steg decimaltecknet ska flyttas. Fyll på med nollor om siffrorna inte räcker: 4,5 · 1000 = 4 500.</div>
+</section>
+
+<section class="card t" id="decimaltal">
+  <h3>Räkna med decimaltal</h3>
+  <p>Ett decimaltal har både en heltalsdel och en decimaldel, till exempel 7,25. Siffrorna efter kommat kallas <b>decimaler</b>, och 7,25 har två decimaler.</p>
+  <table>
+    <thead><tr><th>Räknesätt</th><th>Så gör du</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Addition och subtraktion</b></td><td>Ställ upp talen så att decimaltecknen hamnar rakt under varandra. Fyll gärna ut med nollor.</td><td class="ex">4,50 + 2,35 = 6,85</td></tr>
+      <tr><td><b>Multiplikation</b></td><td>Räkna utan decimaltecken. Svaret får lika många decimaler som faktorerna har tillsammans.</td><td>0,3 · 0,4: 3 · 4 = 12, två decimaler ger 0,12</td></tr>
+      <tr><td><b>Division med heltal</b></td><td>Dela som vanligt och sätt decimaltecknet på samma plats i svaret.</td><td class="ex">8,4 / 4 = 2,1</td></tr>
+      <tr><td><b>Kontroll</b></td><td>Gör ett överslag eller räkna baklänges.</td><td class="ex">2,1 · 4 = 8,4</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Bra att veta:</b> Talen 0,5 och 0,50 är lika stora. Nollor sist i decimaldelen ändrar inte värdet.</div>
+  <div class="note warn"><b>Se upp:</b> När man multiplicerar med ett tal mindre än 1 blir svaret mindre än det tal man började med: 6 · 0,5 = 3.</div>
+</section>
+
+<section class="card t" id="avrundning">
+  <h3>Avrundning och överslagsräkning</h3>
+  <p>Avrundning gör ett tal enklare. Tecknet ≈ betyder ”ungefär lika med”.</p>
+  <ol class="steps">
+    <li>Bestäm vilken position du ska avrunda till, till exempel tiondelar.</li>
+    <li>Titta på siffran direkt efter den positionen.</li>
+    <li>Om den siffran är 0–4 avrundar du nedåt. Om den är 5–9 avrundar du uppåt.</li>
+    <li>Stryk alla siffror efter positionen.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Avrunda till</th><th>Exempel</th><th>Avrunda till</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Heltal</b></td><td class="ex">7,48 ≈ 7</td><td><b>Tiotal</b></td><td class="ex">1 284 ≈ 1 280</td></tr>
+      <tr><td><b>Tiondelar</b></td><td class="ex">3,476 ≈ 3,5</td><td><b>Hundratal</b></td><td class="ex">1 284 ≈ 1 300</td></tr>
+      <tr><td><b>Hundradelar</b></td><td class="ex">2,994 ≈ 2,99</td><td><b>Tusental</b></td><td class="ex">47 600 ≈ 48 000</td></tr>
+    </tbody>
+  </table>
+  <p><b>Överslagsräkning</b> betyder att man avrundar talen till enkla tal och räknar ut ett ungefärligt svar i huvudet. Man använder överslag för att kontrollera att ett svar är rimligt.</p>
+  <table>
+    <thead><tr><th>Uppgift</th><th>Överslag</th><th>Kommentar</th></tr></thead>
+    <tbody>
+      <tr><td class="ex">48 · 21</td><td class="ex">≈ 50 · 20 = 1 000</td><td>Exakt svar: 1 008</td></tr>
+      <tr><td class="ex">3,9 · 6,2</td><td class="ex">≈ 4 · 6 = 24</td><td></td></tr>
+      <tr><td class="ex">397 / 8</td><td class="ex">≈ 400 / 8 = 50</td><td>Välj ett tal i närheten som går jämnt upp</td></tr>
+      <tr><td class="ex">49,90 kr + 29,50 kr</td><td class="ex">≈ 50 kr + 30 kr = 80 kr</td><td></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card t" id="delbarhet">
+  <h3>Delbarhet, primtal och primtalsfaktorisering</h3>
+  <p>Ett tal är <b>delbart</b> med ett annat om divisionen går jämnt upp, det vill säga utan rest. 12 är delbart med 3 eftersom 12 / 3 = 4. Talet 3 är då en <b>delare</b> till 12, och 12 är en <b>multipel</b> av 3.</p>
+  <table>
+    <thead><tr><th class="c">Delbart med</th><th>Regel</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td class="c"><b>2</b></td><td>Sista siffran är jämn (0, 2, 4, 6, 8)</td><td class="ex">538</td></tr>
+      <tr><td class="c"><b>3</b></td><td>Siffersumman är delbar med 3</td><td class="ex">471: 4 + 7 + 1 = 12</td></tr>
+      <tr><td class="c"><b>4</b></td><td>De två sista siffrorna bildar ett tal som är delbart med 4</td><td class="ex">1 316: 16 / 4 = 4</td></tr>
+      <tr><td class="c"><b>5</b></td><td>Sista siffran är 0 eller 5</td><td class="ex">745</td></tr>
+      <tr><td class="c"><b>6</b></td><td>Talet är delbart med både 2 och 3</td><td class="ex">534: jämnt, 5 + 3 + 4 = 12</td></tr>
+      <tr><td class="c"><b>9</b></td><td>Siffersumman är delbar med 9</td><td class="ex">4 572: 4 + 5 + 7 + 2 = 18</td></tr>
+      <tr><td class="c"><b>10</b></td><td>Sista siffran är 0</td><td class="ex">2 390</td></tr>
+    </tbody>
+  </table>
+  <p>Siffersumman är summan av alla siffror i talet.</p>
+  <table>
+    <thead><tr><th>Begrepp</th><th>Förklaring</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Primtal</b></td><td>Ett heltal större än 1 som bara är delbart med 1 och sig självt</td><td>2, 3, 5, 7, 11, 13, 17, 19, 23, 29</td></tr>
+      <tr><td><b>Sammansatt tal</b></td><td>Ett heltal större än 1 som har fler än två delare</td><td class="ex">21 = 3 · 7</td></tr>
+      <tr><td><b>Talet 1</b></td><td>Är varken primtal eller sammansatt tal, eftersom det bara har en delare</td><td class="ex">1</td></tr>
+      <tr><td><b>Primtalsfaktorisering</b></td><td>Att skriva ett tal som en produkt där alla faktorer är primtal</td><td class="ex">60 = 2 · 2 · 3 · 5</td></tr>
+    </tbody>
+  </table>
+  <div class="note warn"><b>Se upp:</b> Talet 2 är det enda jämna primtalet. Udda tal kan se ut som primtal utan att vara det: 51 = 3 · 17, 57 = 3 · 19 och 91 = 7 · 13.</div>
+  <p><b>Så primtalsfaktoriserar du:</b> Dela med det minsta primtal som går jämnt upp. Fortsätt med svaret ända tills du får 1.</p>
+  <div class="calc">60 / 2 = 30<br>30 / 2 = 15<br>15 / 3 = 5<br>&nbsp;5 / 5 = 1</div>
+  <p>Alltså är 60 = 2 · 2 · 3 · 5, vilket också kan skrivas 2² · 3 · 5.</p>
+</section>
+
+<section class="card t" id="potenser">
+  <h3>Potenser</h3>
+  <p>En potens är ett kortare sätt att skriva upprepad multiplikation med samma tal: 2⁵ = 2 · 2 · 2 · 2 · 2 = 32.</p>
+  <table>
+    <thead><tr><th>Begrepp</th><th>Förklaring</th><th class="c">I 2⁵</th></tr></thead>
+    <tbody>
+      <tr><td><b>Bas</b></td><td>Talet som multipliceras med sig självt</td><td class="c">2</td></tr>
+      <tr><td><b>Exponent</b></td><td>Hur många gånger basen står i multiplikationen</td><td class="c">5</td></tr>
+      <tr><td><b>Potensens värde</b></td><td>Det man får när man räknar ut potensen</td><td class="c">32</td></tr>
+    </tbody>
+  </table>
+  <div class="note warn"><b>Vanligt fel:</b> 2⁵ är inte 2 · 5. Det är 2 multiplicerat med sig självt fem gånger.</div>
+  <p><b>Kvadrat och kub:</b> 4² läses ”4 i kvadrat” och är 16. 3³ läses ”3 upphöjt till 3” eller ”3 i kubik” och är 27.</p>
+  <p><b>Tiopotenser:</b> Exponenten visar hur många nollor talet har.</p>
+  <table>
+    <thead><tr><th>Tiopotens</th><th>Värde</th></tr></thead>
+    <tbody>
+      <tr><td>10¹</td><td>10</td></tr>
+      <tr><td>10²</td><td>100</td></tr>
+      <tr><td>10³</td><td>1 000</td></tr>
+      <tr><td>10⁴</td><td>10 000</td></tr>
+      <tr><td>10⁶</td><td>1 000 000 (en miljon)</td></tr>
+    </tbody>
+  </table>
+  <p>Med tiopotenser kan man skriva stora tal kort: 4,2 · 10³ = 4,2 · 1 000 = 4 200.</p>
+  <div class="note tip"><b>Ordning:</b> I en uppgift med flera räknesätt räknar man ut potenserna först: 3² + 2³ = 9 + 8 = 17.</div>
+</section>
+
+<!-- ================= GEOMETRI ================= -->
+<div class="area g" id="geometri"><span class="ic">△</span><div><h2>Geometri</h2><p>Figurer, kroppar, vinklar, area och begränsningsarea</p></div></div>
+
+<section class="card g" id="figurer">
+  <h3>Figurer och kroppar</h3>
+  <p>En <b>figur</b> är platt (tvådimensionell) och har area. En <b>kropp</b> har tre dimensioner, längd, bredd och höjd, och har volym.</p>
+  <table>
+    <thead><tr><th>Figur</th><th>Kännetecken</th></tr></thead>
+    <tbody>
+      <tr><td><b>Triangel</b></td><td>3 sidor och 3 hörn</td></tr>
+      <tr><td><b>Kvadrat</b></td><td>4 lika långa sidor och 4 räta vinklar</td></tr>
+      <tr><td><b>Rektangel</b></td><td>4 räta vinklar, och motstående sidor är lika långa</td></tr>
+      <tr><td><b>Parallellogram</b></td><td>2 par parallella sidor</td></tr>
+      <tr><td><b>Romb</b></td><td>4 lika långa sidor, men vinklarna behöver inte vara räta</td></tr>
+      <tr><td><b>Parallelltrapets</b></td><td>Exakt 1 par parallella sidor</td></tr>
+      <tr><td><b>Månghörning</b></td><td>Har många sidor, till exempel en femhörning eller en sexhörning</td></tr>
+      <tr><td><b>Cirkel</b></td><td>Alla punkter ligger lika långt från medelpunkten. Avståndet kallas radie, och diametern är 2 radier.</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Bra att veta:</b> En kvadrat är en speciell rektangel och en speciell romb. Alla rektanglar och romber är parallellogram.</div>
+  <table>
+    <thead><tr><th>Begrepp</th><th>Förklaring</th></tr></thead>
+    <tbody>
+      <tr><td><b>Hörn</b></td><td>Punkt där kanter eller sidor möts</td></tr>
+      <tr><td><b>Kant</b></td><td>Linje där två sidoytor möts på en kropp</td></tr>
+      <tr><td><b>Sidoyta</b></td><td>En platt yta på en kropp. Botten och lock räknas också.</td></tr>
+      <tr><td><b>Parallella</b></td><td>Linjer som aldrig möts, eftersom de har samma riktning</td></tr>
+      <tr><td><b>Vinkelrät</b></td><td>Linjer som möts i rät vinkel (90°)</td></tr>
+    </tbody>
+  </table>
+  <div class="scroll"><table>
+    <thead><tr><th>Kropp</th><th class="c">Hörn</th><th class="c">Kanter</th><th class="c">Sidoytor</th></tr></thead>
+    <tbody>
+      <tr><td><b>Kub</b> (6 kvadrater)</td><td class="c">8</td><td class="c">12</td><td class="c">6</td></tr>
+      <tr><td><b>Rätblock</b> (6 rektanglar)</td><td class="c">8</td><td class="c">12</td><td class="c">6</td></tr>
+      <tr><td><b>Fyrsidig pyramid</b></td><td class="c">5</td><td class="c">8</td><td class="c">5</td></tr>
+      <tr><td><b>Tresidigt prisma</b></td><td class="c">6</td><td class="c">9</td><td class="c">5</td></tr>
+      <tr><td><b>Cylinder</b></td><td class="c">–</td><td class="c">–</td><td class="c">2 cirklar och en böjd mantelyta</td></tr>
+      <tr><td><b>Kon</b></td><td class="c">1 spets</td><td class="c">–</td><td class="c">1 cirkel och en böjd mantelyta</td></tr>
+      <tr><td><b>Klot</b></td><td class="c">–</td><td class="c">–</td><td class="c">En böjd yta</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card g" id="vinklar">
+  <h3>Vinklar och trianglar</h3>
+  <p>En vinkel bildas av två ben som möts i en spets, även kallad vertex. Vinklar mäts i grader (°) med en gradskiva.</p>
+  <table>
+    <thead><tr><th>Vinkel</th><th>Storlek</th></tr></thead>
+    <tbody>
+      <tr><td><b>Spetsig</b></td><td>Mindre än 90°</td></tr>
+      <tr><td><b>Rät</b></td><td>Exakt 90°, markeras med en liten fyrkant</td></tr>
+      <tr><td><b>Trubbig</b></td><td>Mellan 90° och 180°</td></tr>
+      <tr><td><b>Rak</b></td><td>Exakt 180°, benen bildar en rak linje</td></tr>
+      <tr><td><b>Hel</b></td><td>360°, ett helt varv</td></tr>
+    </tbody>
+  </table>
+  <p><b>Sidovinklar</b> ligger bredvid varandra längs en rak linje och är tillsammans 180°. Om den ena är 130° är den andra 180° − 130° = 50°.</p>
+  <p><b>Vertikalvinklar</b> bildas när två linjer korsar varandra. De ligger mitt emot varandra och är lika stora.</p>
+  <div class="note tip"><b>Vinkelsumman i en triangel är alltid 180°.</b> Om två vinklar är 50° och 70° är den tredje 180° − 50° − 70° = 60°.</div>
+  <table>
+    <thead><tr><th>Triangel</th><th>Kännetecken</th></tr></thead>
+    <tbody>
+      <tr><td><b>Spetsvinklig</b></td><td>Alla vinklar är mindre än 90°</td></tr>
+      <tr><td><b>Rätvinklig</b></td><td>En vinkel är 90°</td></tr>
+      <tr><td><b>Trubbvinklig</b></td><td>En vinkel är större än 90°</td></tr>
+      <tr><td><b>Liksidig</b></td><td>Alla sidor är lika långa, och alla vinklar är 60°</td></tr>
+      <tr><td><b>Likbent</b></td><td>Två sidor är lika långa, och de två basvinklarna är lika stora</td></tr>
+      <tr><td><b>Oliksidig</b></td><td>Alla sidor är olika långa</td></tr>
+    </tbody>
+  </table>
+  <p>I en likbent triangel med toppvinkeln 40° blir varje basvinkel (180° − 40°) / 2 = 70°.</p>
+  <p>I en rätvinklig triangel kallas sidorna som bildar den räta vinkeln <b>kateter</b>. Den längsta sidan, mitt emot den räta vinkeln, kallas <b>hypotenusa</b>.</p>
+</section>
+
+<section class="card g" id="area">
+  <h3>Omkrets, area och areaenheter</h3>
+  <p><b>Omkrets</b> är längden runt en figur, alltså alla sidor adderade. Den mäts i längdenheter som cm. <b>Area</b> är hur stor yta figuren täcker. Den mäts i areaenheter som cm², där 1 cm² är en kvadrat med sidan 1 cm.</p>
+  <p>En rektangel med sidorna 6 cm och 4 cm har omkretsen 6 + 4 + 6 + 4 = 20 cm och arean 6 · 4 = 24 cm².</p>
+  <div class="note warn"><b>Se upp:</b> Höjden (h) är alltid vinkelrät mot basen (b). Den är inte samma sak som en sned sida.</div>
+  <table>
+    <thead><tr><th>Figur</th><th>Formel</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Rektangel</b></td><td class="ex">A = b · h</td><td class="ex">8 · 5 = 40 cm²</td></tr>
+      <tr><td><b>Kvadrat</b></td><td class="ex">A = s · s</td><td class="ex">6 · 6 = 36 cm²</td></tr>
+      <tr><td><b>Parallellogram</b></td><td class="ex">A = b · h</td><td class="ex">6 · 4 = 24 cm²</td></tr>
+      <tr><td><b>Triangel</b></td><td class="ex">A = b · h / 2</td><td class="ex">12 · 9 / 2 = 54 cm²</td></tr>
+      <tr><td><b>Parallelltrapets</b></td><td class="ex">A = (a + b) · h / 2</td><td class="ex">(5 + 9) · 4 / 2 = 28 cm²</td></tr>
+    </tbody>
+  </table>
+  <p>En triangel är hälften av en rektangel eller en parallellogram med samma bas och höjd. Därför delar man med 2.</p>
+  <p>En <b>sammansatt figur</b> delar man upp i rektanglar och trianglar. Räkna ut varje del och addera, eller räkna ut en stor rektangel och dra bort det som saknas.</p>
+  <p><b>Areaenheter:</b> Varje steg mellan två areaenheter är 100, eftersom 1 dm = 10 cm ger 1 dm² = 10 cm · 10 cm = 100 cm².</p>
+  <table>
+    <thead><tr><th>Enhet</th><th>Lika med</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 cm²</b></td><td>100 mm²</td></tr>
+      <tr><td><b>1 dm²</b></td><td>100 cm²</td></tr>
+      <tr><td><b>1 m²</b></td><td>100 dm² = 10 000 cm²</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Tips:</b> Till en mindre enhet multiplicerar du med 100 per steg: 3 m² = 300 dm². Till en större enhet dividerar du med 100 per steg: 450 cm² = 4,5 dm².</div>
+</section>
+
+<section class="card g" id="ba">
+  <h3>Begränsningsarea</h3>
+  <p><b>Begränsningsarean</b> (BA) är summan av arean av alla sidoytor på en kropp. Den visar hur mycket papper som går åt för att slå in kroppen eller hur mycket färg som behövs för att måla den. Man kan rita kroppens <b>utvikning</b>, alla sidoytor utlagda platt, för att se vilka ytor som ska räknas.</p>
+  <table>
+    <thead><tr><th>Kropp</th><th>Så räknar du</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Kub med sidan s</b></td><td>6 lika stora kvadrater: BA = 6 · s · s</td><td>s = 4 cm: 6 · 16 = 96 cm²</td></tr>
+      <tr><td><b>Rätblock l × b × h</b></td><td>3 par likadana rektanglar: BA = 2 · l · b + 2 · l · h + 2 · b · h</td><td>5 × 3 × 4 cm: 30 + 40 + 24 = 94 cm²</td></tr>
+      <tr><td><b>Låda utan lock</b></td><td>Som rätblocket men med botten bara en gång: l · b + 2 · l · h + 2 · b · h</td><td>5 × 3 × 4 cm: 15 + 40 + 24 = 79 cm²</td></tr>
+      <tr><td><b>Tresidigt prisma</b></td><td>2 triangulära ändytor + 3 rektanglar</td><td>Kateter 3 och 4 cm, hypotenusa 5 cm, längd 10 cm: 2 · 6 + (3 + 4 + 5) · 10 = 132 cm²</td></tr>
+    </tbody>
+  </table>
+  <div class="note warn"><b>Se upp:</b> Räkna alltid med alla ytor, även de som skyms bakom kroppen. Ett rätblock har 6 sidoytor. Svara i areaenheter, till exempel cm².</div>
+</section>
+
+<!-- ================= ALGEBRA ================= -->
+<div class="area a" id="algebra"><span class="ic">x</span><div><h2>Algebra</h2><p>Bokstäver som står för tal: uttryck, parenteser och ekvationer</p></div></div>
+
+<section class="card a" id="uttryck">
+  <h3>Variabel och uttryck</h3>
+  <table>
+    <thead><tr><th>Begrepp</th><th>Förklaring</th><th>Exempel</th></tr></thead>
+    <tbody>
+      <tr><td><b>Variabel</b></td><td>En bokstav som står för ett tal</td><td class="ex">x, a, n</td></tr>
+      <tr><td><b>Uttryck</b></td><td>Tal, variabler och räknesätt tillsammans, utan likhetstecken</td><td class="ex">3x + 5</td></tr>
+      <tr><td><b>Term</b></td><td>De delar i ett uttryck som skiljs åt av + eller −</td><td>3x och 5 i 3x + 5</td></tr>
+      <tr><td><b>Koefficient</b></td><td>Talet framför variabeln</td><td>3 i 3x</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Bra att veta:</b> 3x betyder 3 · x. Multiplikationstecknet brukar inte skrivas ut.</div>
+  <p><b>Uttryckets värde:</b> Byt ut variabeln mot ett tal och räkna. Om x = 4 blir 3x + 5 = 3 · 4 + 5 = 17.</p>
+</section>
+
+<section class="card a" id="forenkla">
+  <h3>Förenkla uttryck</h3>
+  <p>Lägg ihop <b>termer av samma sort</b>: x-termer för sig och tal för sig.</p>
+  <table>
+    <thead><tr><th>Uttryck</th><th>Så tänker du</th><th>Förenklat</th></tr></thead>
+    <tbody>
+      <tr><td class="ex">2x + 4 + 3x − 1</td><td>2x + 3x = 5x och 4 − 1 = 3</td><td class="ex">5x + 3</td></tr>
+      <tr><td class="ex">7a − 2a + a</td><td>a betyder 1a: 7 − 2 + 1 = 6</td><td class="ex">6a</td></tr>
+      <tr><td class="ex">4y + 6 − y − 2</td><td>4y − y = 3y och 6 − 2 = 4</td><td class="ex">3y + 4</td></tr>
+    </tbody>
+  </table>
+  <div class="note warn"><b>Se upp:</b> x-termer och tal kan inte läggas ihop. 5x + 3 kan inte förenklas mer.</div>
+</section>
+
+<section class="card a" id="parenteser">
+  <h3>Utveckla parenteser</h3>
+  <p>Multiplicera talet framför parentesen med <b>varje</b> term inuti parentesen.</p>
+  <table>
+    <thead><tr><th>Uttryck</th><th>Så gör du</th><th>Svar</th></tr></thead>
+    <tbody>
+      <tr><td class="ex">3(x + 2)</td><td>3 · x + 3 · 2</td><td class="ex">3x + 6</td></tr>
+      <tr><td class="ex">5(2a − 1)</td><td>5 · 2a − 5 · 1</td><td class="ex">10a − 5</td></tr>
+      <tr><td class="ex">10 − (x − 4)</td><td>Minus framför parentesen byter tecken: 10 − x + 4</td><td class="ex">14 − x</td></tr>
+    </tbody>
+  </table>
+  <div class="note warn"><b>Vanligt fel:</b> 3(x + 2) blir inte 3x + 2. Talet framför ska multipliceras med alla termer.</div>
+</section>
+
+<section class="card a" id="ekvationer">
+  <h3>Ekvationer</h3>
+  <p>En <b>ekvation</b> har ett likhetstecken, och båda sidor är lika mycket värda. Gör samma sak på båda sidor tills x står ensamt.</p>
+  <table>
+    <thead><tr><th>Steg</th><th>Ekvation</th><th>Vad du gör</th></tr></thead>
+    <tbody>
+      <tr><td class="c"><b>1</b></td><td class="ex">2x + 3 = 11</td><td>Starta</td></tr>
+      <tr><td class="c"><b>2</b></td><td class="ex">2x = 8</td><td>Subtrahera 3 på båda sidor</td></tr>
+      <tr><td class="c"><b>3</b></td><td class="ex">x = 4</td><td>Dividera med 2 på båda sidor</td></tr>
+      <tr><td class="c"><b>4</b></td><td class="ex">2 · 4 + 3 = 11</td><td>Kontrollera: stämmer!</td></tr>
+    </tbody>
+  </table>
+  <div class="note tip"><b>Tips:</b> Gör det motsatta räknesättet. Står det + 3, subtraherar du 3. Står det 2x, dividerar du med 2.</div>
+</section>
+
+<section class="card a" id="problem">
+  <h3>Problemlösning med ekvationer</h3>
+  <ol class="steps">
+    <li>Läs uppgiften och bestäm vad x står för.</li>
+    <li>Skriv en ekvation.</li>
+    <li>Lös ekvationen.</li>
+    <li>Svara med enhet och kontrollera att svaret är rimligt.</li>
+  </ol>
+  <p><b>Exempel:</b> Ali har x kr och Sara har 20 kr mer än Ali. Tillsammans har de 100 kr.</p>
+  <div class="calc">x + (x + 20) = 100<br>2x + 20 = 100<br>2x = 80<br>x = 40</div>
+  <p><b>Svar:</b> Ali har 40 kr och Sara har 60 kr.</p>
+</section>
+
+<p class="foot"><a href="#top">↑ Till början</a></p>
+</div>
+<script>
+(function(){
+"use strict";
+var BASE="https://sites.google.com/view/matte-7b/";
+function r(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function round(x,d){var p=Math.pow(10,d);return Math.round(x*p+1e-9)/p;}
+function sv(x){ // svensk talformat
+  var neg=x<0;x=Math.abs(x);
+  var s=String(round(x,6));
+  var parts=s.split(".");var i=parts[0];
+  if(i.length>4){i=i.replace(/\B(?=(\d{3})+(?!\d))/g," ");}
+  return (neg?"−":"")+i+(parts[1]?","+parts[1]:"");
+}
+function isPrime(n){if(n<2)return false;for(var i=2;i*i<=n;i++)if(n%i===0)return false;return true;}
+function frac(n,d){var g=gcd(n,d);n/=g;d/=g;if(d===1)return String(n);if(n>d){var h=Math.floor(n/d);return h+" "+(n-h*d)+"/"+d;}return n+"/"+d;}
+
+// ---- tolkning av svar ----
+function clean(s){return String(s).trim().toLowerCase().replace(/−|–/g,"-").replace(/\s+/g," ");}
+function parseNum(s){
+  s=clean(s).replace(/(kr|cm²|cm2|dm²|dm2|m²|m2|mm²|mm2|cm³|cm3|dm³|dm3|liter|l|cm|dm|m|°|grader)$/,"").trim();
+  s=s.replace(/(\d) (?=\d{3}\b)/g,"$1").replace(",",".");
+  if(/^-?\d+(\.\d+)?$/.test(s))return parseFloat(s);
+  var m=s.match(/^(-?\d+) (\d+)\/(\d+)$/);
+  if(m){var h=parseInt(m[1],10);return h+(h<0?-1:1)*parseInt(m[2],10)/parseInt(m[3],10);}
+  m=s.match(/^(-?\d+)\/(\d+)$/);
+  if(m&&+m[2]!==0)return parseInt(m[1],10)/parseInt(m[2],10);
+  return NaN;
+}
+function numCheck(ans){return function(s){var v=parseNum(s);return isNaN(v)?null:Math.abs(v-ans)<1e-9;};}
+function exprFn(s){
+  s=clean(s).replace(/·|\*|×/g,"*").replace(/,/g,".").replace(/ /g,"");
+  if(!/^[0-9x+\-*/().]+$/.test(s)||!/x/.test(s))return null;
+  s=s.replace(/(\d|\))(?=x|\()/g,"$1*").replace(/x(?=\d|\(|x)/g,"x*").replace(/\)(?=\d)/g,")*");
+  try{var f=new Function("x","return ("+s+");");f(1);return f;}catch(e){return null;}
+}
+function exprCheck(target,needSimple){
+  return function(s){
+    var f=exprFn(s);if(!f)return null;
+    var ok=[0,1,2,-3,7].every(function(x){return Math.abs(f(x)-target(x))<1e-9;});
+    if(!ok)return false;
+    if(needSimple){var c=clean(s).replace(/ /g,"");var terms=c.replace(/^-/,"").split(/[+\-]/);
+      var consts=terms.filter(function(t){return t.indexOf("x")<0;}).length;
+      if(/\(/.test(c)||(c.match(/x/g)||[]).length>1||consts>1)return "simplify";}
+    return true;
+  };
+}
+function factorCheck(n){
+  return function(s){
+    var c=clean(s).replace(/ /g,"").replace(/²/g,"^2").replace(/³/g,"^3");
+    var parts=c.split(/[·*x×]/);if(parts.length<2)return null;
+    var prod=1,allPrime=true;
+    for(var i=0;i<parts.length;i++){var m=parts[i].match(/^(\d+)(\^(\d+))?$/);if(!m)return null;var b=+m[1],e=m[3]?+m[3]:1;if(!isPrime(b))allPrime=false;prod*=Math.pow(b,e);}
+    if(prod!==n)return false;
+    return allPrime?true:"notprime";
+  };
+}
+
+// ---- uppgifter ----
+var T=[
+// TAL
+function(){var a=r(12,999)/100,k=pick([10,100,1000]),mul=Math.random()<.5;var ans=mul?a*k:a/k;
+  return{area:"t",topic:"Tal · Gånger och delat med 10, 100, 1000",link:"#positioner",
+  q:sv(a)+(mul?" · ":" / ")+sv(k)+" = ?",check:numCheck(round(ans,6)),
+  sol:"Decimaltecknet flyttas "+(String(k).length-1)+" steg åt "+(mul?"höger":"vänster")+". Svar: "+sv(round(ans,6))};},
+function(){var a=r(11,99)/10,b=r(101,999)/100;var ans=round(a+b,2);
+  return{area:"t",topic:"Tal · Räkna med decimaltal",link:"#decimaltal",q:sv(a)+" + "+sv(b)+" = ?",check:numCheck(ans),
+  sol:"Ställ upp så att decimaltecknen hamnar under varandra och fyll ut med nollor: "+sv(a)+"0 + "+sv(b)+" = "+sv(ans)};},
+function(){var a=r(2,9),b=r(2,9);var ans=round(a*b/100,2);
+  return{area:"t",topic:"Tal · Räkna med decimaltal",link:"#decimaltal",q:"0,"+a+" · 0,"+b+" = ?",check:numCheck(ans),
+  sol:"Räkna utan decimaltecken: "+a+" · "+b+" = "+(a*b)+". Faktorerna har en decimal var, alltså två decimaler i svaret: "+sv(ans)};},
+function(){var x=r(10000,99999)/1000,lvl=pick([["heltal",0],["tiondelar",1],["hundradelar",2]]);var ans=round(x,lvl[1]);
+  return{area:"t",topic:"Tal · Avrundning",link:"#avrundning",q:"Avrunda "+sv(x)+" till "+lvl[0]+".",check:numCheck(ans),
+  sol:"Titta på siffran direkt efter den position du avrundar till. 0–4 avrundar nedåt, 5–9 uppåt. "+sv(x)+" ≈ "+sv(ans)};},
+function(){var n=r(1001,9899),lvl=pick([["tiotal",10],["hundratal",100]]);var ans=Math.round(n/lvl[1])*lvl[1];
+  return{area:"t",topic:"Tal · Avrundning",link:"#avrundning",q:"Avrunda "+sv(n)+" till "+lvl[0]+".",check:numCheck(ans),sol:sv(n)+" ≈ "+sv(ans)};},
+function(){var d=pick([3,9,4,6]);var n=Math.random()<.5?d*r(30,300):d*r(30,300)+r(1,d-1);var yes=n%d===0;
+  var rule={3:"Siffersumman är delbar med 3.",9:"Siffersumman är delbar med 9.",4:"De två sista siffrorna bildar ett tal som är delbart med 4.",6:"Talet är delbart med både 2 och 3."}[d];
+  var ss=String(n).split("").reduce(function(s,c){return s+ +c;},0);
+  return{area:"t",topic:"Tal · Delbarhet",link:"#delbarhet",q:"Är "+sv(n)+" delbart med "+d+"?",choices:["Ja","Nej"],answer:yes?"Ja":"Nej",
+  sol:"Regel: "+rule+(d===3||d===9||d===6?" Siffersumman är "+ss+".":"")+" Alltså: "+(yes?"ja":"nej")+", "+sv(n)+" / "+d+(yes?" = "+sv(n/d):" går inte jämnt upp")+"."};},
+function(){var primes=[13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73];var traps=[51,57,91,21,27,39,49,33,63,87];var p=pick(primes);var opts=shuffle(traps).slice(0,3).concat([p]);
+  return{area:"t",topic:"Tal · Primtal",link:"#delbarhet",q:"Vilket av talen är ett primtal?",choices:shuffle(opts.map(String)),answer:String(p),
+  sol:p+" är bara delbart med 1 och sig självt. Se upp med till exempel 51 = 3 · 17, 57 = 3 · 19 och 91 = 7 · 13."};},
+function(){var n=pick([12,18,20,24,28,30,36,40,42,45,48,50,60,72,84,90]);var f=[],m=n,d=2;while(m>1){while(m%d===0){f.push(d);m/=d;}d++;}
+  return{area:"t",topic:"Tal · Primtalsfaktorisering",link:"#delbarhet",q:"Primtalsfaktorisera "+n+". Skriv till exempel 2·3·5.",check:factorCheck(n),
+  sol:"Dela med minsta primtal som går jämnt upp tills du får 1. "+n+" = "+f.join(" · ")};},
+function(){var b=r(2,5),e=b>3?r(2,3):r(2,4);var ans=Math.pow(b,e);var sup={2:"²",3:"³",4:"⁴"}[e];
+  return{area:"t",topic:"Tal · Potenser",link:"#potenser",q:"Beräkna "+b+sup+".",check:numCheck(ans),
+  sol:b+sup+" = "+Array(e+1).join(b+" · ").slice(0,-3)+" = "+ans+". Inte "+b+" · "+e+"!"};},
+function(){var a=r(2,6),b=r(2,4);var ans=a*a+b*b*b;
+  return{area:"t",topic:"Tal · Potenser",link:"#potenser",q:"Beräkna "+a+"² + "+b+"³.",check:numCheck(ans),sol:"Potenserna först: "+(a*a)+" + "+(b*b*b)+" = "+ans};},
+function(){var e=r(2,6),a=r(11,99)/10;var ans=round(a*Math.pow(10,e),4);var sup={2:"²",3:"³",4:"⁴",5:"⁵",6:"⁶"}[e];
+  return{area:"t",topic:"Tal · Tiopotenser",link:"#potenser",q:"Skriv "+sv(a)+" · 10"+sup+" som ett vanligt tal.",check:numCheck(ans),
+  sol:"10"+sup+" = "+sv(Math.pow(10,e))+". "+sv(a)+" · "+sv(Math.pow(10,e))+" = "+sv(ans)};},
+// GEOMETRI
+function(){var a=r(25,80),b=r(25,80);var c=180-a-b;
+  return{area:"g",topic:"Geometri · Vinkelsumman i en triangel",link:"#vinklar",q:"En triangel har vinklarna "+a+"° och "+b+"°. Hur stor är den tredje vinkeln?",check:numCheck(c),unit:"°",
+  sol:"Vinkelsumman är 180°. 180° − "+a+"° − "+b+"° = "+c+"°"};},
+function(){var a=r(95,165);
+  return{area:"g",topic:"Geometri · Sidovinklar",link:"#vinklar",q:"Två sidovinklar ligger längs en rak linje. Den ena är "+a+"°. Hur stor är den andra?",check:numCheck(180-a),unit:"°",
+  sol:"Sidovinklar är tillsammans 180°. 180° − "+a+"° = "+(180-a)+"°"};},
+function(){var t=2*r(10,40);var bv=(180-t)/2;
+  return{area:"g",topic:"Geometri · Likbent triangel",link:"#vinklar",q:"I en likbent triangel är toppvinkeln "+t+"°. Hur stor är varje basvinkel?",check:numCheck(bv),unit:"°",
+  sol:"(180° − "+t+"°) / 2 = "+bv+"°"};},
+function(){var k=pick(["rektangel","triangel","parallellogram","parallelltrapets"]);var b=r(3,12),h=r(2,10),a2=r(2,8);
+  var ans,q,sol;
+  if(k==="rektangel"){ans=b*h;q="En rektangel har basen "+b+" cm och höjden "+h+" cm. Vad är arean?";sol="A = b · h = "+b+" · "+h+" = "+ans+" cm²";}
+  else if(k==="triangel"){if((b*h)%2)b++;ans=b*h/2;q="En triangel har basen "+b+" cm och höjden "+h+" cm. Vad är arean?";sol="A = b · h / 2 = "+b+" · "+h+" / 2 = "+ans+" cm²";}
+  else if(k==="parallellogram"){ans=b*h;q="En parallellogram har basen "+b+" cm och höjden "+h+" cm. Vad är arean?";sol="A = b · h = "+b+" · "+h+" = "+ans+" cm²";}
+  else{if(((a2+b)*h)%2)h++;ans=(a2+b)*h/2;q="En parallelltrapets har de parallella sidorna "+a2+" cm och "+b+" cm och höjden "+h+" cm. Vad är arean?";sol="A = (a + b) · h / 2 = ("+a2+" + "+b+") · "+h+" / 2 = "+ans+" cm²";}
+  return{area:"g",topic:"Geometri · Area",link:"#area",q:q,check:numCheck(ans),unit:"cm²",sol:sol};},
+function(){var a=r(3,15),b=r(2,12);
+  return{area:"g",topic:"Geometri · Omkrets",link:"#area",q:"En rektangel har sidorna "+a+" cm och "+b+" cm. Vad är omkretsen?",check:numCheck(2*(a+b)),unit:"cm",
+  sol:"Lägg ihop alla sidor: "+a+" + "+b+" + "+a+" + "+b+" = "+(2*(a+b))+" cm"};},
+function(){var c=pick([["m²","dm²",100,r(2,9)],["dm²","cm²",100,r(2,9)],["cm²","dm²",0.01,r(2,9)*50],["m²","cm²",10000,r(2,5)]]);var ans=round(c[3]*c[2],4);
+  return{area:"g",topic:"Geometri · Areaenheter",link:"#area",q:sv(c[3])+" "+c[0]+" = ? "+c[1],check:numCheck(ans),unit:c[1],
+  sol:"Varje steg mellan areaenheter är 100. "+sv(c[3])+" "+c[0]+" = "+sv(ans)+" "+c[1]};},
+function(){var l=r(3,8),b=r(2,6),h=r(2,6);var ba=2*l*b+2*l*h+2*b*h;
+  return{area:"g",topic:"Geometri · Begränsningsarea",link:"#ba",q:"Ett rätblock är "+l+" cm långt, "+b+" cm brett och "+h+" cm högt. Vad är begränsningsarean?",check:numCheck(ba),unit:"cm²",
+  sol:"BA = 2 · l · b + 2 · l · h + 2 · b · h = "+(2*l*b)+" + "+(2*l*h)+" + "+(2*b*h)+" = "+ba+" cm²"};},
+function(){var s=r(2,9);
+  return{area:"g",topic:"Geometri · Begränsningsarea",link:"#ba",q:"En kub har sidan "+s+" cm. Vad är begränsningsarean?",check:numCheck(6*s*s),unit:"cm²",
+  sol:"6 lika stora kvadrater: 6 · "+s+" · "+s+" = "+(6*s*s)+" cm²"};},
+function(){var l=r(2,10),b=r(2,8),h=r(2,6);
+  return{area:"g",topic:"Geometri · Volym",link:BASE+"geometri/volym",ext:true,q:"Ett rätblock är "+l+" cm långt, "+b+" cm brett och "+h+" cm högt. Vad är volymen?",check:numCheck(l*b*h),unit:"cm³",
+  sol:"V = l · b · h = "+l+" · "+b+" · "+h+" = "+(l*b*h)+" cm³"};},
+function(){var l=r(2,6),b=r(2,5),h=r(2,5);
+  return{area:"g",topic:"Geometri · Volym och liter",link:BASE+"geometri/volym",ext:true,q:"Ett akvarium är "+l+" dm långt, "+b+" dm brett och "+h+" dm högt. Hur många liter rymmer det?",check:numCheck(l*b*h),unit:"liter",
+  sol:"V = "+l+" · "+b+" · "+h+" = "+(l*b*h)+" dm³. 1 dm³ = 1 liter, alltså "+(l*b*h)+" liter."};},
+function(){var k=pick([["en kub",8,12,6],["ett rätblock",8,12,6],["en fyrsidig pyramid",5,8,5],["ett tresidigt prisma",6,9,5]]);var w=pick([["hörn",1],["kanter",2],["sidoytor",3]]);
+  return{area:"g",topic:"Geometri · Kroppar",link:"#figurer",q:"Hur många "+w[0]+" har "+k[0]+"?",check:numCheck(k[w[1]]),
+  sol:k[0].charAt(0).toUpperCase()+k[0].slice(1)+" har "+k[1]+" hörn, "+k[2]+" kanter och "+k[3]+" sidoytor."};},
+function(){var it=pick([["Vilken figur har exakt ett par parallella sidor?","Parallelltrapets",["Parallellogram","Romb","Rektangel"]],
+  ["Vilken triangel har en vinkel som är större än 90°?","Trubbvinklig",["Spetsvinklig","Rätvinklig","Liksidig"]],
+  ["Vad kallas den längsta sidan i en rätvinklig triangel?","Hypotenusa",["Katet","Bas","Höjd"]],
+  ["Vilken vinkel är mellan 90° och 180°?","Trubbig",["Spetsig","Rät","Rak"]],
+  ["Vilken figur har 4 lika långa sidor men inte alltid räta vinklar?","Romb",["Rektangel","Parallelltrapets","Kvadrat"]]]);
+  return{area:"g",topic:"Geometri · Begrepp",link:"#figurer",q:it[0],choices:shuffle([it[1]].concat(it[2])),answer:it[1],sol:"Rätt svar: "+it[1]+"."};},
+// ALGEBRA
+function(){var a=r(2,9),b=r(1,12),x=r(2,9);
+  return{area:"a",topic:"Algebra · Uttryckets värde",link:"#uttryck",q:"Vad är värdet av "+a+"x + "+b+" om x = "+x+"?",check:numCheck(a*x+b),
+  sol:"Byt x mot "+x+": "+a+" · "+x+" + "+b+" = "+(a*x)+" + "+b+" = "+(a*x+b)};},
+function(){var a=r(2,7),c=r(2,7),b=r(3,12),d=r(1,b-1);var P=a+c,Q=b-d;
+  return{area:"a",topic:"Algebra · Förenkla uttryck",link:"#forenkla",q:"Förenkla "+a+"x + "+b+" + "+c+"x − "+d+".",check:exprCheck(function(x){return P*x+Q;},true),
+  sol:"x-termer för sig: "+a+"x + "+c+"x = "+P+"x. Tal för sig: "+b+" − "+d+" = "+Q+". Svar: "+P+"x + "+Q};},
+function(){var a=r(2,9),b=r(1,9),minus=Math.random()<.4;
+  return{area:"a",topic:"Algebra · Utveckla parenteser",link:"#parenteser",q:"Utveckla "+a+"(x "+(minus?"−":"+")+" "+b+").",check:exprCheck(function(x){return a*(minus?x-b:x+b);},true),
+  sol:"Multiplicera "+a+" med båda termerna: "+a+" · x "+(minus?"−":"+")+" "+a+" · "+b+" = "+a+"x "+(minus?"−":"+")+" "+(a*b)};},
+function(){var a=r(2,9),x=r(2,12),b=r(1,15);var c=a*x+b;
+  return{area:"a",topic:"Algebra · Ekvationer",link:"#ekvationer",q:"Lös ekvationen "+a+"x + "+b+" = "+c+".  x = ?",check:numCheck(x),
+  sol:"Subtrahera "+b+": "+a+"x = "+(c-b)+". Dividera med "+a+": x = "+x+". Kontroll: "+a+" · "+x+" + "+b+" = "+c+"."};},
+function(){var x=r(15,60),d=pick([10,15,20,25,30]);var s=2*x+d;var who=pick([["Ali","Sara"],["Elsa","Noah"],["Liam","Maja"]]);
+  return{area:"a",topic:"Algebra · Problemlösning",link:"#problem",q:who[0]+" har x kr. "+who[1]+" har "+d+" kr mer än "+who[0]+". Tillsammans har de "+s+" kr. Hur mycket har "+who[0]+"?",check:numCheck(x),unit:"kr",
+  sol:"x + (x + "+d+") = "+s+" ger 2x + "+d+" = "+s+", 2x = "+(s-d)+" och x = "+x+". "+who[0]+" har "+x+" kr och "+who[1]+" "+(x+d)+" kr."};},
+// BRÅK
+function(){var n=pick([5,7,8,9,11]),a=r(1,n-2),b=r(1,n-1-a);
+  return{area:"b",topic:"Bråk · Lika nämnare",link:BASE+"br%C3%A5k/br%C3%A5kfabriken-7",ext:true,q:a+"/"+n+" + "+b+"/"+n+" = ?",check:numCheck((a+b)/n),
+  sol:"Bitarna är redan lika stora. Lägg ihop täljarna: "+a+" + "+b+" = "+(a+b)+". Svar: "+(a+b)+"/"+n+(gcd(a+b,n)>1?" = "+frac(a+b,n):"")};},
+function(){var d=pick([2,3,4,5]),k=pick([2,3]),D=d*k;var a=1,b=r(1,D-k-1);if(b<1)b=1;
+  return{area:"b",topic:"Bråk · En nämnare ryms i den andra",link:BASE+"br%C3%A5k/br%C3%A5kfabriken-7",ext:true,q:a+"/"+d+" + "+b+"/"+D+" = ?",check:numCheck(a/d+b/D),
+  sol:"Förläng "+a+"/"+d+" med "+k+": "+(a*k)+"/"+D+". Sedan "+(a*k)+"/"+D+" + "+b+"/"+D+" = "+(a*k+b)+"/"+D+(gcd(a*k+b,D)>1?" = "+frac(a*k+b,D):"")};},
+function(){var p=pick([[2,3],[3,4],[2,5],[4,5],[3,5]]);var a=1,b=1;var D=p[0]*p[1];var num=p[1]+p[0];
+  return{area:"b",topic:"Bråk · Olika nämnare",link:BASE+"br%C3%A5k/br%C3%A5kfabriken-7",ext:true,q:"1/"+p[0]+" + 1/"+p[1]+" = ?",check:numCheck(1/p[0]+1/p[1]),
+  sol:"Gemensam nämnare "+D+": "+p[1]+"/"+D+" + "+p[0]+"/"+D+" = "+num+"/"+D+(gcd(num,D)>1?" = "+frac(num,D):"")};},
+function(){var d=pick([4,5,6,8]),h=r(2,4),a=r(1,d-2),b=r(a+1,d-1);var val=h+a/d-b/d;var n=Math.round(val*d);
+  return{area:"b",topic:"Bråk · Blandad form",link:BASE+"br%C3%A5k/br%C3%A5kfabriken-7",ext:true,q:h+" "+a+"/"+d+" − "+b+"/"+d+" = ?",check:numCheck(val),
+  sol:"Växla en hel till "+d+"/"+d+": "+h+" "+a+"/"+d+" = "+(h-1)+" "+(a+d)+"/"+d+". Sedan "+(a+d)+"/"+d+" − "+b+"/"+d+" = "+(a+d-b)+"/"+d+". Svar: "+frac(n,d)};}
+];
+
+// ---- gränssnitt ----
+var cur,tries,done,last=-1;
+var $=function(id){return document.getElementById(id);};
+function fb(cls,txt){var e=$("su-fb");e.className="start-fb "+cls;e.textContent=txt;e.hidden=false;}
+function showSol(){var e=$("su-sol");e.innerHTML="<b>Lösning:</b> "+cur.sol;e.hidden=false;$("su-show").hidden=true;}
+function finish(ok){done=true;if(ok){fb("ok",pick(["Snyggt, rätt!","Helt rätt!","Rätt svar, bra jobbat!"]));showSol();}}
+function newTask(){
+  var i;do{i=Math.floor(Math.random()*T.length);}while(i===last&&T.length>1);last=i;
+  cur=T[i]();tries=0;done=false;
+  var tp=$("su-topic");tp.textContent=cur.topic;tp.className="start-topic "+cur.area;
+  $("su-q").textContent=cur.q;
+  $("su-fb").hidden=true;$("su-sol").hidden=true;$("su-show").hidden=true;
+  var more=$("su-more");more.href=cur.link;if(cur.ext){more.target="_blank";more.rel="noopener";more.textContent="Öva mer ↗";}else{more.removeAttribute("target");more.textContent="Läs mer om det här ↓";}
+  var box=$("su-answer");box.innerHTML="";
+  if(cur.choices){
+    var row=document.createElement("div");row.className="start-row";
+    cur.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="btn choice";b.textContent=c;
+      b.onclick=function(){if(done)return;tries++;
+        if(c===cur.answer){b.classList.add("right");finish(true);row.querySelectorAll("button").forEach(function(x){x.disabled=true;});}
+        else{b.classList.add("wrong");b.disabled=true;fb("no","Inte riktigt. Försök igen!");if(tries>=2)$("su-show").hidden=false;}};
+      row.appendChild(b);});
+    box.appendChild(row);
+  }else{
+    var f=document.createElement("form");f.className="start-row";
+    f.innerHTML='<input type="text" inputmode="text" autocomplete="off" aria-label="Ditt svar" placeholder="Ditt svar">'+(cur.unit?'<span class="unit">'+cur.unit+'</span>':'')+'<button class="btn" type="submit">Kolla svaret</button>';
+    f.onsubmit=function(ev){ev.preventDefault();if(done)return;var v=f.querySelector("input").value;if(!v.trim())return;
+      var res=cur.check(v);
+      if(res===true){finish(true);f.querySelector("input").disabled=true;f.querySelector("button").disabled=true;return;}
+      if(res===null){fb("hint","Jag förstod inte svaret. Skriv bara talet eller uttrycket, till exempel 3,5 eller 5x + 3"+(cur.q.indexOf("/")>=0?" eller 3/4":"")+".");return;}
+      if(res==="simplify"){fb("hint","Rätt värde, men det går att förenkla mer. Lägg ihop termer av samma sort.");return;}
+      if(res==="notprime"){fb("hint","Produkten stämmer, men alla faktorer måste vara primtal. Dela upp mer!");return;}
+      tries++;fb("no",tries>=2?"Inte riktigt. Försök igen eller titta på lösningen.":"Inte riktigt. Försök igen!");if(tries>=2)$("su-show").hidden=false;};
+    box.appendChild(f);
+  }
+}
+$("su-show").onclick=showSol;
+$("su-new").onclick=newTask;
+newTask();
+})();
+
+</script>
+</body>
+</html>
