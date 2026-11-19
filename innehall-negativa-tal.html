@@ -1,0 +1,402 @@
+<title>Under nollan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: en smal spelkolumn – fråga överst, tallinje i mitten, knappsats under. Kallt = negativt, varmt = positivt. */
+:root{
+  --bg:#EAF0F6; --surface:#FFFFFF; --ink:#152033; --muted:#566880; --line:#C8D4E2;
+  --cold:#2C7AD6; --warm:#E86F22; --good:#1C9660; --bad:#D23E35;
+  --display:"Fredoka","Lexend",system-ui,sans-serif;
+  --body:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1520; --surface:#172131; --ink:#E7EEF6; --muted:#93A4BA; --line:#2B3A4E;
+    --cold:#6AAEFF; --warm:#FF9852; --good:#3DC488; --bad:#FF6C60; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1520; --surface:#172131; --ink:#E7EEF6; --muted:#93A4BA; --line:#2B3A4E;
+  --cold:#6AAEFF; --warm:#FF9852; --good:#3DC488; --bad:#FF6C60; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5}
+.page{max-width:760px; margin:0 auto; padding-block:28px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,.q,.big{font-family:var(--display); text-wrap:balance}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--cold); outline-offset:2px}
+
+/* Start */
+.hero h1{font-size:clamp(2.6rem,9vw,4.2rem); line-height:.95; margin:0 0 12px; font-weight:700; letter-spacing:-.01em}
+.hero h1 .c{color:var(--cold)}
+.hero p{margin:0 0 26px; color:var(--muted); max-width:52ch}
+.levels{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:12px}
+.lvl{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; text-align:left;
+  background:var(--surface); border:2px solid var(--line); border-radius:16px; padding:16px 18px}
+.lvl:hover{border-color:var(--cold)}
+.lvl .ex{font-family:var(--display); font-weight:600; font-size:1.25rem; min-width:4.5em; color:var(--cold); font-variant-numeric:tabular-nums}
+.lvl b{display:block; font-family:var(--display); font-size:1.2rem; font-weight:600}
+.lvl span{color:var(--muted); font-size:.9rem}
+.lvl .best{font-size:.82rem; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+.rules{margin-top:26px; display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--muted); font-size:.92rem}
+.rules strong{color:var(--ink); font-family:var(--display); font-weight:600}
+
+/* Spel */
+.bar{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.back{background:none; border:0; color:var(--muted); padding:6px 0; font-size:.95rem}
+.stat{display:flex; gap:16px; font-variant-numeric:tabular-nums; font-weight:600}
+.stat .streak{color:var(--warm)}
+.dots{display:flex; gap:6px; margin-bottom:18px}
+.dots i{flex:1; height:8px; border-radius:4px; background:var(--line)}
+.dots i.now{background:var(--muted)}
+.dots i.ok{background:var(--good)} .dots i.no{background:var(--bad)}
+.card{background:var(--surface); border:2px solid var(--line); border-radius:20px; padding:22px clamp(16px,4vw,28px)}
+.lvlname{font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.q{font-size:clamp(2.2rem,9vw,3.6rem); font-weight:600; margin:4px 0 6px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow-x:auto}
+.ans{display:flex; align-items:baseline; gap:10px; font-family:var(--display); font-size:clamp(2rem,8vw,3rem); font-weight:700; min-height:1.3em}
+.ans .eq{color:var(--muted); font-weight:500}
+.ans .val{min-width:2.5ch; border-bottom:3px solid var(--line); font-variant-numeric:tabular-nums}
+.ans .val.empty{color:var(--line)}
+.ans.ok .val{color:var(--good); border-color:var(--good)}
+.ans.no .val{color:var(--bad); border-color:var(--bad); text-decoration:line-through; text-decoration-thickness:3px}
+.ans .right{color:var(--good)}
+.nl{margin:14px 0 4px; overflow-x:auto}
+.nl svg{display:block; width:100%; min-width:420px; height:auto}
+.nl-axis{stroke:var(--ink); stroke-width:2}
+.nl-tick{stroke:var(--ink); stroke-width:1.5}
+.nl-lab{fill:var(--muted); font:500 14px var(--body); text-anchor:middle}
+.nl-lab.zero{fill:var(--ink); font-weight:600}
+.nl-neg{fill:var(--cold); opacity:.1}
+.nl-pos{fill:var(--warm); opacity:.1}
+.nl-arc{fill:none; stroke-width:3.5; stroke-linecap:round}
+.nl-arc.r{stroke:var(--warm)} .nl-arc.l{stroke:var(--cold)}
+.nl-steps{font:600 17px var(--display); text-anchor:middle}
+.nl-steps.r{fill:var(--warm)} .nl-steps.l{fill:var(--cold)}
+.nl-dot{fill:var(--ink)} .nl-end{fill:var(--good)}
+.nl-cap{fill:var(--ink); font:600 13px var(--body); text-anchor:middle}
+.signs{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 4px}
+.signs span{font-family:var(--display); font-weight:600; font-size:1.1rem; padding:6px 12px; border-radius:10px; border:2px solid var(--line); font-variant-numeric:tabular-nums}
+.signs span.on{border-color:var(--ink); background:var(--bg)}
+.explain{margin:12px 0 0; padding:12px 14px; border-radius:12px; background:var(--bg); font-size:.98rem}
+.explain p{margin:0} .explain p+p{margin-top:4px}
+.explain .head{font-family:var(--display); font-weight:600; font-size:1.15rem}
+.explain .head.ok{color:var(--good)} .explain .head.no{color:var(--bad)}
+
+.pad{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px}
+.pad button{font-family:var(--display); font-weight:600; font-size:1.5rem; padding:12px 0; border-radius:14px;
+  background:var(--surface); border:2px solid var(--line); font-variant-numeric:tabular-nums}
+.pad button:active{transform:translateY(1px)}
+.pad .neg{color:var(--cold)}
+.pad .go{grid-column:span 2; background:var(--ink); color:var(--bg); border-color:var(--ink); font-size:1.2rem}
+.pad .go.next{background:var(--good); border-color:var(--good); color:#fff}
+.keyhint{margin-top:10px; font-size:.82rem; color:var(--muted); text-align:center}
+
+/* Slut */
+.end h2{font-size:clamp(2rem,7vw,2.8rem); margin:0 0 4px; font-weight:700}
+.stars{font-size:2.4rem; letter-spacing:6px; color:var(--warm); line-height:1.2}
+.stars .off{color:var(--line)}
+.big{font-size:3rem; font-weight:700; font-variant-numeric:tabular-nums; line-height:1}
+.endstats{display:flex; gap:28px; flex-wrap:wrap; margin:16px 0 18px}
+.endstats div span{display:block; color:var(--muted); font-size:.85rem}
+.miss{margin:0 0 18px; padding:0; list-style:none; display:grid; gap:8px}
+.miss li{padding:10px 14px; border-radius:12px; background:var(--bg); font-size:.95rem}
+.miss li b{font-family:var(--display); font-weight:600; font-size:1.1rem; font-variant-numeric:tabular-nums}
+.actions{display:flex; gap:10px; flex-wrap:wrap}
+.btn{padding:12px 20px; border-radius:12px; border:2px solid var(--ink); background:var(--ink); color:var(--bg); font-weight:600}
+.btn.ghost{background:transparent; color:var(--ink)}
+.pop{animation:pop .3s ease-out}
+@keyframes pop{50%{transform:scale(1.06)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion: reduce){.pop,.shake{animation:none}}
+</style>
+
+<div class="page">
+  <section id="start">
+    <div class="hero">
+      <h1>Under <span class="c">nollan</span></h1>
+      <p>Räkna med negativa tal. Varje runda har tio uppgifter. När du har svarat ser du hoppet på tallinjen och hur man räknar.</p>
+    </div>
+    <div class="levels" id="levels"></div>
+    <div class="rules">
+      <div><strong>+ (−)</strong> blir minus</div>
+      <div><strong>− (−)</strong> blir plus</div>
+      <div><strong>lika tecken</strong> ger plus vid · och ÷</div>
+      <div><strong>olika tecken</strong> ger minus vid · och ÷</div>
+    </div>
+  </section>
+
+  <section id="game" hidden>
+    <div class="bar">
+      <button class="back" id="quit">← Byt nivå</button>
+      <div class="stat"><span id="score">0 poäng</span><span class="streak" id="streak"></span></div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="card" id="card">
+      <div class="lvlname" id="lvlname"></div>
+      <div class="q" id="q"></div>
+      <div class="ans" id="ans"><span class="eq">=</span><span class="val empty" id="val">?</span></div>
+      <div class="nl" id="nl"></div>
+      <div class="signs" id="signs" hidden></div>
+      <div class="explain" id="explain" hidden></div>
+    </div>
+    <div class="pad" id="pad">
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="back" aria-label="Sudda">⌫</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button data-k="neg" class="neg" aria-label="Byt tecken">±</button>
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="0">0</button>
+      <button data-k="go" class="go" id="go">Svara</button>
+    </div>
+    <div class="keyhint">Du kan också skriva med tangentbordet. Minustecknet byter tecken, Enter svarar.</div>
+  </section>
+
+  <section id="end" class="card end" hidden>
+    <div class="lvlname" id="endlvl"></div>
+    <h2 id="endtitle"></h2>
+    <div class="stars" id="stars"></div>
+    <div class="endstats">
+      <div><span>Rätt</span><div class="big" id="endright"></div></div>
+      <div><span>Poäng</span><div class="big" id="endscore"></div></div>
+      <div><span>Bästa på nivån</span><div class="big" id="endbest"></div></div>
+    </div>
+    <ul class="miss" id="miss"></ul>
+    <div class="actions">
+      <button class="btn" id="again">Spela igen</button>
+      <button class="btn ghost" id="other">Byt nivå</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const ROUNDS = 10;
+const M = '−';
+const f = n => n < 0 ? M + Math.abs(n) : String(n);
+const p = n => n < 0 ? '(' + f(n) + ')' : f(n);
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const nz = (a,b) => { let x; do { x = rnd(a,b); } while(x === 0); return x; };
+
+function stepText(start, move){
+  const end = start + move, n = Math.abs(move);
+  return `Börja på ${f(start)} och gå ${n} steg åt ${move > 0 ? 'höger' : 'vänster'}. Du hamnar på ${f(end)}.`;
+}
+function additive(a, op, b){
+  // a op b, b may be negative (shown in parentheses)
+  const move = op === '+' ? b : -b;
+  const ex = [];
+  if(b < 0){
+    ex.push(op === '+'
+      ? `Plus och minus blir minus: ${f(a)} + ${p(b)} = ${f(a)} ${M} ${Math.abs(b)}.`
+      : `Minus och minus blir plus: ${f(a)} ${M} ${p(b)} = ${f(a)} + ${Math.abs(b)}.`);
+  }
+  ex.push(stepText(a, move));
+  return {move, ex};
+}
+
+const LEVELS = [
+  {id:'add', name:'Plus och minus', sub:'Hoppa förbi nollan', ex:`${M}3 + 5`,
+   gen(){
+     let a, b, op, ans;
+     do { a = rnd(-10,10); b = rnd(1,10); op = pick(['+', M]); ans = op === '+' ? a+b : a-b; } while(a >= 0 && ans >= 0);
+     const r = additive(a, op === '+' ? '+' : '-', b);
+     return {text:`${f(a)} ${op} ${b}`, answer:ans, ex:r.ex, line:{start:a, move:r.move}};
+   }},
+  {id:'neg', name:'Minus och minus', sub:'När två tecken möts', ex:`4 ${M} (${M}2)`,
+   gen(){
+     const a = rnd(-10,10), b = -rnd(1,10), op = pick(['+','-']);
+     const r = additive(a, op, b), ans = a + r.move;
+     return {text:`${f(a)} ${op === '+' ? '+' : M} ${p(b)}`, answer:ans, ex:r.ex, line:{start:a, move:r.move}};
+   }},
+  {id:'mul', name:'Gånger och delat', sub:'Teckenreglerna', ex:`${M}3 · (${M}4)`,
+   gen(){
+     let x, y;
+     do { x = nz(-9,9); y = nz(-9,9); } while(x > 0 && y > 0);
+     const same = (x < 0) === (y < 0);
+     if(Math.random() < 0.5){
+       const ans = x*y;
+       return {text:`${f(x)} · ${p(y)}`, answer:ans, signs:{a:x, b:y, op:'·'},
+         ex:[`${same ? 'Lika tecken ger plus.' : 'Olika tecken ger minus.'} ${Math.abs(x)} · ${Math.abs(y)} = ${Math.abs(ans)}, så svaret är ${f(ans)}.`]};
+     }
+     const d = x*y, ans = x;
+     const s2 = (d < 0) === (y < 0);
+     return {text:`${f(d)} ÷ ${p(y)}`, answer:ans, signs:{a:d, b:y, op:'÷'},
+       ex:[`${s2 ? 'Lika tecken ger plus.' : 'Olika tecken ger minus.'} ${Math.abs(d)} ÷ ${Math.abs(y)} = ${Math.abs(ans)}, så svaret är ${f(ans)}.`]};
+   }},
+  {id:'mix', name:'Blandat', sub:'Gånger först, sedan plus och minus', ex:`${M}2 · 3 + 7`,
+   gen(){
+     let x, y, c, op, m, mtxt, mex;
+     do{
+       x = nz(-6,6); y = nz(-6,6); c = nz(-9,9); op = pick(['+','-']);
+       if(Math.random() < 0.5){ m = x*y; mtxt = `${f(x)} · ${p(y)}`; }
+       else { m = x; mtxt = `${f(x*y)} ÷ ${p(y)}`; }
+     } while(x > 0 && y > 0);
+     mex = `Räkna ${mtxt.includes('÷') ? 'delat' : 'gånger'} först: ${mtxt} = ${f(m)}.`;
+     const r = additive(m, op, c);
+     return {text:`${mtxt} ${op === '+' ? '+' : M} ${p(c)}`, answer:m + r.move, ex:[mex, ...r.ex], line:{start:m, move:r.move}};
+   }}
+];
+
+/* ---------- lagring ---------- */
+const best = id => { try { return +(localStorage.getItem('un-best-' + id) || 0); } catch(e){ return 0; } };
+const saveBest = (id, v) => { try { localStorage.setItem('un-best-' + id, v); } catch(e){} };
+
+/* ---------- vyer ---------- */
+const $ = id => document.getElementById(id);
+const views = {start:$('start'), game:$('game'), end:$('end')};
+function show(v){ for(const k in views) views[k].hidden = k !== v; window.scrollTo(0,0); }
+
+function renderLevels(){
+  $('levels').innerHTML = LEVELS.map((L,i) => `<button class="lvl" data-i="${i}">
+    <span class="ex">${L.ex}</span><span><b>${L.name}</b><span>${L.sub}</span></span>
+    <span class="best">${best(L.id) ? 'Bäst<br>' + best(L.id) : ''}</span></button>`).join('');
+  $('levels').querySelectorAll('.lvl').forEach(b => b.addEventListener('click', () => startLevel(+b.dataset.i)));
+}
+
+/* ---------- spelstate ---------- */
+let L, idx, score, streak, results, cur, input, answered;
+
+function startLevel(i){
+  L = LEVELS[i]; idx = 0; score = 0; streak = 0; results = [];
+  $('lvlname').textContent = L.name;
+  show('game'); next();
+}
+function next(){
+  if(idx >= ROUNDS) return finish();
+  let q; do { q = L.gen(); } while(results.some(r => r.q.text === q.text));
+  cur = q; input = ''; answered = false;
+  $('q').textContent = q.text;
+  $('ans').className = 'ans';
+  $('ans').innerHTML = `<span class="eq">=</span><span class="val empty" id="val">?</span>`;
+  $('explain').hidden = true; $('signs').hidden = true;
+  $('go').textContent = 'Svara'; $('go').classList.remove('next');
+  drawLine(q.line ? {lo:-10, hi:10, start:q.line.start} : null);
+  $('nl').hidden = !q.line;
+  renderBar();
+}
+function renderBar(){
+  $('score').textContent = score + ' poäng';
+  $('streak').textContent = streak >= 2 ? streak + ' i rad' : '';
+  $('dots').innerHTML = Array.from({length:ROUNDS}, (_,i) =>
+    `<i class="${i < results.length ? (results[i].ok ? 'ok' : 'no') : (i === idx ? 'now' : '')}"></i>`).join('');
+}
+function setVal(){
+  const v = $('val');
+  v.textContent = input === '' ? '?' : (input === '-' ? M : input.replace('-', M));
+  v.classList.toggle('empty', input === '');
+}
+function key(k){
+  if(answered){ if(k === 'go'){ idx++; next(); } return; }
+  if(k === 'go') return submit();
+  if(k === 'back') input = input.slice(0,-1);
+  else if(k === 'neg') input = input.startsWith('-') ? input.slice(1) : '-' + input;
+  else if(/^\d$/.test(k) && input.replace('-','').length < 3) input = (input === '0' ? '' : input === '-0' ? '-' : input) + k;
+  setVal();
+}
+function submit(){
+  if(input === '' || input === '-'){ const c = $('ans'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); return; }
+  answered = true;
+  const given = parseInt(input, 10), ok = given === cur.answer;
+  if(ok){ streak++; score += 100 + Math.min(streak-1, 5)*20; } else streak = 0;
+  results.push({q:cur, given, ok});
+  const a = $('ans');
+  a.classList.add(ok ? 'ok' : 'no', 'pop');
+  if(!ok) a.insertAdjacentHTML('beforeend', `<span class="right">${f(cur.answer)}</span>`);
+  if(cur.line) drawLine(rangeFor(cur.line), true);
+  if(cur.signs) drawSigns(cur.signs);
+  const praise = streak >= 3 ? `Rätt! ${streak} i rad.` : 'Rätt!';
+  $('explain').innerHTML = `<p class="head ${ok ? 'ok' : 'no'}">${ok ? praise : 'Inte riktigt. Svaret är ' + f(cur.answer) + '.'}</p>` +
+    cur.ex.map(e => `<p>${e}</p>`).join('');
+  $('explain').hidden = false;
+  $('go').textContent = idx === ROUNDS-1 ? 'Se resultat' : 'Nästa';
+  $('go').classList.add('next');
+  renderBar();
+}
+function finish(){
+  const right = results.filter(r => r.ok).length;
+  const prev = best(L.id); if(score > prev) saveBest(L.id, score);
+  const stars = right >= 9 ? 3 : right >= 7 ? 2 : right >= 5 ? 1 : 0;
+  $('endlvl').textContent = L.name;
+  $('endtitle').textContent = right === 10 ? 'Alla rätt!' : stars >= 2 ? 'Snyggt jobbat' : stars === 1 ? 'Bra början' : 'Öva lite till';
+  $('stars').innerHTML = [0,1,2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('');
+  $('endright').textContent = right + '/' + ROUNDS;
+  $('endscore').textContent = score;
+  $('endbest').textContent = Math.max(prev, score) + (score > prev && prev > 0 ? ' ny!' : '');
+  const miss = results.filter(r => !r.ok);
+  $('miss').innerHTML = miss.map(r => `<li><b>${r.q.text} = ${f(r.q.answer)}</b> (du svarade ${f(r.given)})<br>${r.q.ex.join(' ')}</li>`).join('');
+  show('end');
+}
+
+/* ---------- tallinje ---------- */
+function rangeFor({start, move}){
+  const end = start + move;
+  let lo = Math.min(start, end, 0) - 2, hi = Math.max(start, end, 0) + 2;
+  while(hi - lo < 12){ lo--; if(hi - lo < 12) hi++; }
+  return {lo, hi, start, end};
+}
+function drawLine(r, animate){
+  if(!r){ $('nl').innerHTML = ''; return; }
+  const W = 700, H = 170, pad = 26, ay = 120;
+  const u = (W - 2*pad) / (r.hi - r.lo), X = v => pad + (v - r.lo)*u;
+  const span = r.hi - r.lo, step = span > 30 ? 5 : span > 18 ? 2 : 1;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tallinje">`;
+  const x0 = Math.max(pad, Math.min(W-pad, X(0)));
+  s += `<rect class="nl-neg" x="${pad}" y="${ay-14}" width="${x0-pad}" height="28" rx="4"/>`;
+  s += `<rect class="nl-pos" x="${x0}" y="${ay-14}" width="${W-pad-x0}" height="28" rx="4"/>`;
+  s += `<line class="nl-axis" x1="${pad-10}" y1="${ay}" x2="${W-pad+10}" y2="${ay}"/>`;
+  for(let v = r.lo; v <= r.hi; v++){
+    const big = v % step === 0 || v === 0;
+    s += `<line class="nl-tick" x1="${X(v)}" y1="${ay-(big?9:5)}" x2="${X(v)}" y2="${ay+(big?9:5)}"/>`;
+    if(big) s += `<text class="nl-lab${v===0?' zero':''}" x="${X(v)}" y="${ay+30}">${f(v)}</text>`;
+  }
+  if(r.end !== undefined && r.end !== r.start){
+    const a = X(r.start), b = X(r.end), dir = r.end > r.start ? 'r' : 'l';
+    const hgt = Math.min(95, Math.abs(b-a)*0.45 + 22), mx = (a+b)/2;
+    s += `<path class="nl-arc ${dir}" id="arc" d="M${a} ${ay} Q${mx} ${ay - hgt*2} ${b} ${ay}"/>`;
+    const sgn = dir === 'r' ? '+' : M;
+    s += `<text class="nl-steps ${dir}" x="${mx}" y="${ay - hgt - 8}">${sgn}${Math.abs(r.end - r.start)}</text>`;
+    s += `<circle class="nl-end" id="endDot" cx="${b}" cy="${ay}" r="9"/>`;
+  }
+  if(r.start >= r.lo && r.start <= r.hi){
+    s += `<circle class="nl-dot" cx="${X(r.start)}" cy="${ay}" r="7"/>`;
+    s += `<text class="nl-cap" x="${X(r.start)}" y="${ay+50}">start</text>`;
+  }
+  s += `</svg>`;
+  $('nl').innerHTML = s;
+  const arc = document.getElementById('arc'), dot = document.getElementById('endDot');
+  if(arc && animate && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const len = arc.getTotalLength();
+    arc.style.strokeDasharray = len; arc.style.strokeDashoffset = len;
+    dot.style.opacity = 0; dot.style.transition = 'opacity .2s';
+    arc.getBoundingClientRect();
+    arc.style.transition = 'stroke-dashoffset .7s ease-in-out';
+    arc.style.strokeDashoffset = 0;
+    setTimeout(() => { dot.style.opacity = 1; }, 700);
+  }
+}
+function drawSigns({a, b, op}){
+  const sa = a < 0 ? M : '+', sb = b < 0 ? M : '+';
+  const rules = [['+','+','+'],['+',M,M],[M,'+',M],[M,M,'+']];
+  $('signs').innerHTML = rules.map(([x,y,z]) =>
+    `<span class="${x===sa && y===sb ? 'on' : ''}">${x} ${op} ${y} = ${z}</span>`).join('');
+  $('signs').hidden = false;
+}
+
+/* ---------- händelser ---------- */
+$('pad').addEventListener('click', e => { const b = e.target.closest('button'); if(b) key(b.dataset.k); });
+document.addEventListener('keydown', e => {
+  if(views.game.hidden) return;
+  if(/^\d$/.test(e.key)) key(e.key);
+  else if(e.key === '-' || e.key === '−' || e.key === 'Subtract') key('neg');
+  else if(e.key === 'Backspace'){ e.preventDefault(); key('back'); }
+  else if(e.key === 'Enter'){ e.preventDefault(); key('go'); }
+});
+$('quit').addEventListener('click', () => { renderLevels(); show('start'); });
+$('again').addEventListener('click', () => startLevel(LEVELS.indexOf(L)));
+$('other').addEventListener('click', () => { renderLevels(); show('start'); });
+renderLevels();
+})();
+</script>

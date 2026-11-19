@@ -1,0 +1,272 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Primtalsjakten</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bungee&display=swap">
+<style>
+/* Layout: en arkadskärm med en enda mörk rymdlook. Spelplanen i mitten, HUD ovanför och överlägg för start och slut. */
+:root{
+  --space:#141233; --space2:#241d52; --panel:#1e1a45; --ink:#f3f0ff; --muted:#a9a3d1;
+  --amber:#ffb53d; --prime:#ffd65c; --rock:#7d79b8; --bad:#ff5d73; --good:#5ee6a8; --line:#3a3474;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--space);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:720px;margin:0 auto;padding-block:16px 24px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:10px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.title{font-family:var(--display);font-size:clamp(20px,5vw,28px);letter-spacing:.02em;color:var(--prime);margin:0}
+.stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{background:var(--panel);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill b{color:var(--prime)}
+.hearts{color:var(--bad);letter-spacing:2px;font-size:18px}
+.hearts .off{color:var(--line)}
+.iconbtn{background:var(--panel);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font:700 15px var(--body);cursor:pointer}
+.stage{position:relative;border-radius:16px;overflow:hidden;border:2px solid var(--line);background:var(--space2);touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;cursor:crosshair}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(20,18,51,.82);overflow-y:auto}
+.card{max-width:440px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:center}
+.card h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,7vw,40px);line-height:1.05;margin:0;color:var(--prime);text-wrap:balance}
+.card p{margin:0}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;text-align:left;background:var(--panel);border-radius:12px;padding:12px 14px}
+.dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--body);color:#141233}
+.dot.p{background:var(--prime)} .dot.c{background:var(--rock);color:var(--ink)}
+.go{font:400 20px var(--display);background:var(--amber);color:#141233;border:none;border-radius:12px;padding:14px 26px;cursor:pointer;align-self:center}
+.go:focus-visible,.iconbtn:focus-visible{outline:3px solid var(--prime);outline-offset:2px}
+.keys{color:var(--muted);font-size:14px}
+.big{font-family:var(--display);font-size:46px;color:var(--prime);line-height:1}
+.missed{list-style:none;margin:0;padding:0;text-align:left;display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto;background:var(--panel);border-radius:12px;padding:10px 14px}
+.missed li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:5px;font-variant-numeric:tabular-nums}
+.missed li:last-child{border-bottom:none}
+.missed .why{color:var(--muted)}
+.tip{color:var(--muted);font-size:14px;margin:0;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="hud">
+    <h1 class="title">Primtalsjakten</h1>
+    <div class="stats">
+      <span class="pill">Poäng <b id="score">0</b></span>
+      <span class="pill">Nivå <b id="level">1</b></span>
+      <span class="pill hearts" id="hearts" aria-label="Liv">♥♥♥</span>
+      <button class="iconbtn" id="pause" aria-label="Pausa">Paus</button>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="c"></canvas>
+
+    <div class="overlay" id="start">
+      <div class="card">
+        <h2>Skjut primtalen!</h2>
+        <div class="rules">
+          <span class="dot p">17</span><span>Skjut primtal: <b>+10 poäng</b> gånger nivån.</span>
+          <span class="dot c">21</span><span>Skjut inte sammansatta tal. Då förlorar du ett liv.</span>
+          <span class="dot p">?</span><span>Ett primtal som når marken kostar också ett liv.</span>
+        </div>
+        <p>Ett primtal har exakt två delare: 1 och sig självt. Talet 1 är alltså inget primtal.</p>
+        <button class="go" id="go">Starta</button>
+        <p class="keys">Dator: ← → för att flytta och mellanslag för att skjuta. Du kan också sikta med musen och klicka.<br>Mobil: tryck där du vill skjuta.</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="paused" hidden>
+      <div class="card"><h2>Paus</h2><button class="go" id="resume">Fortsätt</button></div>
+    </div>
+
+    <div class="overlay" id="over" hidden>
+      <div class="card">
+        <h2 id="o-head">Spelet är slut</h2>
+        <div class="big" id="o-score">0</div>
+        <p id="o-info"></p>
+        <div id="o-missed-wrap">
+          <p class="keys" style="margin-bottom:6px">Det här blev fel:</p>
+          <ul class="missed" id="o-missed"></ul>
+        </div>
+        <button class="go" id="again">Spela igen</button>
+      </div>
+    </div>
+  </div>
+  <p class="tip">Tips: alla jämna tal utom 2 är sammansatta. Tal som slutar på 5 är delbara med 5. Om siffersumman är delbar med 3 är talet också delbart med 3.</p>
+</div>
+
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),stage=document.getElementById('stage');
+const $=id=>document.getElementById(id);
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const isPrime=n=>{if(n<2)return false;for(let d=2;d*d<=n;d++)if(n%d===0)return false;return true};
+const factors=n=>{const f=[];let m=n,p=2;while(m>1){while(m%p===0){f.push(p);m/=p}p++}return f};
+const why=n=>n===1?'1 har bara en delare, så det är inget primtal':`${n} = ${factors(n).join(' · ')}`;
+const TRICKY=[9,15,21,25,27,33,35,39,45,49,51,57,63,65,69,75,77,81,85,87,91,93,95,99,111,117,119,121,123,129,133,141,143];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let Wd=0,Ht=0,dpr=1;
+function resize(){
+  const w=stage.clientWidth,h=Math.min(Math.round(w*1.2),Math.max(380,window.innerHeight-150));
+  dpr=Math.min(window.devicePixelRatio||1,2);cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';Wd=w;Ht=h;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(G)G.ship.x=Math.min(Math.max(G.ship.x,20),Wd-20);
+}
+window.addEventListener('resize',resize);
+
+const stars=Array.from({length:70},()=>({x:Math.random(),y:Math.random(),z:Math.random()*0.8+0.2}));
+let best=0;try{best=+localStorage.getItem('primtalsjakten-best')||0}catch(e){}
+
+let G=null,running=false,paused=false,last=0;
+function newGame(){
+  G={score:0,level:1,lives:3,primesHit:0,rocks:[],bullets:[],parts:[],pops:[],spawnT:0.3,cool:0,
+     ship:{x:Wd/2,tx:Wd/2},keys:{},missed:[],hits:0,shake:0,flash:0};
+  updHud();
+}
+const maxN=()=>[30,50,70,100,130,150][Math.min(G.level-1,5)];
+function spawn(){
+  const r=Math.max(22,Math.min(32,Wd/15));
+  let n;const roll=Math.random();
+  if(roll<0.45){do{n=R(2,maxN())}while(!isPrime(n))}
+  else if(roll<0.5&&G.level<=3){n=1}
+  else if(G.level>=2&&roll<0.8){const t=TRICKY.filter(x=>x<=maxN());n=t[R(0,t.length-1)]}
+  else{do{n=R(4,maxN())}while(isPrime(n))}
+  let x,tries=0;
+  do{x=R(r+6,Wd-r-6);tries++}while(G.rocks.some(o=>o.y<r*3&&Math.abs(o.x-x)<r*2.6)&&tries<20);
+  const sp=(34+G.level*11)*(Ht/600)*(0.85+Math.random()*0.3);
+  G.rocks.push({n,x,y:-r,r,vy:sp,vx:(Math.random()-.5)*12,rot:Math.random()*6,prime:isPrime(n),wob:Math.random()*6});
+}
+function fire(){if(G.cool>0)return;G.cool=0.22;G.bullets.push({x:G.ship.x,y:Ht-46,vy:-Ht*1.6})}
+function burst(x,y,col,k=18){if(reduce)k=6;for(let i=0;i<k;i++){const a=Math.random()*6.28,s=60+Math.random()*180;G.parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0.6,col})}}
+function pop(x,y,text,col,dur=1.4,size=18){G.pops.push({x,y,text,col,t:dur,d:dur,size})}
+function loseLife(){G.lives--;G.shake=0.35;G.flash=0.25;updHud();if(G.lives<=0)gameOver()}
+
+function updHud(){
+  $('score').textContent=G.score;$('level').textContent=G.level;
+  $('hearts').innerHTML=[0,1,2].map(i=>`<span class="${i<G.lives?'':'off'}">♥</span>`).join('');
+}
+
+function step(dt){
+  const s=G.ship;
+  const kv=(G.keys.ArrowRight||G.keys.d?1:0)-(G.keys.ArrowLeft||G.keys.a?1:0);
+  if(kv){s.tx=Math.min(Math.max(s.x+kv*420*dt,20),Wd-20)}
+  s.x+=(s.tx-s.x)*Math.min(1,dt*14);
+  G.cool-=dt;if(G.keys[' '])fire();
+  G.spawnT-=dt;
+  if(G.spawnT<=0){spawn();G.spawnT=Math.max(0.55,1.55-G.level*0.14)*(0.8+Math.random()*0.4)}
+  for(const b of G.bullets)b.y+=b.vy*dt;
+  G.bullets=G.bullets.filter(b=>b.y>-20&&!b.dead);
+  for(const o of G.rocks){
+    o.y+=o.vy*dt;o.x+=o.vx*dt;o.rot+=dt*0.6;
+    if(o.x<o.r||o.x>Wd-o.r)o.vx*=-1;
+    for(const b of G.bullets){
+      if(!b.dead&&!o.dead&&Math.hypot(b.x-o.x,b.y-o.y)<o.r+4){
+        b.dead=true;o.dead=true;
+        if(o.prime){
+          const pts=10*G.level;G.score+=pts;G.primesHit++;G.hits++;
+          burst(o.x,o.y,'#ffd65c',22);pop(o.x,o.y,`+${pts}  ${o.n} är ett primtal`,'#ffd65c',1.1);
+          if(G.primesHit%8===0){G.level++;pop(Wd/2,Ht*0.4,`NIVÅ ${G.level}`,'#5ee6a8',1.6,30)}
+        }else{
+          burst(o.x,o.y,'#ff5d73',14);pop(o.x,o.y,why(o.n),'#ff5d73',2.2,19);
+          G.missed.push({n:o.n,t:why(o.n)});loseLife();
+        }
+        updHud();
+      }
+    }
+    if(!o.dead&&o.y-o.r>Ht-28){
+      o.dead=true;
+      if(o.prime){pop(o.x,Ht-60,`${o.n} var ett primtal!`,'#ff5d73',2,19);G.missed.push({n:o.n,t:`${o.n} är ett primtal och borde ha skjutits`});burst(o.x,Ht-30,'#ff5d73',10);loseLife()}
+    }
+  }
+  G.rocks=G.rocks.filter(o=>!o.dead);
+  for(const p of G.parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=200*dt;p.t-=dt}
+  G.parts=G.parts.filter(p=>p.t>0);
+  for(const p of G.pops){p.t-=dt;p.y-=18*dt}
+  G.pops=G.pops.filter(p=>p.t>0);
+  G.shake=Math.max(0,G.shake-dt);G.flash=Math.max(0,G.flash-dt);
+}
+
+function draw(t){
+  ctx.save();
+  if(G&&G.shake>0&&!reduce)ctx.translate((Math.random()-.5)*10*G.shake/0.35,(Math.random()-.5)*10*G.shake/0.35);
+  const g=ctx.createLinearGradient(0,0,0,Ht);g.addColorStop(0,'#141233');g.addColorStop(1,'#2b2160');
+  ctx.fillStyle=g;ctx.fillRect(-10,-10,Wd+20,Ht+20);
+  for(const s of stars){const y=((s.y*Ht)+(reduce?0:t*0.012*s.z))%Ht;ctx.fillStyle=`rgba(243,240,255,${0.25+s.z*0.5})`;ctx.fillRect(s.x*Wd,y,s.z*2.2,s.z*2.2)}
+  // mark
+  ctx.fillStyle='#3a3474';ctx.fillRect(0,Ht-28,Wd,28);
+  ctx.fillStyle='#4a438c';for(let x=0;x<Wd;x+=26)ctx.fillRect(x,Ht-28,13,3);
+  if(!G){ctx.restore();return}
+  for(const o of G.rocks){
+    ctx.save();ctx.translate(o.x,o.y);
+    if(o.prime){ // samma utseende för alla så att man måste tänka
+    }
+    ctx.rotate(Math.sin(o.rot)*0.15);
+    const rg=ctx.createRadialGradient(-o.r*.35,-o.r*.35,o.r*.2,0,0,o.r);
+    rg.addColorStop(0,'#9d99d6');rg.addColorStop(1,'#56529a');
+    ctx.fillStyle=rg;ctx.beginPath();
+    for(let i=0;i<10;i++){const a=i/10*6.283,rr=o.r*(0.9+0.1*Math.sin(i*2.7+o.wob));ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}
+    ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#bdb8f0';ctx.lineWidth=2;ctx.stroke();
+    ctx.rotate(-Math.sin(o.rot)*0.15);
+    ctx.fillStyle='#f3f0ff';ctx.font=`700 ${Math.round(o.r*0.82)}px "Atkinson Hyperlegible",system-ui,sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(o.n,0,1);
+    ctx.restore();
+  }
+  ctx.fillStyle='#ffd65c';
+  for(const b of G.bullets){ctx.fillRect(b.x-2,b.y-9,4,16)}
+  for(const p of G.parts){ctx.globalAlpha=Math.max(0,p.t/0.6);ctx.fillStyle=p.col;ctx.fillRect(p.x-2,p.y-2,4,4)}
+  ctx.globalAlpha=1;
+  // skepp
+  const s=G.ship,y=Ht-30;
+  ctx.fillStyle='#ffb53d';ctx.beginPath();ctx.moveTo(s.x,y-34);ctx.lineTo(s.x+22,y);ctx.lineTo(s.x+8,y-6);ctx.lineTo(s.x-8,y-6);ctx.lineTo(s.x-22,y);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#141233';ctx.beginPath();ctx.arc(s.x,y-16,5,0,6.28);ctx.fill();
+  ctx.strokeStyle='rgba(255,214,92,.18)';ctx.setLineDash([4,8]);ctx.beginPath();ctx.moveTo(s.x,y-36);ctx.lineTo(s.x,0);ctx.stroke();ctx.setLineDash([]);
+  for(const p of G.pops){
+    ctx.globalAlpha=Math.min(1,p.t/(p.d*0.4));
+    ctx.font=`700 ${p.size}px "Atkinson Hyperlegible",system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    const w=ctx.measureText(p.text).width+16,x=Math.min(Math.max(p.x,w/2+4),Wd-w/2-4);
+    ctx.fillStyle='rgba(20,18,51,.85)';ctx.fillRect(x-w/2,p.y-p.size*0.8,w,p.size*1.6);
+    ctx.fillStyle=p.col;ctx.fillText(p.text,x,p.y+1);
+  }
+  ctx.globalAlpha=1;
+  if(G.flash>0){ctx.fillStyle=`rgba(255,93,115,${G.flash})`;ctx.fillRect(0,0,Wd,Ht)}
+  ctx.restore();
+}
+
+function loop(t){
+  const dt=Math.min(0.05,(t-last)/1000||0);last=t;
+  if(running&&!paused)step(dt);
+  draw(t);
+  requestAnimationFrame(loop);
+}
+
+function startGame(){resize();newGame();running=true;paused=false;$('start').hidden=true;$('over').hidden=true;$('paused').hidden=true;stage.focus?.()}
+function gameOver(){
+  running=false;
+  const rec=G.score>best;if(rec){best=G.score;try{localStorage.setItem('primtalsjakten-best',best)}catch(e){}}
+  $('o-head').textContent=rec&&G.score>0?'Nytt rekord!':'Spelet är slut';
+  $('o-score').textContent=G.score;
+  $('o-info').textContent=`Du sköt ${G.hits} primtal och nådde nivå ${G.level}. Ditt rekord är ${best} poäng.`;
+  $('o-missed-wrap').hidden=!G.missed.length;
+  $('o-missed').innerHTML=G.missed.map(m=>`<li><b>${m.n}</b><span class="why">${m.t}</span></li>`).join('');
+  $('over').hidden=false;setTimeout(()=>$('again').focus(),50);
+}
+function setPause(p){if(!running)return;paused=p;$('paused').hidden=!p;$('pause').textContent=p?'Fortsätt':'Paus'}
+
+$('go').onclick=startGame;$('again').onclick=startGame;
+$('pause').onclick=()=>setPause(!paused);$('resume').onclick=()=>setPause(false);
+const toX=e=>{const r=cv.getBoundingClientRect();return Math.min(Math.max(e.clientX-r.left,20),Wd-20)};
+cv.addEventListener('pointermove',e=>{if(running&&!paused&&e.pointerType==='mouse')G.ship.tx=toX(e)});
+cv.addEventListener('pointerdown',e=>{if(!running||paused)return;e.preventDefault();G.ship.tx=toX(e);
+  if(e.pointerType==='mouse'){G.ship.x=G.ship.tx;fire()}else{const dx=Math.abs(G.ship.x-G.ship.tx);setTimeout(()=>{if(running&&!paused)fire()},Math.min(260,dx*1.2))}});
+window.addEventListener('keydown',e=>{
+  if(['ArrowLeft','ArrowRight',' ','a','d'].includes(e.key)){if(running&&!paused){G.keys[e.key]=true;e.preventDefault()}}
+  if((e.key==='p'||e.key==='Escape')&&running)setPause(!paused);
+  if(e.key==='Enter'&&!running&&(!$('start').hidden||!$('over').hidden)){e.preventDefault();startGame()}
+});
+window.addEventListener('keyup',e=>{if(G)G.keys[e.key]=false});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true)});
+resize();requestAnimationFrame(loop);
+</script>
+
+</body></html>

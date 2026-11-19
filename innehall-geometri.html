@@ -1,0 +1,639 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Geometrikapitlet åk 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: prickpapper som i ett geometrihäfte. Stationer i två spalter, varje fråga får en ritad figur på bladet. */
+:root{
+  --paper:#f6f8f7; --dot:#c9d6d2; --card:#ffffff; --ink:#172a2a; --muted:#53676a;
+  --pen:#0d7468; --pen-soft:#dcf1ec; --fill:#e8f5f1; --arc:#d9620f; --marker:#ffe24d; --on-marker:#172a2a;
+  --good:#17824a; --good-soft:#e2f4e8; --bad:#c2352b; --bad-soft:#fbe7e4; --line:#cddbd7;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1716; --dot:#24332f; --card:#162120; --ink:#e3eeeb; --muted:#97aba7;
+  --pen:#4fd1bd; --pen-soft:#163a34; --fill:#173430; --arc:#ff9a52; --marker:#e6c62e; --on-marker:#0f1716;
+  --good:#52c486; --good-soft:#143020; --bad:#ff7b6f; --bad-soft:#3a1a18; --line:#2a3b38; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1716; --dot:#24332f; --card:#162120; --ink:#e3eeeb; --muted:#97aba7;
+  --pen:#4fd1bd; --pen-soft:#163a34; --fill:#173430; --arc:#ff9a52; --marker:#e6c62e; --on-marker:#0f1716;
+  --good:#52c486; --good-soft:#143020; --bad:#ff7b6f; --bad-soft:#3a1a18; --line:#2a3b38; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background-color:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  background-image:radial-gradient(circle,var(--dot) 1.3px,transparent 1.6px);background-size:22px 22px}
+.wrap{max-width:780px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,7vw,52px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 mark,.hl{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+.total{font-family:var(--display);font-weight:700;font-size:15px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.total b{color:var(--pen)}
+.label{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.stations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.stations{grid-template-columns:1fr}}
+.st{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);color:var(--ink);
+  border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font:inherit;transition:transform .12s,border-color .12s}
+.st:hover{border-color:var(--pen);transform:translateY(-2px)}
+.st:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.glyph{flex:0 0 70px;height:64px;display:grid;place-items:center;border-radius:10px;background:var(--pen-soft);color:var(--pen);
+  font-family:var(--display);font-weight:800;font-size:22px}
+.glyph svg{width:42px;height:42px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.st.mix .glyph{background:var(--marker);color:var(--on-marker)}
+.st-body{min-width:0;display:flex;flex-direction:column;gap:2px}
+.st-name{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.2}
+.st-ex{color:var(--muted);font-size:14px}
+.stars{letter-spacing:2px;font-size:16px;color:var(--line)}
+.stars .on{color:var(--marker);-webkit-text-stroke:.5px var(--ink)}
+.how{color:var(--muted);font-size:15px;margin:0}
+
+.sheet{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:22px clamp(16px,4vw,32px) 26px;display:flex;flex-direction:column;gap:16px;
+  box-shadow:0 10px 30px -18px rgba(23,42,42,.35)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar .topic{font-family:var(--display);font-weight:700;font-size:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:14px;font-weight:700;border-radius:999px;padding:3px 11px;background:var(--pen-soft);color:var(--pen);font-variant-numeric:tabular-nums}
+.chip.streak{background:var(--marker);color:var(--on-marker)}
+.progress{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.progress i{height:7px;border-radius:4px;background:var(--line)}
+.progress i.ok{background:var(--good)} .progress i.no{background:var(--bad)} .progress i.now{background:var(--pen)}
+.ask{font-family:var(--display);font-weight:700;font-size:clamp(21px,4.4vw,28px);line-height:1.25;text-wrap:balance}
+.prompt{color:var(--muted);font-size:16px;margin-top:4px}
+.prompt:empty{display:none}
+.figbox{display:flex;justify-content:center;background-image:radial-gradient(circle,var(--dot) 1.2px,transparent 1.5px);background-size:16px 16px;border-radius:12px;border:1.5px dashed var(--line);padding:6px}
+.figbox:empty{display:none}
+svg.fig{width:100%;max-width:420px;height:auto;display:block;overflow:visible}
+.fig .s{fill:var(--fill);stroke:var(--pen);stroke-width:2.6;stroke-linejoin:round}
+.fig .e{fill:none;stroke:var(--pen);stroke-width:2.6;stroke-linecap:round}
+.fig .h{fill:none;stroke:var(--pen);stroke-width:1.8;stroke-dasharray:6 5;opacity:.75}
+.fig .aux{fill:none;stroke:var(--muted);stroke-width:1.8;stroke-dasharray:5 4}
+.fig .arc{fill:none;stroke:var(--arc);stroke-width:2.4}
+.fig .ra{fill:none;stroke:var(--arc);stroke-width:2}
+.fig .tick{stroke:var(--arc);stroke-width:2.4}
+.fig .gridl{stroke:var(--pen);stroke-width:.8;opacity:.5}
+.fig text{fill:var(--ink);font-family:var(--display);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.fig text.x{fill:var(--arc);font-size:19px}
+.answer-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ans{flex:1 1 160px;min-width:0;font:700 26px var(--display);padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink)}
+#ans:focus{border-color:var(--pen)}
+.unit{font:700 22px var(--display);color:var(--muted)}
+.unit:empty{display:none}
+.btn{font:700 17px var(--display);border:none;border-radius:12px;padding:12px 22px;cursor:pointer;background:var(--pen);color:var(--card)}
+.btn.ghost{background:transparent;color:var(--pen);border:2px solid var(--pen)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{font:700 20px var(--display);text-align:left;padding:13px 16px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:12px;align-items:center;font-variant-numeric:tabular-nums}
+.opt .k{flex:0 0 26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;background:var(--line);color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--pen)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--good-soft)} .fb.no{background:var(--bad-soft)}
+.fb h3{margin:0;font-family:var(--display);font-size:20px}
+.fb.ok h3{color:var(--good)} .fb.no h3{color:var(--bad)}
+.fb p{margin:0}
+.next-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big-stars{font-size:54px;letter-spacing:6px;line-height:1;color:var(--line)}
+.big-stars .on{color:var(--marker);-webkit-text-stroke:1px var(--ink)}
+.res-h{font-family:var(--display);font-size:clamp(26px,5vw,36px);margin:0}
+.facts{display:flex;gap:26px;flex-wrap:wrap}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-family:var(--display);font-size:30px;font-variant-numeric:tabular-nums}
+.missed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.missed li{border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.missed .q{font-weight:700}
+.missed .a{color:var(--good);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Geometri<mark>kapitlet</mark></h1>
+      <p class="sub">Matte 7B · Välj en station och klara tio frågor.</p>
+    </div>
+    <div class="total" id="total">★ <b>0</b> / 21 stjärnor</div>
+  </header>
+
+  <section id="home" style="display:flex;flex-direction:column;gap:14px">
+    <div class="stations" id="stations"></div>
+    <p class="how">Rätt svar ger 10 poäng, och flera rätt i rad ger bonus. 9–10 rätt ger tre stjärnor, 7–8 ger två och 5–6 ger en. Figurerna är inte alltid ritade i skala, så lita på måtten. Skriv decimaltal med komma, till exempel 7,5.</p>
+  </section>
+
+  <section id="game" class="sheet" hidden>
+    <div class="bar">
+      <span class="topic" id="g-topic"></span>
+      <div class="chips"><span class="chip" id="g-score">0 p</span><span class="chip streak" id="g-streak" hidden></span></div>
+    </div>
+    <div class="progress" id="g-progress"></div>
+    <div>
+      <div class="ask" id="g-ask"></div>
+      <div class="prompt" id="g-prompt"></div>
+    </div>
+    <div class="figbox" id="g-fig"></div>
+    <div id="g-input" class="answer-row" hidden>
+      <input id="ans" type="text" inputmode="decimal" autocomplete="off" aria-label="Ditt svar" placeholder="Ditt svar">
+      <span class="unit" id="g-unit"></span>
+      <button class="btn" id="check">Rätta</button>
+    </div>
+    <div id="g-opts" class="opts" hidden></div>
+    <div id="g-fb" class="fb" hidden></div>
+    <div class="next-row">
+      <button class="btn ghost" id="quit">Avsluta</button>
+      <button class="btn" id="next" hidden>Nästa fråga</button>
+    </div>
+  </section>
+
+  <section id="result" class="sheet" hidden>
+    <div class="big-stars" id="r-stars"></div>
+    <h2 class="res-h" id="r-head"></h2>
+    <div class="facts">
+      <div><span class="label">Rätt</span><b id="r-correct"></b></div>
+      <div><span class="label">Poäng</span><b id="r-score"></b></div>
+      <div><span class="label">Bästa svit</span><b id="r-streak"></b></div>
+    </div>
+    <div id="r-missed-wrap">
+      <div class="label" style="margin-bottom:6px">Öva på de här</div>
+      <ul class="missed" id="r-missed"></ul>
+    </div>
+    <div class="next-row">
+      <button class="btn ghost" id="to-home">Till stationerna</button>
+      <button class="btn" id="again">Spela igen</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[R(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const clean=n=>Math.round(n*1e8)/1e8;
+const fmt=n=>clean(n).toLocaleString('sv-SE',{maximumFractionDigits:8});
+const mc=(correct,wrongs)=>{const seen=new Set([correct]);const w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  return shuffle([{html:correct,ok:true},...w.map(h=>({html:h,ok:false}))])};
+const rad=d=>d*Math.PI/180;
+
+/* ---------- SVG-hjälp ---------- */
+const W=320,H=210;
+const svg=c=>`<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">${c}</svg>`;
+const P=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+const poly=(pts,c='s')=>`<polygon class="${c}" points="${P(pts)}"/>`;
+const pl=(pts,c='e')=>`<polyline class="${c}" points="${P(pts)}"/>`;
+const ln=(a,b,c='e')=>`<line class="${c}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`;
+const tx=(p,s,c='',anchor='middle')=>`<text class="${c}" x="${p[0].toFixed(1)}" y="${(p[1]+6).toFixed(1)}" text-anchor="${anchor}">${s}</text>`;
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1]], sub=(a,b)=>[a[0]-b[0],a[1]-b[1]], mul=(a,k)=>[a[0]*k,a[1]*k];
+const unit=v=>{const l=Math.hypot(v[0],v[1])||1;return [v[0]/l,v[1]/l]};
+const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+const cent=pts=>[pts.reduce((s,p)=>s+p[0],0)/pts.length,pts.reduce((s,p)=>s+p[1],0)/pts.length];
+/* matematiska koordinater (y uppåt) -> passa in i rutan */
+function fit(pts,bw=250,bh=150){
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>-p[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const s=Math.min(bw/((x1-x0)||1),bh/((y1-y0)||1));
+  const ox=(W-(x1-x0)*s)/2-x0*s, oy=(H-(y1-y0)*s)/2-y0*s;
+  return pts.map(p=>[p[0]*s+ox,-p[1]*s+oy]);
+}
+const raMark=(V,A,B,s=13)=>{const u=mul(unit(sub(A,V)),s),w=mul(unit(sub(B,V)),s);return pl([add(V,u),add(add(V,u),w),add(V,w)],'ra')};
+const sideLbl=(a,b,c,txt,d=16,cls='')=>{const m=mid(a,b);let n=unit([-(b[1]-a[1]),b[0]-a[0]]);if((m[0]-c[0])*n[0]+(m[1]-c[1])*n[1]<0)n=mul(n,-1);return tx(add(m,mul(n,d)),txt,cls)};
+const angLbl=(V,c,txt,d=30,cls='')=>tx(add(V,mul(unit(sub(c,V)),d)),txt,cls);
+const tickOn=(a,b)=>{const m=mid(a,b),n=mul(unit([-(b[1]-a[1]),b[0]-a[0]]),7);return ln(add(m,n),sub(m,n),'tick')};
+
+/* ---------- Figurer och kroppar ---------- */
+const reg=(n,r=82)=>Array.from({length:n},(_,i)=>[160+r*Math.cos(rad(-90+360*i/n)),108+r*Math.sin(rad(-90+360*i/n))]);
+const SHAPES={
+  'triangel':{pts:[[60,175],[262,175],[140,38]],why:'Tre sidor och tre hörn.'},
+  'kvadrat':{pts:[[95,40],[230,40],[230,175],[95,175]],why:'Fyra lika långa sidor och fyra räta vinklar.'},
+  'rektangel':{pts:[[45,62],[275,62],[275,160],[45,160]],why:'Fyra räta vinklar. Motstående sidor är lika långa.'},
+  'parallellogram':{pts:[[100,55],[285,55],[220,160],[35,160]],why:'Två par parallella sidor, men inga räta vinklar.'},
+  'romb':{pts:[[160,22],[252,108],[160,194],[68,108]],why:'Fyra lika långa sidor, men vinklarna är inte räta.'},
+  'parallelltrapets':{pts:[[112,52],[215,52],[285,165],[35,165]],why:'Exakt ett par parallella sidor.'},
+  'femhörning':{pts:reg(5),why:'Fem sidor och fem hörn.'},
+  'sexhörning':{pts:reg(6),why:'Sex sidor och sex hörn.'},
+};
+function boxSvg(l,b,h,labels){
+  const s=Math.min(190/(l+0.5*b),140/(h+0.38*b)),w=l*s,hh=h*s,dx=b*s*0.5*Math.cos(rad(35)),dy=b*s*0.5*Math.sin(rad(35))*1.25;
+  const x=(W-(w+dx))/2,y=(H-(hh+dy))/2+dy;
+  const A=[x,y+hh],B=[x+w,y+hh],C=[x+w,y],D=[x,y],o=[dx,-dy];
+  const A2=add(A,o),B2=add(B,o),C2=add(C,o),D2=add(D,o);
+  let c=poly([D,C,C2,D2])+poly([B,B2,C2,C])+poly([A,B,C,D]);
+  c+=ln(A,A2,'h')+ln(A2,B2,'h')+ln(A2,D2,'h');
+  if(labels){c+=tx([x+w/2,y+hh+20],labels[0])+tx([x-12,y+hh/2],labels[2],'','end')+tx(add(mid(B,B2),[16,8]),labels[1],'','start')}
+  return svg(c);
+}
+const SOLIDS={
+  'kub':()=>boxSvg(5,5,5),
+  'rätblock':()=>boxSvg(8,4,4),
+  'cylinder':()=>svg(`<path class="s" d="M90,48 L90,165 A70,18 0 0 0 230,165 L230,48 Z"/><ellipse class="s" cx="160" cy="48" rx="70" ry="18"/><path class="h" d="M90,165 A70,18 0 0 1 230,165"/>`),
+  'kon':()=>svg(`<path class="s" d="M160,28 L88,168 A72,19 0 0 0 232,168 Z"/><path class="h" d="M88,168 A72,19 0 0 1 232,168"/>`),
+  'klot':()=>svg(`<circle class="s" cx="160" cy="105" r="80"/><path class="e" d="M80,105 A80,20 0 0 0 240,105"/><path class="h" d="M80,105 A80,20 0 0 1 240,105"/>`),
+  'pyramid':()=>{const A=[70,172],B=[220,172],C=[262,135],D=[112,135],E=[166,30];return svg(poly([E,A,B])+poly([E,B,C])+ln(C,D,'h')+ln(D,A,'h')+ln(E,D,'h'))},
+  'prisma':()=>{const f=[[55,172],[178,172],[116,82]],o=[92,-38],b=f.map(p=>add(p,o));return svg(poly([f[2],b[2],b[1],f[1]])+poly(f)+ln(f[0],b[0],'h')+ln(b[0],b[1],'h')+ln(b[0],b[2],'h'))},
+};
+const SOLID_WHY={kub:'Sex sidoytor som alla är lika stora kvadrater.',rätblock:'Sex sidoytor som är rektanglar.',cylinder:'Två lika stora cirklar som botten och lock, och en böjd mantelyta.',
+  kon:'En cirkel som botten och en spets överst.',klot:'Helt runt, som en boll. Alla punkter på ytan ligger lika långt från mitten.',
+  pyramid:'En botten (här en fyrhörning) och trianglar som möts i en spets.',prisma:'Två likadana ändytor (här trianglar) som förbinds av rektanglar.'};
+const COUNT={kub:[8,12,6],rätblock:[8,12,6],pyramid:[5,8,5],prisma:[6,9,5]};
+const CNAME={kub:'en kub',rätblock:'ett rätblock',pyramid:'en fyrsidig pyramid',prisma:'ett tresidigt prisma'};
+function genFig(lv){
+  const v=pick(lv===1?['shape','shape','solid']:['shape','solid','solid','count','count']);
+  if(v==='shape'){
+    const name=pick(Object.keys(SHAPES)),sh=SHAPES[name];
+    const near={kvadrat:['romb','rektangel','parallellogram'],romb:['kvadrat','parallellogram','parallelltrapets'],rektangel:['kvadrat','parallellogram','parallelltrapets'],
+      parallellogram:['romb','rektangel','parallelltrapets'],parallelltrapets:['parallellogram','rektangel','romb'],triangel:['femhörning','romb','parallelltrapets'],
+      femhörning:['sexhörning','triangel','romb'],sexhörning:['femhörning','romb','parallelltrapets']}[name];
+    return {ask:'Vad heter figuren?',prompt:'',fig:svg(poly(sh.pts)),type:'mc',options:mc(name,shuffle(near)),answerText:name,
+      explain:`Det är en <b>${name}</b>. ${sh.why}`};
+  }
+  if(v==='solid'){
+    const name=pick(Object.keys(SOLIDS));
+    const others=shuffle(Object.keys(SOLIDS).filter(n=>n!==name));
+    return {ask:'Vad heter kroppen?',prompt:'Streckade linjer är kanter som skyms bakom kroppen.',fig:SOLIDS[name](),type:'mc',options:mc(name,others),answerText:name,
+      explain:`Det är ett <b>${name}</b>`.replace('ett <b>kub','en <b>kub').replace('ett <b>cylinder','en <b>cylinder').replace('ett <b>kon','en <b>kon').replace('ett <b>pyramid','en <b>pyramid')+`. ${SOLID_WHY[name]}`};
+  }
+  const name=pick(Object.keys(COUNT)),k=R(0,2),what=['hörn','kanter','sidoytor'][k],ans=COUNT[name][k];
+  const tip=['Hörnen är spetsarna där kanterna möts.','Kanterna är linjerna där två sidoytor möts. Räkna även de streckade.','Sidoytorna är de platta ytorna, även botten och de som skyms.'][k];
+  return {ask:`Hur många ${what} har ${CNAME[name]}?`,prompt:'Räkna även med det som skyms bakom.',fig:SOLIDS[name](),type:'input',answer:ans,answerText:String(ans),unit:'st',
+    explain:`${tip} ${CNAME[name][0].toUpperCase()+CNAME[name].slice(1)} har <b>${COUNT[name][0]} hörn, ${COUNT[name][1]} kanter och ${COUNT[name][2]} sidoytor</b>.`};
+}
+
+/* ---------- Vinklar ---------- */
+function angleSvg(v,showVal,label){
+  const V=v>100?[160,165]:[95,165],L=135;
+  const A=add(V,[L,0]),B=add(V,[L*Math.cos(rad(v)),-L*Math.sin(rad(v))]);
+  let c=pl([A,V,B]);
+  const r=36;
+  if(v===90)c+=raMark(V,A,B,18);
+  else c+=`<path class="arc" d="M${V[0]+r},${V[1]} A${r},${r} 0 0 0 ${(V[0]+r*Math.cos(rad(v))).toFixed(1)},${(V[1]-r*Math.sin(rad(v))).toFixed(1)}"/>`;
+  if(label)c+=tx(add(V,[ (r+22)*Math.cos(rad(v/2)),-(r+22)*Math.sin(rad(v/2))]),label,'x');
+  return svg(c);
+}
+function genVink(lv){
+  const v=pick(lv===1?['typ','typ','sido','upp']:lv===2?['typ','sido','vert','upp']:['sido','vert','vert','upp']);
+  if(v==='typ'){
+    const t=pick(['spetsig','rät','trubbig','rak']);
+    const a=t==='spetsig'?R(2,7)*10:t==='rät'?90:t==='trubbig'?R(11,16)*10:180;
+    const why={spetsig:'En spetsig vinkel är mindre än 90°.',rät:'En rät vinkel är exakt 90°. Den markeras ofta med en liten fyrkant.',trubbig:'En trubbig vinkel är större än 90° men mindre än 180°.',rak:'En rak vinkel är 180°. Benen bildar en rak linje.'}[t];
+    return {ask:'Vilken sorts vinkel är det?',prompt:'',fig:angleSvg(a,false),type:'mc',options:['spetsig','rät','trubbig','rak'].map(o=>({html:o,ok:o===t})),answerText:t,
+      explain:`Vinkeln är ${a}°, alltså <b>${t}</b>. ${why}`};
+  }
+  if(v==='upp'){
+    const a=pick([20,30,45,60,75,100,120,135,150,160]);
+    const opts=[a,a+40>175?a-40:a+40,a+80>175?a-80:a+80,a-40<10?a+60:a-40].filter((x,i,s)=>x>5&&x<180&&s.indexOf(x)===i);
+    while(opts.length<4){const z=R(1,17)*10;if(!opts.includes(z)&&Math.abs(z-a)>=30)opts.push(z)}
+    return {ask:'Uppskatta vinkeln. Vilket värde stämmer bäst?',prompt:'Jämför med en rät vinkel, 90°.',fig:angleSvg(a,false),type:'mc',
+      options:mc(a+'°',opts.filter(x=>x!==a).map(x=>x+'°')),answerText:a+'°',
+      explain:`Vinkeln är <b>${a}°</b>. Den är ${a<90?'mindre än en rät vinkel':a===90?'rät':'större än en rät vinkel'}${a<90?(a<=45?', högst hälften av 90°':', mer än hälften av 90°'):(a>90?` med ${a-90}° extra`:'')}.`};
+  }
+  if(v==='sido'){
+    const a=R(3,15)*10+pick([0,5]),x=180-a,V=[160,150];
+    const B=add(V,[120*Math.cos(rad(a)),-120*Math.sin(rad(a))]);
+    let c=ln([25,150],[295,150])+ln(V,B);
+    c+=`<path class="arc" d="M${V[0]+34},150 A34,34 0 0 0 ${(V[0]+34*Math.cos(rad(a))).toFixed(1)},${(150-34*Math.sin(rad(a))).toFixed(1)}"/>`;
+    c+=tx(add(V,[58*Math.cos(rad(a/2)),-58*Math.sin(rad(a/2))]),a+'°')+tx(add(V,[58*Math.cos(rad(a+x/2)),-58*Math.sin(rad(a+x/2))]),'x','x');
+    return {ask:'Hur stor är vinkeln x?',prompt:'Vinklarna ligger längs en rak linje.',fig:svg(c),type:'input',answer:x,answerText:x+'°',unit:'°',
+      explain:`Vinklar längs en rak linje (sidovinklar) är tillsammans 180°.<br><b>x = 180° − ${a}° = ${x}°</b>`};
+  }
+  const a=R(4,13)*10+pick([0,5]),V=[160,105],dir=[Math.cos(rad(a)),-Math.sin(rad(a))];
+  const opp=Math.random()<.5,x=opp?a:180-a;
+  let c=ln([30,105],[290,105])+ln(add(V,mul(dir,-Math.min(115,92/Math.max(Math.abs(dir[1]),.01)))),add(V,mul(dir,Math.min(115,92/Math.max(Math.abs(dir[1]),.01)))));
+  c+=tx(add(V,[52*Math.cos(rad(a/2)),-52*Math.sin(rad(a/2))]),a+'°');
+  const ang=opp?180+a/2:a+(180-a)/2;
+  c+=tx(add(V,[52*Math.cos(rad(ang)),-52*Math.sin(rad(ang))]),'x','x');
+  return {ask:'Hur stor är vinkeln x?',prompt:'Två räta linjer korsar varandra.',fig:svg(c),type:'input',answer:x,answerText:x+'°',unit:'°',
+    explain:opp?`x och ${a}° ligger mitt emot varandra. Sådana vinklar (vertikalvinklar) är lika stora.<br><b>x = ${a}°</b>`
+      :`x och ${a}° ligger bredvid varandra längs en rak linje, så de är tillsammans 180°.<br><b>x = 180° − ${a}° = ${x}°</b>`};
+}
+
+/* ---------- Trianglar ---------- */
+function triByAngles(A,B){const C=180-A-B,d=Math.sin(rad(B))/Math.sin(rad(C));return fit([[0,0],[1,0],[Math.cos(rad(A))*d,Math.sin(rad(A))*d]],240,150)}
+function triBySides(a,b,c){const x=(a*a+c*c-b*b)/(2*a);return fit([[0,0],[a,0],[x,Math.sqrt(Math.max(c*c-x*x,0.01))]],240,150)}
+function genTri(lv){
+  const v=pick(lv===1?['miss','miss','vtyp']:lv===2?['miss','vtyp','styp','rat']:['miss','likb','likb','rat','styp']);
+  if(v==='miss'||v==='rat'){
+    let A,B;
+    if(v==='rat'){A=R(4,13)*5;B=90}else{do{A=R(5,16)*5;B=R(5,16)*5}while(A+B>160)}
+    const C=180-A-B,p=triByAngles(A,B),c=cent(p);
+    let s=poly(p)+angLbl(p[0],c,A+'°',34)+(B===90?raMark(p[1],p[0],p[2],15):angLbl(p[1],c,B+'°',34))+angLbl(p[2],c,'x',30,'x');
+    return {ask:'Hur stor är vinkeln x?',prompt:B===90?'Triangeln är rätvinklig.':'',fig:svg(s),type:'input',answer:C,answerText:C+'°',unit:'°',
+      explain:`Vinkelsumman i en triangel är alltid 180°.${B===90?' Den räta vinkeln är 90°.':''}<br><b>x = 180° − ${A}° − ${B}° = ${C}°</b>`};
+  }
+  if(v==='vtyp'){
+    const t=pick(['spetsvinklig','rätvinklig','trubbvinklig']);let A,B,C;
+    do{A=R(3,14)*5;if(t==='rätvinklig')B=90;else if(t==='trubbvinklig')B=R(20,28)*5;else B=R(9,17)*5;C=180-A-B}
+    while(C<15||(t==='spetsvinklig'&&(C>=90)));
+    const p=triByAngles(A,B),c=cent(p);
+    const s=poly(p)+angLbl(p[0],c,A+'°',34)+(B===90?raMark(p[1],p[0],p[2],15):angLbl(p[1],c,B+'°',34))+angLbl(p[2],c,C+'°',30);
+    const why={spetsvinklig:'Alla tre vinklarna är mindre än 90°.',rätvinklig:'En av vinklarna är exakt 90°.',trubbvinklig:'En av vinklarna är större än 90°.'}[t];
+    return {ask:'Vilken sorts triangel är det, om man ser på vinklarna?',prompt:'',fig:svg(s),type:'mc',options:['spetsvinklig','rätvinklig','trubbvinklig'].map(o=>({html:o,ok:o===t})),answerText:t,
+      explain:`Triangeln är <b>${t}</b>. ${why}`};
+  }
+  if(v==='styp'){
+    const t=pick(['liksidig','likbent','oliksidig']);
+    let a,b,c;
+    if(t==='liksidig'){a=b=c=R(3,9)}
+    else if(t==='likbent'){b=c=R(5,9);do{a=R(3,12)}while(a===b||a>=2*b)}
+    else{do{a=R(5,10);b=R(3,9);c=R(4,9)}while(a===b||b===c||a===c||a>=b+c||b>=a+c||c>=a+b)}
+    const p=triBySides(a,b,c),ce=cent(p);
+    let s=poly(p)+sideLbl(p[0],p[1],ce,a+' cm')+sideLbl(p[1],p[2],ce,b+' cm',22)+sideLbl(p[0],p[2],ce,c+' cm',22);
+    const why={liksidig:'Alla tre sidorna är lika långa.',likbent:'Två av sidorna är lika långa.',oliksidig:'Alla sidorna är olika långa.'}[t];
+    return {ask:'Vilken sorts triangel är det, om man ser på sidorna?',prompt:'',fig:svg(s),type:'mc',options:['liksidig','likbent','oliksidig'].map(o=>({html:o,ok:o===t})),answerText:t,
+      explain:`Triangeln är <b>${t}</b>. ${why}`};
+  }
+  const top=R(4,14)*10,base=(180-top)/2,p=triByAngles(base,base),c=cent(p);
+  const s=poly(p)+tickOn(p[0],p[2])+tickOn(p[1],p[2])+angLbl(p[2],c,top+'°',30)+angLbl(p[0],c,'x',34,'x');
+  return {ask:'Triangeln är likbent. Hur stor är vinkeln x?',prompt:'Strecken visar vilka sidor som är lika långa.',fig:svg(s),type:'input',answer:base,answerText:fmt(base)+'°',unit:'°',
+    explain:`I en likbent triangel är de två basvinklarna lika stora. Tillsammans är de 180° − ${top}° = ${180-top}°.<br><b>x = ${180-top}° / 2 = ${fmt(base)}°</b>`};
+}
+
+/* ---------- Area ---------- */
+function genArea(lv){
+  const v=pick(lv===1?['rekt','tri','rekt','tri']:lv===2?['tri','para','trap','rekt']:['trap','para','L','omv','tri']);
+  if(v==='rekt'){
+    const b=R(3,12),h=R(2,9);const p=fit([[0,0],[b,0],[b,h],[0,h]],230,140),c=cent(p);
+    return {ask:'Beräkna rektangelns area.',prompt:'',fig:svg(poly(p)+sideLbl(p[0],p[1],c,b+' cm',18)+sideLbl(p[1],p[2],c,h+' cm',30)),type:'input',answer:b*h,answerText:b*h+' cm²',unit:'cm²',
+      explain:`A = basen · höjden<br><b>A = ${b} · ${h} = ${b*h} cm²</b>`};
+  }
+  if(v==='tri'){
+    let b,h;do{b=R(4,14);h=R(3,10)}while(lv===1&&(b*h)%2);const off=R(2,b-2)*(Math.random()<.5?1:0.6);
+    const p=fit([[0,0],[b,0],[off,h]],230,140),c=cent(p),F=[p[2][0],p[0][1]];
+    let s=poly(p)+ln(p[2],F,'aux')+raMark(F,p[1],p[2],11)+sideLbl(p[0],p[1],c,b+' cm',18)+tx([F[0]+8,(p[2][1]+F[1])/2],h+' cm','','start');
+    return {ask:'Beräkna triangelns area.',prompt:'Den streckade linjen är höjden.',fig:svg(s),type:'input',answer:b*h/2,answerText:fmt(b*h/2)+' cm²',unit:'cm²',
+      explain:`En triangel är hälften av en rektangel med samma bas och höjd.<br>A = (basen · höjden) / 2<br><b>A = (${b} · ${h}) / 2 = ${fmt(b*h/2)} cm²</b>`};
+  }
+  if(v==='para'){
+    const b=R(5,12),h=R(3,8),o=R(2,4),sl=Math.round(Math.hypot(o,h)*10)/10;
+    const p=fit([[0,0],[b,0],[b+o,h],[o,h]],240,140),c=cent(p),F=[p[3][0],p[0][1]];
+    let s=poly(p)+ln(p[3],F,'aux')+raMark(F,p[1],p[3],11)+sideLbl(p[0],p[1],c,b+' cm',18)+tx([F[0]+8,(p[3][1]+F[1])/2],h+' cm','','start');
+    if(lv>=3||Math.random()<.5)s+=sideLbl(p[0],p[3],c,fmt(sl)+' cm',30);
+    return {ask:'Beräkna parallellogrammens area.',prompt:'Den streckade linjen är höjden.',fig:svg(s),type:'input',answer:b*h,answerText:b*h+' cm²',unit:'cm²',
+      explain:`A = basen · höjden. Använd höjden som står vinkelrätt mot basen, inte den sneda sidan.<br><b>A = ${b} · ${h} = ${b*h} cm²</b>`};
+  }
+  if(v==='trap'){
+    let a,b,h;do{b=R(7,14);a=R(3,b-2);h=R(3,8)}while(((a+b)*h)%2&&lv<3);const o=(b-a)/2+R(-1,1);
+    const p=fit([[0,0],[b,0],[o+a,h],[o,h]],240,140),c=cent(p),F=[p[3][0],p[0][1]];
+    let s=poly(p)+ln(p[3],F,'aux')+raMark(F,p[1],p[3],11)+sideLbl(p[0],p[1],c,b+' cm',18)+sideLbl(p[3],p[2],c,a+' cm',18)+tx([F[0]+8,(p[3][1]+F[1])/2],h+' cm','','start');
+    const A=(a+b)*h/2;
+    return {ask:'Beräkna parallelltrapetsets area.',prompt:'De två vågräta sidorna är parallella.',fig:svg(s),type:'input',answer:A,answerText:fmt(A)+' cm²',unit:'cm²',
+      explain:`A = (a + b) · h / 2, där a och b är de parallella sidorna.<br><b>A = (${a} + ${b}) · ${h} / 2 = ${a+b} · ${h} / 2 = ${fmt(A)} cm²</b>`};
+  }
+  if(v==='L'){
+    const Wd=R(7,12),Ht=R(6,10),w=R(2,Wd-3),h=R(2,Ht-3);
+    const p=fit([[0,0],[Wd,0],[Wd,Ht-h],[Wd-w,Ht-h],[Wd-w,Ht],[0,Ht]],220,140),c=cent([p[0],p[1],p[4],p[5]]);
+    let s=poly(p)+tx([(p[0][0]+p[1][0])/2,p[0][1]+20],Wd+' cm')+tx([p[0][0]-10,(p[0][1]+p[5][1])/2],Ht+' cm','','end')
+      +tx([(p[4][0]+p[5][0])/2,p[5][1]-14],(Wd-w)+' cm')+tx([p[1][0]+10,(p[1][1]+p[2][1])/2],(Ht-h)+' cm','','start');
+    const A=Wd*Ht-w*h;
+    return {ask:'Beräkna figurens area.',prompt:'Alla hörn är räta vinklar.',fig:svg(s),type:'input',answer:A,answerText:A+' cm²',unit:'cm²',
+      explain:`Ett sätt: räkna hela rektangeln och dra bort hörnet som saknas. Hörnet är ${Wd} − ${Wd-w} = ${w} cm brett och ${Ht} − ${Ht-h} = ${h} cm högt.<br><b>A = ${Wd} · ${Ht} − ${w} · ${h} = ${Wd*Ht} − ${w*h} = ${A} cm²</b>`};
+  }
+  const b=R(4,12),h=R(3,9),A=b*h;const p=fit([[0,0],[b,0],[b,h],[0,h]],230,140),c=cent(p);
+  return {ask:`Rektangelns area är ${A} cm². Hur hög är den?`,prompt:'',fig:svg(poly(p)+sideLbl(p[0],p[1],c,b+' cm',18)+sideLbl(p[1],p[2],c,'?',22,'x')+tx(c,A+' cm²')),type:'input',answer:h,answerText:h+' cm',unit:'cm',
+    explain:`A = b · h, så h = A / b.<br><b>h = ${A} / ${b} = ${h} cm</b>`};
+}
+
+/* ---------- Areaenheter ---------- */
+const UN=['mm²','cm²','dm²','m²'];
+function genEnh(lv){
+  if(Math.random()<(lv===1?.45:.25)){
+    const pairs=[[1,2,'1 dm²','cm²',100],[2,3,'1 m²','dm²',100],[0,1,'1 cm²','mm²',100],[1,3,'1 m²','cm²',10000]];
+    const [,,,u,ans]=lv===1?pick(pairs.slice(0,3)):pick(pairs),from=pairs.find(p=>p[3]===u&&p[4]===ans)[2];
+    let c='';
+    if(u==='cm²'&&ans===100){for(let i=0;i<=10;i++){c+=ln([85+i*15,30],[85+i*15,180],'gridl')+ln([85,30+i*15],[235,30+i*15],'gridl')}
+      c=`<rect class="s" x="85" y="30" width="150" height="150"/>`+c+tx([160,198],'1 dm = 10 cm');}
+    return {ask:`${from} = ? ${u}`,prompt:u==='cm²'&&ans===100?'Rutan är 1 dm × 1 dm. Varje liten ruta är 1 cm × 1 cm.':'',fig:c?svg(c):'',type:'mc',
+      options:mc(fmt(ans)+' '+u,[(ans===100?'10':'100')+' '+u,fmt(ans*10)+' '+u,fmt(ans/10)+' '+u]),answerText:fmt(ans)+' '+u,
+      explain:`En längdenhet är 10 gånger större än nästa, men en areaenhet är 10 · 10 = 100 gånger större. <b>${from} = ${fmt(ans)} ${u}</b>`};
+  }
+  let i,j;do{i=R(0,3);j=R(0,3)}while(i===j||Math.abs(i-j)>(lv===3?3:2));
+  const d=Math.abs(i-j),f=100**d;
+  let x;if(i>j){x=R(2,95)/pick([1,1,10])}else{x=R(2,99)*pick([1,10,100])}
+  const ans=clean(i>j?x*f:x/f);
+  const steps=[];for(let k=Math.max(i,j);k>Math.min(i,j);k--)steps.push(`1 ${UN[k]} = 100 ${UN[k-1]}`);
+  return {ask:`Gör om ${fmt(x)} ${UN[i]} till ${UN[j]}.`,prompt:'',fig:'',type:'input',answer:ans,answerText:fmt(ans)+' '+UN[j],unit:UN[j],
+    explain:`${steps.join(', ')}. Det är ${d} steg, så ${i>j?'multiplicera':'dividera'} med ${fmt(f)}.<br><b>${fmt(x)} ${UN[i]} = ${fmt(ans)} ${UN[j]}</b>`};
+}
+
+/* ---------- Begränsningsarea ---------- */
+function genBA(lv){
+  const v=pick(lv===1?['kub','block','block']:lv===2?['block','kub','block']:['block','lock','prisma']);
+  if(v==='kub'){
+    const s=R(2,9),A=6*s*s;
+    return {ask:'Beräkna kubens begränsningsarea.',prompt:'Begränsningsarean är summan av alla sidoytornas area.',fig:boxSvg(1,1,1,[s+' cm',s+' cm',s+' cm']),type:'input',answer:A,answerText:A+' cm²',unit:'cm²',
+      explain:`En kub har 6 lika stora kvadratiska sidoytor. En sidoyta: ${s} · ${s} = ${s*s} cm².<br><b>BA = 6 · ${s*s} = ${A} cm²</b>`};
+  }
+  const l=R(3,10),b=R(2,7),h=R(2,8);
+  if(v==='block'){
+    const A=2*(l*b+l*h+b*h);
+    return {ask:'Beräkna rätblockets begränsningsarea.',prompt:'Begränsningsarean är summan av alla sidoytornas area.',fig:boxSvg(l,b,h,[l+' cm',b+' cm',h+' cm']),type:'input',answer:A,answerText:A+' cm²',unit:'cm²',
+      explain:`Rätblocket har tre par likadana sidoytor:<br>botten och lock: 2 · ${l} · ${b} = ${2*l*b} cm²<br>fram och bak: 2 · ${l} · ${h} = ${2*l*h} cm²<br>sidorna: 2 · ${b} · ${h} = ${2*b*h} cm²<br><b>BA = ${2*l*b} + ${2*l*h} + ${2*b*h} = ${A} cm²</b>`};
+  }
+  if(v==='lock'){
+    const A=l*b+2*l*h+2*b*h;
+    return {ask:'En låda utan lock ska målas utvändigt. Hur stor area ska målas?',prompt:'Lådan har botten men inget lock.',fig:boxSvg(l,b,h,[l+' cm',b+' cm',h+' cm']),type:'input',answer:A,answerText:A+' cm²',unit:'cm²',
+      explain:`Räkna alla sidoytor utom locket:<br>botten: ${l} · ${b} = ${l*b} cm²<br>fram och bak: 2 · ${l} · ${h} = ${2*l*h} cm²<br>sidorna: 2 · ${b} · ${h} = ${2*b*h} cm²<br><b>Area = ${l*b} + ${2*l*h} + ${2*b*h} = ${A} cm²</b>`};
+  }
+  const k=pick([1,2]),a=3*k,bb=4*k,c=5*k,L=R(4,10);
+  const f=[[60,172],[180,172],[60,82]],o=[105,-42],bk=f.map(p=>add(p,o));
+  let s=poly([f[1],bk[1],bk[2],f[2]])+poly(f)+raMark(f[0],f[1],f[2],12)+ln(f[0],bk[0],'h')+ln(bk[0],bk[1],'h')+ln(bk[0],bk[2],'h');
+  s+=tx([(f[0][0]+f[1][0])/2,192],bb+' cm')+tx([f[0][0]-8,(f[0][1]+f[2][1])/2],a+' cm','','end')+tx(add(mid(f[1],f[2]),[-30,14]),c+' cm')+tx(add(mid(f[1],bk[1]),[12,12]),L+' cm','','start');
+  const tri=a*bb/2,A=2*tri+(a+bb+c)*L;
+  return {ask:'Beräkna prismats begränsningsarea.',prompt:'Ändytorna är rätvinkliga trianglar.',fig:svg(s),type:'input',answer:A,answerText:A+' cm²',unit:'cm²',
+    explain:`Två triangulära ändytor: 2 · (${a} · ${bb} / 2) = ${2*tri} cm².<br>Tre rektanglar som alla är ${L} cm långa: (${a} + ${bb} + ${c}) · ${L} = ${(a+bb+c)*L} cm².<br><b>BA = ${2*tri} + ${(a+bb+c)*L} = ${A} cm²</b>`};
+}
+
+/* ---------- Volym (åk 7) ---------- */
+/* Generellt prisma: framyta i matematiska koordinater (y uppåt) och djup. label(F,B) ritar mått. */
+function prismSvg(front,depth,label){
+  const xs=front.map(p=>p[0]),ys=front.map(p=>p[1]);
+  const w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);
+  depth=Math.min(depth,Math.max(w,h)*1.1); // ej skalenlig: håll framytan stor
+  const sc=Math.min(190/(w+depth*0.5),135/(h+depth*0.34));
+  const dx=depth*sc*0.5,dy=depth*sc*0.34,o=[dx,-dy];
+  const ox=(W-(w*sc+dx))/2-Math.min(...xs)*sc, oy=(H-(h*sc+dy))/2+dy+Math.max(...ys)*sc;
+  const F=front.map(p=>[p[0]*sc+ox,oy-p[1]*sc]),B=F.map(p=>add(p,o));
+  let area=0;for(let i=0;i<F.length;i++){const a=F[i],b=F[(i+1)%F.length];area+=a[0]*b[1]-b[0]*a[1]}
+  let c=poly(B,'h');F.forEach((p,i)=>c+=ln(p,B[i],'h'));
+  const sides=[];
+  for(let i=0;i<F.length;i++){const a=F[i],b=F[(i+1)%F.length];let n=[b[1]-a[1],-(b[0]-a[0])];if(area<0)n=[-n[0],-n[1]];
+    if(n[0]*o[0]+n[1]*o[1]>1e-6)sides.push([a,b,B[(i+1)%F.length],B[i]])}
+  sides.sort((p,q)=>Math.max(p[0][1],p[1][1])-Math.max(q[0][1],q[1][1]));
+  sides.forEach(sd=>c+=poly(sd));
+  c+=poly(F);
+  return svg(c+label(F,B));
+}
+const lenLbl=(F,B,i,txt)=>tx(add(mid(F[i],B[i]),[12,10]),txt,'','start');
+function genVol(lv){
+  const v=pick(lv===1?['kub','block','block']:lv===2?['block','prisma','para','tob','tob']:['prismaFalla','para','tob','hojd','para','tob']);
+  const svar=(V,u='cm³')=>({answer:V,answerText:fmt(V)+' '+u,unit:u,type:'input',expr:true});
+  if(v==='kub'){const s=R(2,9),V=s**3;
+    return {ask:'Beräkna kubens volym.',prompt:'',fig:boxSvg(1,1,1,[s+' cm',s+' cm',s+' cm']),...svar(V),
+      explain:`Alla kanter i en kub är lika långa.<br><b>V = ${s} · ${s} · ${s} = ${fmt(V)} cm³</b>`}}
+  if(v==='block'){const l=R(3,12),b=R(2,8),h=R(2,9),V=l*b*h;
+    return {ask:'Beräkna rätblockets volym.',prompt:'',fig:boxSvg(l,b,h,[l+' cm',b+' cm',h+' cm']),...svar(V),
+      explain:`V = basytan · höjden = l · b · h<br>Basytan: ${l} · ${b} = ${l*b} cm²<br><b>V = ${l*b} · ${h} = ${fmt(V)} cm³</b>`}}
+  if(v==='hojd'){const l=R(3,10),b=R(2,6),h=R(2,9),V=l*b*h;
+    return {ask:`Rätblocket har volymen ${fmt(V)} cm³. Hur högt är det?`,prompt:'',fig:boxSvg(l,b,h,[l+' cm',b+' cm','?']),...svar(h,'cm'),
+      explain:`V = B · h, så h = V / B.<br>B = ${l} · ${b} = ${l*b} cm²<br><b>h = ${fmt(V)} / ${l*b} = ${h} cm</b>`}}
+  if(v==='prisma'||v==='prismaFalla'){
+    let a,bb,hyp=null;
+    if(v==='prismaFalla'){const k=pick([1,2]);a=3*k;bb=4*k;hyp=5*k}else{a=R(3,9);bb=R(3,10)}
+    const L=R(4,12),B=a*bb/2,V=B*L;
+    const fig=prismSvg([[0,0],[bb,0],[0,a]],L,(F,Bk)=>raMark(F[0],F[1],F[2],11)+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],bb+' cm')
+      +tx([F[0][0]-8,(F[0][1]+F[2][1])/2],a+' cm','','end')+lenLbl(F,Bk,1,L+' cm')+(hyp?(()=>{const m=mid(F[1],F[2]);return tx([m[0]+(F[0][0]-m[0])*.3,m[1]+(F[0][1]-m[1])*.3+4],hyp+' cm')})():''));
+    return {ask:'Beräkna prismats volym.',prompt:hyp?'Basytan är en rätvinklig triangel. Alla mått behövs inte.':'Basytan är en rätvinklig triangel.',fig,...svar(V),
+      explain:`V = basytan · längden. Basytan är triangeln.<br>B = ${bb} · ${a} / 2 = ${fmt(B)} cm²<br><b>V = ${fmt(B)} · ${L} = ${fmt(V)} cm³</b>`
+        +(hyp?`<br>Sidan ${hyp} cm behövs inte. Använd de två sidorna som bildar den räta vinkeln.`:'')}}
+  if(v==='tob'){
+    const b=R(3,9),h=R(3,9),L=R(8,20),B=b*h/2,V=B*L,slant=lv===3?Math.round(Math.hypot(b/2,h)*10)/10:null;
+    const fig=prismSvg([[0,0],[b,0],[b/2,h]],L,(F,Bk)=>{const foot=[F[2][0],F[0][1]];
+      return ln(F[2],foot,'aux')+raMark(foot,F[1],F[2],9)+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],b+' cm')
+        +tx([foot[0]+6,(F[2][1]+foot[1])/2+4],h+' cm','','start')+lenLbl(F,Bk,1,L+' cm')
+        +(slant?tx(add(mid(F[0],F[2]),[-10,0]),fmt(slant)+' cm','','end'):'')});
+    return {ask:'Beräkna volymen av Tobleroneförpackningen.',prompt:'Förpackningen är ett prisma med en triangel som basyta. Den streckade linjen är triangelns höjd.'+(slant?' Alla mått behövs inte.':''),fig,...svar(V),
+      explain:`Basytan är triangeln på kortsidan: B = b · h / 2 = ${b} · ${h} / 2 = ${fmt(B)} cm²<br>Multiplicera med förpackningens längd.<br><b>V = ${fmt(B)} · ${L} = ${fmt(V)} cm³</b>`
+        +(slant?`<br>Den sneda sidan ${fmt(slant)} cm behövs inte. Använd höjden som står vinkelrätt mot basen.`:'')}}
+  // parallellepiped: prisma med en parallellogram som basyta
+  const b=R(4,10),h=R(2,7),o=R(1,3),L=R(3,10),B=b*h,V=B*L,slant=Math.round(Math.hypot(o,h)*10)/10,showSlant=lv===3||Math.random()<.4;
+  const fig=prismSvg([[0,0],[b,0],[b+o,h],[o,h]],L,(F,Bk)=>{const foot=[F[3][0],F[0][1]];
+    return ln(F[3],foot,'aux')+raMark(foot,F[1],F[3],9)+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],b+' cm')
+      +tx([foot[0]+6,(F[3][1]+foot[1])/2+4],h+' cm','','start')+lenLbl(F,Bk,1,L+' cm')
+      +(showSlant?tx(add(mid(F[0],F[3]),[-10,0]),fmt(slant)+' cm','','end'):'')});
+  return {ask:'Beräkna parallellepipedens volym.',prompt:'Basytan är en parallellogram. Den streckade linjen är parallellogrammens höjd.',fig,...svar(V),
+    explain:`En parallellepiped är ett prisma där basytan är en parallellogram.<br>B = basen · höjden = ${b} · ${h} = ${B} cm²<br><b>V = B · längden = ${B} · ${L} = ${fmt(V)} cm³</b>`
+      +(showSlant?`<br>Den sneda sidan ${fmt(slant)} cm behövs inte för volymen.`:'')};
+}
+
+const IC={
+  vol:'<svg viewBox="0 0 44 44"><path d="M8 16h20v20H8z" fill="currentColor" fill-opacity=".35"/><path d="M8 16h20v20H8zM8 16l8-8h20l-8 8M36 8v20l-8 8"/></svg>',
+  fig:'<svg viewBox="0 0 44 44"><path d="M8 16h20v20H8zM8 16l8-8h20l-8 8M36 8v20l-8 8"/></svg>',
+  vink:'<svg viewBox="0 0 44 44"><path d="M6 36h32M6 36L30 10"/><path d="M20 36a14 14 0 0 0-4-10" stroke-width="2"/></svg>',
+  tri:'<svg viewBox="0 0 44 44"><path d="M6 36h32L18 8z"/></svg>',
+  area:'<svg viewBox="0 0 44 44"><path d="M14 10h24l-8 24H6z" fill="currentColor" fill-opacity=".25"/></svg>',
+  enh:'<span style="font-size:20px">m²</span>',
+  ba:'<svg viewBox="0 0 44 44"><path d="M15 4h10v10h10v10H25v16H15V24H5V14h10z"/></svg>',
+};
+const TOPICS=[
+  {id:'fig',name:'Figurer och kroppar',glyph:IC.fig,ex:'Namn, hörn, kanter och sidoytor',gen:genFig},
+  {id:'vink',name:'Vinklar',glyph:IC.vink,ex:'Spetsig, rät, trubbig och rak',gen:genVink},
+  {id:'tri',name:'Trianglar',glyph:IC.tri,ex:'Vinkelsumman är 180°',gen:genTri},
+  {id:'area',name:'Area',glyph:IC.area,ex:'Triangel: A = b · h / 2',gen:genArea},
+  {id:'ba',name:'Begränsningsarea',glyph:IC.ba,ex:'Summan av alla sidoytor',gen:genBA},
+  {id:'vol',name:'Volym',glyph:IC.vol,ex:'V = basytan · höjden',gen:genVol},
+  {id:'mix',name:'Blandat',glyph:'Mix',ex:'Frågor från alla sex delar',gen:null},
+];
+
+/* ---------- Spelmotor ---------- */
+const KEY='geometrikapitlet-7b-best';
+let best={};try{best=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){best={}}
+const saveBest=()=>{try{localStorage.setItem(KEY,JSON.stringify(best))}catch(e){}};
+const starHTML=n=>[0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join('');
+const $=id=>document.getElementById(id);
+function renderHome(){
+  $('stations').innerHTML=TOPICS.map(t=>`<button class="st ${t.id==='mix'?'mix':''}" data-id="${t.id}" id="st-${t.id}">
+    <span class="glyph">${t.glyph}</span>
+    <span class="st-body"><span class="st-name">${t.name}</span><span class="st-ex">${t.ex}</span>
+    <span class="stars" aria-label="${(best[t.id]?.stars)||0} av 3 stjärnor">${starHTML((best[t.id]?.stars)||0)}</span></span></button>`).join('');
+  const tot=TOPICS.reduce((s,t)=>s+((best[t.id]?.stars)||0),0);
+  $('total').innerHTML=`★ <b>${tot}</b> / 21 stjärnor`;
+  document.querySelectorAll('.st').forEach(b=>b.onclick=()=>start(b.dataset.id));
+}
+function show(id){['home','game','result'].forEach(s=>$(s).hidden=s!==id);window.scrollTo({top:0})}
+let S=null;
+function start(id){
+  const topic=TOPICS.find(t=>t.id===id);
+  S={topic,i:0,score:0,streak:0,bestStreak:0,correct:0,marks:[],missed:[],used:new Set(),cur:null,answered:false};
+  $('g-topic').textContent=topic.name;show('game');ask();
+}
+function makeQ(){
+  const lv=S.i<3?1:S.i<7?2:3;let q,t=0;
+  do{const g=S.topic.gen||pick(TOPICS.slice(0,6)).gen;q=g(lv);t++}while(S.used.has(q.ask+q.answerText)&&t<30);
+  S.used.add(q.ask+q.answerText);return q;
+}
+function ask(){
+  const q=S.cur=makeQ();S.answered=false;
+  $('g-progress').innerHTML=Array.from({length:10},(_,k)=>`<i class="${k<S.i?(S.marks[k]?'ok':'no'):k===S.i?'now':''}"></i>`).join('');
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('g-ask').textContent=q.ask;$('g-prompt').textContent=q.prompt||'';$('g-fig').innerHTML=q.fig||'';
+  $('g-fb').hidden=true;$('next').hidden=true;
+  if(q.type==='input'){
+    $('g-opts').hidden=true;$('g-input').hidden=false;$('g-unit').textContent=q.unit||'';
+    const inp=$('ans');inp.value='';inp.disabled=false;inp.style.borderColor='';$('check').disabled=false;
+    inp.inputMode=q.expr?'text':'decimal';inp.placeholder=q.expr?'Svar eller uträkning, t.ex. 5*4*3':'Ditt svar';
+    setTimeout(()=>inp.focus({preventScroll:true}),30);
+  }else{
+    $('g-input').hidden=true;$('g-opts').hidden=false;
+    $('g-opts').innerHTML=q.options.map((o,k)=>`<button class="opt" data-k="${k}" id="opt-${k}"><span class="k">${k+1}</span><span>${o.html}</span></button>`).join('');
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.k));
+  }
+}
+/* Tar emot ett tal eller en uträkning, t.ex. 5*4*3 eller 6*4/2*10 */
+function parse(raw){
+  let s=raw.trim().toLowerCase().replace(/[\s ]/g,'').replace(/(cm³|mm³|dm³|m³|cm3|mm3|dm3|m3|cm²|mm²|dm²|m²|cm2|mm2|dm2|m2|cm|st|°|grader|liter|ml|dl|l)$/i,'');
+  s=s.replace(/,/g,'.').replace(/[·×]/g,'*').replace(/(\d)x(?=[\d(])/g,'$1*').replace(/[÷:]/g,'/').replace(/−/g,'-').replace(/²/g,'^2').replace(/³/g,'^3');
+  if(!s||!/^[\d.+\-*/^()]+$/.test(s))return null;
+  let i=0;const peek=()=>s[i];
+  const num=()=>{const m=s.slice(i).match(/^\d*\.?\d+/);if(!m)throw 0;i+=m[0].length;return parseFloat(m[0])};
+  const primary=()=>{if(peek()==='('){i++;const v=expr();if(peek()!==')')throw 0;i++;return v}return num()};
+  const power=()=>{let b=primary();if(peek()==='^'){i++;b=Math.pow(b,unary())}return b};
+  const unary=()=>{if(peek()==='-'){i++;return -unary()}if(peek()==='+'){i++;return unary()}return power()};
+  const term=()=>{let v=unary();for(;;){const c=peek();if(c==='*'){i++;v*=unary()}else if(c==='/'){i++;const d=unary();if(d===0)throw 0;v/=d}else if(c==='('){v*=unary()}else break}return v};
+  function expr(){let v=term();while(peek()==='+'||peek()==='-'){const op=s[i++];const t=term();v=op==='+'?v+t:v-t}return v}
+  try{const v=expr();if(i!==s.length||!isFinite(v))return null;return v}catch(e){return null}
+}
+const isExpr=raw=>{const s=raw.trim().replace(/[\s\u00a0]/g,'').replace(/(cm³|mm³|dm³|m³|cm3|mm3|dm3|m3|cm²|mm²|dm²|m²|cm2|mm2|dm2|m2|cm|st|°|grader|liter|ml|dl|l)$/i,'');return /[+*/·×÷^()x²³:]/i.test(s)||/\d-\d/.test(s)};
+function checkInput(){
+  if(S.answered)return;const v=parse($('ans').value);
+  if(v===null){const r=$('g-input');r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake');$('ans').value='';$('ans').placeholder='Skriv ett tal eller en uträkning';return}
+  const typed=$('ans').value.trim();
+  const ok=Math.abs(v-S.cur.answer)<1e-7;
+  $('ans').disabled=true;$('check').disabled=true;$('ans').style.borderColor=ok?'var(--good)':'var(--bad)';finish(ok);
+  if(isExpr(typed))$('g-fb').insertAdjacentHTML('afterbegin',`<p style="font-variant-numeric:tabular-nums">Din uträkning: ${typed.replace(/</g,'&lt;')} = ${fmt(v)}</p>`);
+}
+function choose(k){
+  if(S.answered)return;const ok=S.cur.options[k].ok;
+  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(S.cur.options[j].ok)b.classList.add('right');else if(j===k)b.classList.add('wrong')});finish(ok);
+}
+function finish(ok){
+  S.answered=true;S.marks.push(ok);
+  if(ok){S.streak++;S.correct++;S.score+=10+Math.min(S.streak-1,5)*2;S.bestStreak=Math.max(S.bestStreak,S.streak)}
+  else{S.streak=0;S.missed.push({ask:S.cur.ask,a:S.cur.answerText})}
+  const fb=$('g-fb');fb.hidden=false;fb.className='fb '+(ok?'ok':'no');
+  fb.innerHTML=`<h3>${ok?pick(['Rätt!','Snyggt!','Helt rätt!','Bra jobbat!']):'Inte riktigt. Rätt svar: '+S.cur.answerText}</h3><p>${S.cur.explain}</p>`;
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('next').hidden=false;$('next').textContent=S.i===9?'Se resultat':'Nästa fråga';
+  setTimeout(()=>$('next').focus({preventScroll:true}),30);
+}
+function next(){S.i++;if(S.i>=10)result();else ask()}
+function result(){
+  const c=S.correct,stars=c>=9?3:c>=7?2:c>=5?1:0,prev=best[S.topic.id]||{stars:0,score:0},rec=S.score>prev.score;
+  best[S.topic.id]={stars:Math.max(prev.stars,stars),score:Math.max(prev.score,S.score)};saveBest();
+  $('r-stars').innerHTML=starHTML(stars);
+  $('r-head').textContent=(stars===3?'Mästerligt!':stars===2?'Riktigt bra!':stars===1?'Bra kämpat!':'Öva lite till, du klarar det!')+(rec?' Nytt rekord.':'');
+  $('r-correct').textContent=`${c}/10`;$('r-score').textContent=S.score;$('r-streak').textContent=S.bestStreak;
+  $('r-missed-wrap').hidden=!S.missed.length;
+  $('r-missed').innerHTML=S.missed.map(m=>`<li><span class="q">${m.ask}</span><span class="a">${m.a}</span></li>`).join('');
+  show('result');renderHome();
+}
+$('check').onclick=checkInput;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkInput()}});
+$('next').onclick=next;$('quit').onclick=()=>{show('home');renderHome()};
+$('again').onclick=()=>start(S.topic.id);$('to-home').onclick=()=>show('home');
+document.addEventListener('keydown',e=>{
+  if($('game').hidden||!S)return;
+  if(!S.answered&&S.cur.type==='mc'&&/^[1-4]$/.test(e.key)){const k=+e.key-1;if(k<S.cur.options.length)choose(k)}
+  else if(S.answered&&e.key==='Enter'&&document.activeElement!==$('next')){e.preventDefault();next()}
+});
+renderHome();
+</script>
+
+</body></html>

@@ -1,0 +1,350 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Volymverkstaden</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: en blåkopia (ritning). En enda medvetet mörkblå look. Startsida med läge och formler, spelbladet med ritad kropp, vattentank som framsteg. */
+:root{
+  --bp:#123a6b; --bp2:#0e2f58; --grid:rgba(190,220,255,.12); --face:#1a4a82; --face2:#1f5596;
+  --ink:#eef5ff; --muted:#a9c3e6; --line:#3d6aa3; --amber:#ffcf5c; --water:#3fb6ff; --water2:#1d8fe0;
+  --good:#58e0a0; --bad:#ff7d7d; --card:#16437a;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background-color:var(--bp);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+  linear-gradient(rgba(190,220,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(190,220,255,.05) 1px,transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px}
+.wrap{max-width:760px;margin:0 auto;padding-block:26px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,7.5vw,54px);line-height:.95;margin:0;letter-spacing:-.01em;text-transform:uppercase}
+.stamp{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right;line-height:1.4}
+.stamp b{color:var(--amber)}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.panel{background:rgba(14,47,88,.85);border:1.5px solid var(--line);border-radius:6px;padding:20px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px}
+.mode{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.mode p{margin:0;max-width:44ch}
+.toggle{font:700 17px var(--display);text-transform:uppercase;letter-spacing:.03em;border:2px solid var(--amber);color:var(--amber);background:transparent;border-radius:6px;padding:11px 18px;cursor:pointer;display:flex;gap:10px;align-items:center}
+.toggle .box{width:20px;height:20px;border:2px solid var(--amber);border-radius:3px;display:grid;place-items:center;font-size:14px;line-height:1}
+.toggle[aria-pressed="true"]{background:var(--amber);color:var(--bp2)}
+.toggle[aria-pressed="true"] .box{border-color:var(--bp2)}
+.formulas{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.fm{border:1.5px dashed var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.fm.new{border-color:var(--amber)}
+.fm .n{font-family:var(--display);font-weight:700;font-size:17px}
+.fm .f{font-family:var(--mono);font-size:15px;color:var(--amber)}
+.fm .d{font-size:13px;color:var(--muted)}
+.startrow{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.btn{font:800 18px var(--display);text-transform:uppercase;letter-spacing:.03em;border:none;border-radius:6px;padding:13px 24px;cursor:pointer;background:var(--amber);color:var(--bp2)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn:focus-visible,.toggle:focus-visible,#ans:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+.stars{font-size:22px;letter-spacing:3px;color:var(--line)}
+.stars .on{color:var(--amber)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:14px;border:1.5px solid var(--line);border-radius:4px;padding:3px 9px}
+.chip.hot{border-color:var(--amber);color:var(--amber)}
+.tank{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;border:2px solid var(--line);border-radius:4px;padding:4px}
+.tank i{height:14px;border-radius:2px;background:rgba(190,220,255,.08)}
+.tank i.ok{background:linear-gradient(var(--water),var(--water2))}
+.tank i.no{background:repeating-linear-gradient(45deg,rgba(255,125,125,.5) 0 4px,transparent 4px 8px)}
+.tank i.now{outline:2px solid var(--amber)}
+.ask{font-family:var(--display);font-weight:700;font-size:clamp(21px,4.5vw,28px);line-height:1.2;text-wrap:balance}
+.note{color:var(--muted);font-size:15px;margin-top:2px}
+.note:empty{display:none}
+.figbox{display:flex;justify-content:center;border:1.5px solid var(--line);border-radius:4px;padding:8px;position:relative;background:rgba(18,58,107,.6)}
+.figbox::after{content:"EJ SKALENLIG";position:absolute;right:8px;bottom:6px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+svg.fig{width:100%;max-width:440px;height:auto;display:block;overflow:visible}
+.fig .s{fill:var(--face);stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;transition:fill .9s}
+.fig .s.top{fill:var(--face2)}
+.fig .h{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-dasharray:5 5;opacity:.6}
+.fig .aux{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:6 4}
+.fig .dim{stroke:var(--amber);stroke-width:2;fill:none}
+.fig .ra{fill:none;stroke:var(--amber);stroke-width:1.6}
+.fig text{fill:var(--ink);font-family:var(--mono);font-weight:600;font-size:15px}
+.fig text.a{fill:var(--amber)}
+.fig.filled .s{fill:var(--water2)}
+.fig.filled .s.top{fill:var(--water)}
+.answer-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ans{flex:1 1 160px;min-width:0;font:600 24px var(--mono);padding:10px 14px;border-radius:6px;border:2px solid var(--line);background:var(--bp2);color:var(--ink)}
+#ans:focus{border-color:var(--amber)}
+.unit{font:600 20px var(--mono);color:var(--muted)}
+.hint{font-size:14px;color:var(--muted);width:100%}
+.hint:empty{display:none}
+.fb{border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;border:1.5px solid}
+.fb.ok{border-color:var(--good);background:rgba(88,224,160,.08)} .fb.no{border-color:var(--bad);background:rgba(255,125,125,.08)}
+.fb h3{margin:0;font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em}
+.fb.ok h3{color:var(--good)} .fb.no h3{color:var(--bad)}
+.fb p{margin:0} .fb .calc{font-family:var(--mono);font-size:15px}
+.next-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big{font-family:var(--display);font-weight:800;font-size:56px;color:var(--amber);line-height:1}
+.missed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.missed li{border-top:1px dashed var(--line);padding-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.missed .a{color:var(--good);font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Volym&shy;verkstaden</h1>
+    <div class="stamp">RITNING NR 7B-V<br>Läge: <b id="modeLbl">Prismor</b></div>
+  </header>
+
+  <section id="home" class="panel">
+    <div class="mode">
+      <p id="modeText">Räkna volymen på prismor. Volymen är basytan gånger höjden, där höjden är prismats längd.</p>
+      <button class="toggle" id="toggle" aria-pressed="false"><span class="box" id="tbox"></span>Jag går i 8A</button>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:8px">Formler i det här läget</div>
+      <div class="formulas" id="formulas"></div>
+    </div>
+    <div class="startrow">
+      <div><div class="label">Bästa resultat</div><div class="stars" id="bestStars"></div></div>
+      <button class="btn" id="start">Starta 10 uppdrag</button>
+    </div>
+    <p class="note" style="margin:0">Fyll tanken genom att svara rätt. Varje rätt svar fyller en tiondel av tanken. Skriv decimaltal med komma. När π finns med räcker det att avrunda till heltal eller till en decimal.</p>
+  </section>
+
+  <section id="game" class="panel" hidden>
+    <div class="bar">
+      <span class="label" id="g-n">Uppdrag 1/10</span>
+      <span style="display:flex;gap:8px"><span class="chip" id="g-score">0 p</span><span class="chip hot" id="g-streak" hidden></span></span>
+    </div>
+    <div class="tank" id="tank" aria-label="Vattentank"></div>
+    <div><div class="ask" id="g-ask"></div><div class="note" id="g-note"></div></div>
+    <div class="figbox" id="g-fig"></div>
+    <div class="answer-row" id="g-input">
+      <input id="ans" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Svar eller uträkning" placeholder="t.ex. 9*3/2*6">
+      <span class="unit" id="g-unit">cm³</span>
+      <button class="btn" id="check">Rätta</button>
+      <div class="hint" id="g-hint"></div>
+    </div>
+    <div class="fb" id="g-fb" hidden></div>
+    <div class="next-row">
+      <button class="btn ghost" id="quit">Avsluta</button>
+      <button class="btn" id="next" hidden>Nästa</button>
+    </div>
+  </section>
+
+  <section id="result" class="panel" hidden>
+    <div class="stars" id="r-stars" style="font-size:44px"></div>
+    <div class="ask" id="r-head"></div>
+    <div style="display:flex;gap:28px;flex-wrap:wrap">
+      <div><div class="label">Rätt</div><div class="big" id="r-correct"></div></div>
+      <div><div class="label">Poäng</div><div class="big" id="r-score"></div></div>
+    </div>
+    <div id="r-mw"><div class="label" style="margin-bottom:6px">Räkna om de här</div><ul class="missed" id="r-missed"></ul></div>
+    <div class="next-row"><button class="btn ghost" id="home-btn">Till start</button><button class="btn" id="again">Spela igen</button></div>
+  </section>
+</div>
+
+<script>
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[R(0,a.length-1)];
+const clean=n=>Math.round(n*1e8)/1e8;
+const fmt=(n,d=8)=>clean(n).toLocaleString('sv-SE',{maximumFractionDigits:d});
+const $=id=>document.getElementById(id);
+const PI=Math.PI;
+
+/* ---------- ritning ---------- */
+const W=320,H=220;
+const svg=c=>`<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">${c}</svg>`;
+const P=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+const poly=(pts,c='s')=>`<polygon class="${c}" points="${P(pts)}"/>`;
+const ln=(a,b,c='h')=>`<line class="${c}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`;
+const tx=(p,s,c='',an='middle')=>`<text class="${c}" x="${p[0].toFixed(1)}" y="${(p[1]+5).toFixed(1)}" text-anchor="${an}">${s}</text>`;
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1]],mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+const raMark=(V,A,B,s=10)=>{const u=[(A[0]-V[0]),(A[1]-V[1])],w=[(B[0]-V[0]),(B[1]-V[1])],lu=Math.hypot(...u),lw=Math.hypot(...w);
+  const a=[V[0]+u[0]/lu*s,V[1]+u[1]/lu*s],b=[V[0]+w[0]/lw*s,V[1]+w[1]/lw*s];return `<polyline class="ra" points="${P([a,[a[0]+b[0]-V[0],a[1]+b[1]-V[1]],b])}"/>`};
+
+/* Prisma: framyta (matematiska koordinater, y uppåt) + djup. Returnerar svg och skärmpunkter. */
+function prism(front,depth,label){
+  const xs=front.map(p=>p[0]),ys=front.map(p=>p[1]);
+  const w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);
+  const s=Math.min(200/(w+depth*0.5),140/(h+depth*0.34));
+  const dx=depth*s*0.5,dy=depth*s*0.34,o=[dx,-dy];
+  const totW=w*s+dx,totH=h*s+dy;
+  const ox=(W-totW)/2-Math.min(...xs)*s, oy=(H-totH)/2+dy+Math.max(...ys)*s;
+  const F=front.map(p=>[p[0]*s+ox,oy-p[1]*s]),B=F.map(p=>add(p,o));
+  let area=0;for(let i=0;i<F.length;i++){const a=F[i],b=F[(i+1)%F.length];area+=a[0]*b[1]-b[0]*a[1]}
+  let c=poly(B,'h');F.forEach((p,i)=>c+=ln(p,B[i]));
+  const sides=[];
+  for(let i=0;i<F.length;i++){const a=F[i],b=F[(i+1)%F.length];let n=[b[1]-a[1],-(b[0]-a[0])];if(area<0)n=[-n[0],-n[1]];
+    // ytterriktning i skärmkoordinater: area>0 betyder medurs på skärmen
+    const dot=n[0]*o[0]+n[1]*o[1];if(dot>1e-6)sides.push([a,b,B[(i+1)%F.length],B[i]])}
+  sides.sort((p,q)=>Math.max(p[0][1],p[1][1])-Math.max(q[0][1],q[1][1]));
+  sides.forEach(sd=>c+=poly(sd,'s top'));
+  c+=poly(F);
+  return {svg:c+(label?label(F,B,o,s):''),F,B};
+}
+function boxFig(l,b,h,lab){
+  const r=prism([[0,0],[l,0],[l,h],[0,h]],b,(F,B)=>tx([(F[0][0]+F[1][0])/2,F[0][1]+20],lab[0])+tx([F[0][0]-8,(F[0][1]+F[3][1])/2],lab[2],'','end')+tx(add(mid(F[1],B[1]),[12,10]),lab[1],'','start'));
+  return svg(r.svg);
+}
+
+/* ---------- uppgifter: prismor (7B) ---------- */
+function qKub(){const s=R(2,9),V=s**3;
+  return {ask:'Beräkna kubens volym.',fig:boxFig(1,1,1,[s+' cm',s+' cm',s+' cm']),ans:V,unit:'cm³',name:'Kub',
+    calc:`V = s · s · s = ${s} · ${s} · ${s} = <b>${V} cm³</b>`,why:'En kub har lika långa kanter åt alla håll.'}}
+function qBlock(){const l=R(3,12),b=R(2,8),h=R(2,9),V=l*b*h;
+  return {ask:'Beräkna rätblockets volym.',fig:boxFig(l,b,h,[l+' cm',b+' cm',h+' cm']),ans:V,unit:'cm³',name:'Rätblock',
+    calc:`B = ${l} · ${b} = ${l*b} cm²<br>V = B · h = ${l*b} · ${h} = <b>${V} cm³</b>`,why:'Basytan gånger höjden, alltså längd · bredd · höjd.'}}
+function qTriRight(){const a=R(3,9),b=R(3,10),L=R(4,12),B=a*b/2,V=B*L;
+  const r=prism([[0,0],[b,0],[0,a]],L,(F,Bk,o)=>raMark(F[0],F[1],F[2])+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],b+' cm')+tx([F[0][0]-8,(F[0][1]+F[2][1])/2],a+' cm','','end')+tx(add(mid(F[1],Bk[1]),[12,10]),L+' cm','a','start'));
+  return {ask:'Beräkna prismats volym.',note:'Basytan är en rätvinklig triangel.',fig:svg(r.svg),ans:V,unit:'cm³',name:'Triangulärt prisma',
+    calc:`Basytan (triangeln): B = ${b} · ${a} / 2 = ${fmt(B)} cm²<br>V = B · längden = ${fmt(B)} · ${L} = <b>${fmt(V)} cm³</b>`,why:'Triangelns area är bas · höjd / 2. Multiplicera sedan med prismats längd.'}}
+function qTriGen(){const b=R(4,10),h=R(3,8),off=R(1,b-1),L=R(4,12),B=b*h/2,V=B*L;
+  const r=prism([[0,0],[b,0],[off,h]],L,(F,Bk)=>{const foot=[F[2][0],F[0][1]];return ln(F[2],foot,'aux')+raMark(foot,F[1],F[2],9)+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],b+' cm')+tx([foot[0]+6,(F[2][1]+foot[1])/2],h+' cm','a','start')+tx(add(mid(F[1],Bk[1]),[12,10]),L+' cm','','start')});
+  return {ask:'Beräkna prismats volym.',note:'Den streckade gula linjen är triangelns höjd.',fig:svg(r.svg),ans:V,unit:'cm³',name:'Triangulärt prisma',
+    calc:`B = ${b} · ${h} / 2 = ${fmt(B)} cm²<br>V = B · längden = ${fmt(B)} · ${L} = <b>${fmt(V)} cm³</b>`,why:'Använd triangelns höjd, som står vinkelrätt mot basen.'}}
+function qTrap(){let a,b,h;do{b=R(6,12);a=R(2,b-2);h=R(3,7)}while(((a+b)*h)%2);const L=R(4,10),o=(b-a)/2,B=(a+b)*h/2,V=B*L;
+  const r=prism([[0,0],[b,0],[o+a,h],[o,h]],L,(F,Bk)=>{const foot=[F[3][0],F[0][1]];return ln(F[3],foot,'aux')+tx([(F[0][0]+F[1][0])/2,F[0][1]+20],b+' cm')+tx([(F[3][0]+F[2][0])/2-4,F[3][1]-12],a+' cm')+tx([foot[0]+6,(F[3][1]+foot[1])/2],h+' cm','a','start')+tx(add(mid(F[1],Bk[1]),[12,10]),L+' cm','','start')});
+  return {ask:'Beräkna prismats volym.',note:'Basytan är ett parallelltrapets.',fig:svg(r.svg),ans:V,unit:'cm³',name:'Prisma med parallelltrapets',
+    calc:`B = (${a} + ${b}) · ${h} / 2 = ${fmt(B)} cm²<br>V = B · längden = ${fmt(B)} · ${L} = <b>${fmt(V)} cm³</b>`,why:'Parallelltrapetsets area är (a + b) · h / 2.'}}
+function qL(){const Wd=R(6,10),Ht=R(5,9),w=R(2,Wd-3),h=R(2,Ht-3),L=R(3,8),B=Wd*Ht-w*h,V=B*L;
+  const r=prism([[0,0],[Wd,0],[Wd,Ht-h],[Wd-w,Ht-h],[Wd-w,Ht],[0,Ht]],L,(F,Bk)=>tx([(F[0][0]+F[1][0])/2,F[0][1]+20],Wd+' cm')+tx([F[0][0]-8,(F[0][1]+F[5][1])/2],Ht+' cm','','end')+tx([(F[4][0]+F[5][0])/2,F[5][1]+18],(Wd-w)+' cm')+tx([F[2][0]-8,(F[1][1]+F[2][1])/2],(Ht-h)+' cm','','end')+tx(add(mid(F[1],Bk[1]),[12,10]),L+' cm','a','start'));
+  return {ask:'Beräkna prismats volym.',note:'Basytan är en L-form. Alla hörn är räta.',fig:svg(r.svg),ans:V,unit:'cm³',name:'L-prisma',
+    calc:`B = ${Wd} · ${Ht} − ${w} · ${h} = ${Wd*Ht} − ${w*h} = ${B} cm²<br>V = B · längden = ${B} · ${L} = <b>${V} cm³</b>`,why:'Räkna ut den stora rektangeln och dra bort hörnet som saknas.'}}
+function qLiter(){const l=R(2,9),b=R(2,6),h=R(2,8),V=l*b*h;
+  return {ask:'Hur många liter rymmer akvariet?',note:'1 dm³ = 1 liter.',fig:boxFig(l,b,h,[l+' dm',b+' dm',h+' dm']),ans:V,unit:'liter',name:'Akvarium',
+    calc:`V = ${l} · ${b} · ${h} = ${V} dm³ = <b>${V} liter</b>`,why:'Måtten är i dm, så volymen blir i dm³. En kubikdecimeter är en liter.'}}
+function qLiterCm(){const l=R(2,6)*10,b=R(1,4)*10,h=R(1,5)*10,V=l*b*h;
+  return {ask:'Hur många liter rymmer lådan?',note:'1 liter = 1 dm³ = 1 000 cm³.',fig:boxFig(l,b,h,[l+' cm',b+' cm',h+' cm']),ans:V/1000,unit:'liter',name:'Låda',
+    calc:`V = ${l} · ${b} · ${h} = ${fmt(V)} cm³<br>${fmt(V)} cm³ / 1 000 = <b>${fmt(V/1000)} liter</b>`,why:'Räkna i cm³ och dela med 1 000. Eller gör om måtten till dm först.'}}
+function qHeight(){const l=R(3,10),b=R(2,6),h=R(2,9),V=l*b*h;
+  return {ask:`Rätblocket har volymen ${V} cm³. Hur högt är det?`,fig:boxFig(l,b,h,[l+' cm',b+' cm','? cm']),ans:h,unit:'cm',name:'Rätblock baklänges',
+    calc:`B = ${l} · ${b} = ${l*b} cm²<br>h = V / B = ${V} / ${l*b} = <b>${h} cm</b>`,why:'Om V = B · h, så är h = V / B.'}}
+
+/* ---------- uppgifter: 8A ---------- */
+const piCalc=(expr,V,unit='cm³')=>`V = ${expr} ≈ <b>${fmt(V,1)} ${unit}</b>`;
+function cylFig(r,h,lab,useD){
+  const rx=72,ry=20,top=48,bot=168,cx=160;
+  let c=`<path class="s" d="M${cx-rx},${top} L${cx-rx},${bot} A${rx},${ry} 0 0 0 ${cx+rx},${bot} L${cx+rx},${top} Z"/><ellipse class="s top" cx="${cx}" cy="${top}" rx="${rx}" ry="${ry}"/><path class="h" d="M${cx-rx},${bot} A${rx},${ry} 0 0 1 ${cx+rx},${bot}"/>`;
+  if(useD)c+=ln([cx-rx,top],[cx+rx,top],'dim')+tx([cx,top+12],lab[0],'a');
+  else c+=ln([cx,top],[cx+rx,top],'dim')+`<circle cx="${cx}" cy="${top}" r="2.5" fill="#ffcf5c"/>`+tx([cx+rx/2,top+12],lab[0],'a');
+  c+=tx([cx+rx+10,(top+bot)/2],lab[1],'','start');
+  return svg(c);
+}
+function qCyl(){const r=R(2,9),h=R(3,15),useD=Math.random()<.4,V=PI*r*r*h;
+  return {ask:'Beräkna cylinderns volym.',note:useD?'Observera att diametern är given.':'',fig:cylFig(r,h,[(useD?'d = '+2*r:'r = '+r)+' cm','h = '+h+' cm'],useD),ans:V,approx:true,unit:'cm³',name:'Cylinder',
+    calc:(useD?`r = d / 2 = ${2*r} / 2 = ${r} cm<br>`:'')+`B = π · r² = π · ${r}² ≈ ${fmt(PI*r*r,1)} cm²<br>`+piCalc(`B · h = π · ${r}² · ${h}`,V),why:'Basytan är en cirkel: B = π · r². Multiplicera med höjden.'}}
+function qKon(){const r=R(2,9),h=R(3,15),V=PI*r*r*h/3;
+  const cx=160,rx=74,ry=20,bot=172,apex=[cx,30];
+  let c=`<path class="s" d="M${apex[0]},${apex[1]} L${cx-rx},${bot} A${rx},${ry} 0 0 0 ${cx+rx},${bot} Z"/><path class="h" d="M${cx-rx},${bot} A${rx},${ry} 0 0 1 ${cx+rx},${bot}"/>`;
+  c+=ln(apex,[cx,bot],'aux')+raMark([cx,bot],[cx+rx,bot],apex,9)+ln([cx,bot],[cx+rx,bot],'dim')+tx([cx+rx/2+4,bot-12],'r = '+r+' cm','a')+tx([cx+8,(apex[1]+bot)/2+14],'h = '+h+' cm','','start');
+  return {ask:'Beräkna konens volym.',note:'Den streckade linjen är konens höjd.',fig:svg(c),ans:V,approx:true,unit:'cm³',name:'Kon',
+    calc:`B = π · ${r}² ≈ ${fmt(PI*r*r,1)} cm²<br>`+piCalc(`B · h / 3 = π · ${r}² · ${h} / 3`,V),why:'En kon är en tredjedel av en cylinder med samma bas och höjd.'}}
+function qKlot(){const r=R(2,9),V=4*PI*r**3/3;
+  const c=`<circle class="s" cx="160" cy="110" r="88"/><path class="s top" style="fill:none" d="M72,110 A88,24 0 0 0 248,110"/><path class="h" d="M72,110 A88,24 0 0 1 248,110"/>`+ln([160,110],[248,110],'dim')+`<circle cx="160" cy="110" r="3" fill="#ffcf5c"/>`+tx([204,98],'r = '+r+' cm','a');
+  return {ask:'Beräkna klotets volym.',fig:svg(c),ans:V,approx:true,unit:'cm³',name:'Klot',
+    calc:`r³ = ${r} · ${r} · ${r} = ${r**3}<br>`+piCalc(`4 · π · r³ / 3 = 4 · π · ${r**3} / 3`,V),why:'Formeln för klotets volym är V = 4 · π · r³ / 3.'}}
+function qPyr(){const l=R(3,10),b=R(3,9),h=R(3,12),V=l*b*h/3;
+  const A=[72,176],Bp=[222,176],C=[262,140],D=[112,140],cen=[(A[0]+C[0])/2,(A[1]+C[1])/2],E=[cen[0],32];
+  let c=poly([E,A,Bp])+poly([E,Bp,C],'s top')+ln(C,D)+ln(D,A)+ln(E,D)+ln(E,cen,'aux')+`<circle cx="${cen[0]}" cy="${cen[1]}" r="2.5" fill="#ffcf5c"/>`;
+  c+=tx([(A[0]+Bp[0])/2,A[1]+20],l+' cm')+tx(add(mid(Bp,C),[12,6]),b+' cm','','start')+tx([cen[0]+8,(E[1]+cen[1])/2],'h = '+h+' cm','a','start');
+  return {ask:'Beräkna pyramidens volym.',note:'Pyramiden har en rektangel som botten. Den streckade linjen är höjden.',fig:svg(c),ans:V,approx:V%1!==0,unit:'cm³',name:'Pyramid',
+    calc:`B = ${l} · ${b} = ${l*b} cm²<br>V = B · h / 3 = ${l*b} · ${h} / 3 = <b>${fmt(V,2)} cm³</b>`,why:'En pyramid är en tredjedel av ett prisma med samma bas och höjd.'}}
+
+const BASIC=[[qKub,qBlock,qTriRight],[qBlock,qTriRight,qTriGen,qLiter],[qTrap,qL,qTriGen,qLiterCm,qHeight]];
+const EXTRA=[[qCyl,qPyr],[qCyl,qKon,qPyr,qKlot],[qKon,qKlot,qCyl]];
+const FORM7=[['Rätblock','V = l · b · h','Basyta · höjd'],['Kub','V = s · s · s','Alla kanter lika långa'],['Triangulärt prisma','V = (b · h / 2) · l','Triangelns area · längden'],['Prisma, allmänt','V = B · h','B = basytans area'],['Liter','1 dm³ = 1 liter','1 liter = 1 000 cm³']];
+const FORM8=[['Cylinder','V = π · r² · h','Basytan är en cirkel'],['Kon','V = π · r² · h / 3','En tredjedel av en cylinder'],['Pyramid','V = B · h / 3','En tredjedel av ett prisma'],['Klot','V = 4 · π · r³ / 3','r = radien']];
+
+/* ---------- motor ---------- */
+let mode8=false,best={p:0,a:0};
+try{mode8=localStorage.getItem('vv-mode8')==='1';best=JSON.parse(localStorage.getItem('vv-best')||'{"p":0,"a":0}')}catch(e){}
+const starHTML=n=>[0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join('');
+function renderHome(){
+  $('toggle').setAttribute('aria-pressed',mode8);$('tbox').textContent=mode8?'✓':'';
+  $('modeLbl').textContent=mode8?'8A: prismor + runda kroppar':'Prismor';
+  $('modeText').textContent=mode8?'8A-läge: prismor blandas med cylindrar, koner, pyramider och klot. Använd π-knappen på räknaren.':'Räkna volymen på prismor. Volymen är basytan gånger höjden, där höjden är prismats längd.';
+  $('formulas').innerHTML=FORM7.map(f=>`<div class="fm"><span class="n">${f[0]}</span><span class="f">${f[1]}</span><span class="d">${f[2]}</span></div>`).join('')
+    +(mode8?FORM8.map(f=>`<div class="fm new"><span class="n">${f[0]}</span><span class="f">${f[1]}</span><span class="d">${f[2]}</span></div>`).join(''):'');
+  $('bestStars').innerHTML=starHTML(best[mode8?'a':'p']||0);
+}
+$('toggle').onclick=()=>{mode8=!mode8;try{localStorage.setItem('vv-mode8',mode8?'1':'0')}catch(e){};renderHome()};
+function show(id){['home','game','result'].forEach(s=>$(s).hidden=s!==id);window.scrollTo({top:0})}
+let G=null;
+function start(){G={i:0,score:0,streak:0,correct:0,marks:[],missed:[],last:''};show('game');ask()}
+function makeQ(){
+  const lv=G.i<3?0:G.i<7?1:2;let q,t=0;
+  do{const pool=mode8&&Math.random()<.55?EXTRA[lv]:BASIC[lv];q=pick(pool)();t++}while(q.name===G.last&&t<10);
+  G.last=q.name;return q;
+}
+function ask(){
+  const q=G.q=makeQ();G.answered=false;
+  $('tank').innerHTML=Array.from({length:10},(_,k)=>`<i class="${k<G.i?(G.marks[k]?'ok':'no'):k===G.i?'now':''}"></i>`).join('');
+  $('g-n').textContent=`Uppdrag ${G.i+1}/10 · ${q.name}`;
+  $('g-score').textContent=`${G.score} p`;$('g-streak').hidden=G.streak<2;$('g-streak').textContent=`${G.streak} i rad`;
+  $('g-ask').textContent=q.ask;$('g-note').textContent=q.note||'';$('g-fig').innerHTML=q.fig;
+  $('g-unit').textContent=q.unit;$('g-hint').textContent='Du kan skriva svaret eller hela uträkningen, till exempel 9*3/2*6.'+(q.approx?' Skriv π eller 3,14, och r² som r^2.':'');
+  $('g-fb').hidden=true;$('next').hidden=true;
+  const inp=$('ans');inp.value='';inp.disabled=false;inp.style.borderColor='';$('check').disabled=false;
+  setTimeout(()=>inp.focus({preventScroll:true}),30);
+}
+/* Räknar ut ett svar som en uträkning, t.ex. 9*3/2*6, 3,14*4^2*10 eller π·5²·3/3 */
+function parse(raw){
+  let s=raw.trim().toLowerCase().replace(/[\s ]/g,'').replace(/(cm³|cm3|cm|liter|l|dm³|dm3)$/i,'');
+  s=s.replace(/,/g,'.').replace(/[·×]/g,'*').replace(/(\d)x(?=[\d(π]|pi)/g,'$1*').replace(/[÷:]/g,'/').replace(/−/g,'-').replace(/pi/g,'π')
+     .replace(/²/g,'^2').replace(/³/g,'^3');
+  if(!s||!/^[\d.+\-*/^()π]+$/.test(s))return null;
+  let i=0;const peek=()=>s[i];
+  function num(){const m=s.slice(i).match(/^\d*\.?\d+/);if(!m)throw 0;i+=m[0].length;return parseFloat(m[0])}
+  function primary(){
+    if(peek()==='('){i++;const v=expr();if(peek()!==')')throw 0;i++;return v}
+    if(peek()==='π'){i++;return Math.PI}
+    return num();
+  }
+  function power(){let b=primary();if(peek()==='^'){i++;const e=unary();b=Math.pow(b,e)}return b}
+  function unary(){if(peek()==='-'){i++;return -unary()}if(peek()==='+'){i++;return unary()}return power()}
+  function term(){let v=unary();
+    while(true){const c=peek();
+      if(c==='*'){i++;v*=unary()}else if(c==='/'){i++;const d=unary();if(d===0)throw 0;v/=d}
+      else if(c==='π'||c==='('){v*=unary()} // 3π eller 2(3+4)
+      else break}
+    return v}
+  function expr(){let v=term();while(peek()==='+'||peek()==='-'){const op=s[i++];const t=term();v=op==='+'?v+t:v-t}return v}
+  try{const v=expr();if(i!==s.length||!isFinite(v))return null;return v}catch(e){return null}
+}
+const isExpr=s=>/[+\-*/·×÷^()πx²³:]|pi/i.test(s.trim().replace(/^-/,''));
+function check(){
+  if(G.answered)return;const v=parse($('ans').value),q=G.q;
+  if(v===null){const r=$('g-input');r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake');
+    $('g-hint').textContent='Det gick inte att räkna ut. Skriv ett tal eller en uträkning, till exempel 9*3/2*6.';return}
+  const ok=q.approx?(Math.abs(v-q.ans)<=Math.max(0.6,q.ans*0.012)):Math.abs(v-q.ans)<1e-6;
+  G.answered=true;G.marks.push(ok);$('ans').disabled=true;$('check').disabled=true;$('ans').style.borderColor=ok?'var(--good)':'var(--bad)';
+  const ansTxt=fmt(q.ans,q.approx?1:3)+' '+q.unit;
+  if(ok){G.streak++;G.correct++;G.score+=10+Math.min(G.streak-1,5)*2;const f=$('g-fig').querySelector('svg');if(f)f.classList.add('filled')}
+  else{G.streak=0;G.missed.push({n:q.name,a:ansTxt})}
+  const fb=$('g-fb');fb.hidden=false;fb.className='fb '+(ok?'ok':'no');
+  const typed=$('ans').value.trim();
+  const yours=isExpr(typed)?`<p class="calc">Din uträkning: ${typed.replace(/</g,'&lt;')} = ${fmt(v,2)}</p>`:'';
+  fb.innerHTML=yours+`<h3>${ok?pick(['Rätt! Tanken fylls','Exakt!','Snyggt räknat!']):'Inte riktigt. Rätt svar: '+ansTxt}</h3><p>${q.why}</p><p class="calc">${q.calc}</p>`;
+  $('g-score').textContent=`${G.score} p`;$('g-streak').hidden=G.streak<2;$('g-streak').textContent=`${G.streak} i rad`;
+  $('tank').children[G.i].className=ok?'ok':'no';
+  $('next').hidden=false;$('next').textContent=G.i===9?'Se resultat':'Nästa';setTimeout(()=>$('next').focus({preventScroll:true}),30);
+}
+function next(){G.i++;if(G.i>=10)result();else ask()}
+function result(){
+  const c=G.correct,st=c>=9?3:c>=7?2:c>=5?1:0,k=mode8?'a':'p';
+  if(st>(best[k]||0)){best[k]=st;try{localStorage.setItem('vv-best',JSON.stringify(best))}catch(e){}}
+  $('r-stars').innerHTML=starHTML(st);
+  $('r-head').textContent=st===3?'Tanken är full. Mästerligt!':st===2?'Nästan full tank!':st===1?'Halvvägs, bra kämpat!':'Tanken läcker. Öva lite till!';
+  $('r-correct').textContent=`${c}/10`;$('r-score').textContent=G.score;
+  $('r-mw').hidden=!G.missed.length;$('r-missed').innerHTML=G.missed.map(m=>`<li><span>${m.n}</span><span class="a">${m.a}</span></li>`).join('');
+  show('result');renderHome();
+}
+$('start').onclick=start;$('again').onclick=start;$('home-btn').onclick=()=>show('home');$('quit').onclick=()=>{show('home');renderHome()};
+$('check').onclick=check;$('next').onclick=next;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check()}});
+document.addEventListener('keydown',e=>{if(G&&G.answered&&!$('game').hidden&&e.key==='Enter'&&document.activeElement!==$('next')){e.preventDefault();next()}});
+renderHome();
+</script>
+
+</body></html>

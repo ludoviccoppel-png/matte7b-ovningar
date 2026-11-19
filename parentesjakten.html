@@ -3,254 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Parentesjakten</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+<title>Parentesjakten – Matte 7B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#f5f7fb;--grid:#dfe6f2;--card:#fff;--ink:#18223d;--muted:#56627f;--pen:#1f4fd1;--marker:#ffe24d;--good:#17824a;--good-soft:#e2f4e8;--bad:#c2352b;--bad-soft:#fbe7e4;--line:#cdd6e8;--alg:#6a3fc8;--alg-soft:#eee8fb;
---display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+:root{--ink:#18223d;--muted:#56627f;--line:#cdd6e8;--paper:#f5f7fb;--grid:#dfe6f2}
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.45 var(--body);color:var(--ink);background:var(--paper);
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
-.wrap{max-width:860px;margin:0 auto;padding:22px 14px 40px}
-header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1;margin:0;letter-spacing:-.02em}
-h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
-.sub{color:var(--muted);margin:6px 0 0}
-.levels{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
-.lv{font:700 14px var(--display);border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink)}
-.lv small{font:400 12px var(--body);color:var(--muted);margin-left:6px}
-.lv[aria-pressed="true"]{background:var(--alg);border-color:var(--alg);color:#fff}
-.lv[aria-pressed="true"] small{color:#e7defc}
-.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-.pill{background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-family:var(--display);font-weight:700;font-size:14px}
-.pill b{color:var(--alg)}
-.lives{letter-spacing:2px}
-.task{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--ink);color:#fff;border-radius:14px 14px 0 0;padding:12px 16px;min-height:62px}
-.task .lbl{font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#c9cfee}
-.task .expr{font:700 clamp(24px,5vw,34px) var(--display)}
-.arena{position:relative;height:440px;background:#fff;border:2px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;overflow:hidden;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none;
-  background-image:radial-gradient(#e6e9f3 1.2px,transparent 1.2px);background-size:18px 18px}
-.target{position:absolute;padding:10px 16px;border-radius:999px;background:var(--alg-soft);border:2px solid var(--alg);color:var(--ink);font:700 clamp(17px,3.2vw,22px) var(--display);white-space:nowrap;box-shadow:0 3px 0 rgba(24,34,61,.15);transform:translate(-50%,-50%);pointer-events:none}
-.target.hit-ok{background:var(--good-soft);border-color:var(--good);color:var(--good);transition:transform .35s,opacity .35s;transform:translate(-50%,-50%) scale(1.25);opacity:0}
-.target.hit-bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);transition:transform .45s,opacity .45s;transform:translate(-50%,-50%) scale(.8);opacity:0}
-.cannon{position:absolute;left:50%;bottom:-6px;width:70px;height:70px;transform:translateX(-50%);pointer-events:none}
-.cannon .base{position:absolute;left:10px;bottom:0;width:50px;height:30px;border-radius:30px 30px 6px 6px;background:var(--ink)}
-.cannon .barrel{position:absolute;left:29px;bottom:16px;width:12px;height:50px;border-radius:6px;background:var(--alg);transform-origin:6px 44px}
-.shot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--marker);border:2px solid var(--ink);transform:translate(-50%,-50%);pointer-events:none}
-.pop{position:absolute;font:800 20px var(--display);transform:translate(-50%,-50%);pointer-events:none;animation:up .9s ease-out forwards}
-.pop.ok{color:var(--good)}.pop.bad{color:var(--bad)}
-@keyframes up{to{transform:translate(-50%,-150%);opacity:0}}
-.fb{margin-top:10px;border-radius:12px;padding:10px 14px;font-size:15px;min-height:44px;background:var(--card);border:1.5px solid var(--line)}
-.fb.ok{background:var(--good-soft);border-color:#b9e3c8;color:#105c34}
-.fb.bad{background:var(--bad-soft);border-color:#f1c2bb;color:#8f2a17}
-.fb b{font-family:var(--display)}
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(245,247,251,.92);z-index:5;padding:16px}
-.overlay .box{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:20px 22px;max-width:460px;text-align:center;box-shadow:5px 5px 0 var(--marker)}
-.overlay h2{font:800 26px var(--display);margin:0 0 6px}
-.overlay p{margin:6px 0;color:var(--muted)}
-.btn{font:700 16px var(--display);border-radius:12px;padding:10px 20px;cursor:pointer;border:2px solid var(--ink);background:var(--ink);color:#fff;margin-top:10px}
-.btn.ghost{background:var(--card);color:var(--ink)}
-.rules{margin-top:14px;color:var(--muted);font-size:14px}
-.rules b{color:var(--ink)}
-@media (max-width:560px){.arena{height:400px}}
+html,body{margin:0;padding:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font:16px/1.4 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+.site-nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:2px solid var(--ink)}
+.bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 14px;flex-wrap:wrap}
+.brand{font-family:"Bricolage Grotesque","Segoe UI",sans-serif;font-weight:800;font-size:21px;color:var(--ink);text-decoration:none;margin-right:10px;white-space:nowrap}
+.brand b{background:linear-gradient(transparent 55%,#ffe24d 55%)}
+.menu{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.grp{position:relative;display:flex;align-items:center;border-radius:10px}
+.grp .top{font-weight:700;color:var(--c);text-decoration:none;padding:7px 4px 7px 10px;border-radius:10px 0 0 10px}
+.grp:not(:has(.tog)) .top{padding-right:10px;border-radius:10px}
+.grp .tog{border:0;background:transparent;color:var(--c);font-size:14px;padding:7px 9px 7px 3px;cursor:pointer;border-radius:0 10px 10px 0}
+.grp.cur{background:color-mix(in srgb,var(--c) 12%,#fff)}
+.grp .top.here{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.grp:hover{background:color-mix(in srgb,var(--c) 12%,#fff)}
+.dd{display:none;position:absolute;top:100%;left:0;min-width:220px;background:#fff;border:2px solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 var(--c);padding:6px;margin-top:4px;z-index:101}
+.dd a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none}
+.dd a:hover,.dd a.here{background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);font-weight:700}
+.grp.open .dd{display:block}
+@media (hover:hover) and (min-width:761px){.grp:hover .dd,.grp:focus-within .dd{display:block}.grp .dd::before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px}}
+.burger{display:none;margin-left:auto;font:inherit;font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:6px 12px;cursor:pointer}
+@media (max-width:760px){.burger{display:block}.menu{display:none;width:100%;flex-direction:column;align-items:stretch;padding:6px 0 4px}.site-nav.show .menu{display:flex}.grp{flex-wrap:wrap}.grp .top{flex:1}.dd{position:static;display:none;width:100%;box-shadow:none;margin:2px 0 6px;border-width:1.5px}.grp.open .dd{display:block}}
+main{display:block}
+main iframe{display:block;width:100%;border:0;height:600px;background:transparent}
+.fig{max-width:900px;margin:10px auto;padding:0 16px}.fig img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:10px}
+.landing{max-width:900px;margin:0 auto;padding:30px 18px 50px}
+.landing h1{font-family:"Bricolage Grotesque","Segoe UI",sans-serif;font-size:42px;margin:0 0 6px}
+.landing p{color:var(--muted);margin:0 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.cards a{display:block;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:16px 18px;color:var(--ink);text-decoration:none;box-shadow:5px 5px 0 #c2410c;font-weight:700;font-size:19px}
+.cards a span{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.cards a:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 #c2410c}
 </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-  <div>
-    <h1>Parentes<mark>jakten</mark></h1>
-    <p class="sub">Skjut den bubbla som visar rätt utveckling av parentesen.</p>
-  </div>
-</header>
-<div class="levels" id="levels"></div>
-<div class="hud">
-  <span class="pill">Poäng <b id="score">0</b></span>
-  <span class="pill">I rad <b id="streak">0</b></span>
-  <span class="pill">Rekord <b id="best">0</b></span>
-  <span class="pill lives" id="lives" aria-label="Liv"></span>
-</div>
-<div class="task"><span class="lbl">Utveckla</span><span class="expr" id="expr"></span></div>
-<div class="arena" id="arena">
-  <div class="cannon"><div class="barrel" id="barrel"></div><div class="base"></div></div>
-  <div class="overlay" id="overlay"></div>
-</div>
-<div class="fb" id="fb">Sikta med musen eller fingret och klicka eller tryck för att skjuta. Med tangentbordet: ← → siktar och mellanslag skjuter.</div>
-<div class="rules">
-  <b>Kom ihåg:</b> 3(x + 4) = 3 · x + 3 · 4 = 3x + 12. Talet framför multipliceras med <b>alla</b> termer.
-  Minus framför en parentes byter tecken på <b>alla</b> termer: 3 − (x + 5) = 3 − x − 5 och 3 − (x − 5) = 3 − x + 5.
-</div>
-</div>
-<script>
-(function(){
-"use strict";
-var MINUS="−";
-function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
-function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-// bygg uttryck av termer [{c:koef, x:bool}] -> HTML
-function term(c,isx,first){
-  var s="";var a=Math.abs(c);
-  if(first){s=c<0?MINUS:"";}else{s=c<0?" "+MINUS+" ":" + ";}
-  if(isx){s+=(a===1?"":a)+"<i>x</i>";}else s+=a;
-  return s;
-}
-function expr(ts){return ts.map(function(t,i){return term(t[0],t[1],i===0);}).join("");}
-function xs(c,b){return expr([[c,true],[b,false]]);} // cx ± b  (x först)
-
-// ---- uppgiftstyper ----
-function taskK(){ // k(x ± b)
-  var k=ri(2,9),b=ri(1,9)*(Math.random()<.5?1:-1),a=Math.random()<.25?ri(2,5):1;
-  var q=k+"("+xs(a,b)+")";
-  var ok=xs(k*a,k*b);
-  var opts=[[ok,1,""],
-    [xs(k*a,b),0,"Talet "+k+" ska multipliceras med <b>båda</b> termerna – även "+term(b,false,true).replace(" ","")+"."],
-    [xs(a,k*b),0,"Glöm inte x-termen: "+k+" · "+(a===1?"":a)+"<i>x</i> = "+(k*a)+"<i>x</i>."],
-    [xs(k*a,-k*b),0,"Kolla tecknet: "+k+" · ("+term(b,false,true)+") = "+term(k*b,false,true)+"."],
-    [xs(k*a,(b<0?-1:1)*(k+Math.abs(b))),0,k+" · "+Math.abs(b)+" är "+Math.abs(k*b)+", inte "+k+" + "+Math.abs(b)+"."]];
-  return {q:q,opts:opts,tip:k+"("+xs(a,b)+") = "+k+" · "+(a===1?"":a)+"<i>x</i> "+(b<0?MINUS:"+")+" "+k+" · "+Math.abs(b)+" = "+ok};
-}
-function taskMinus(){ // c − (x ± b)
-  var c=ri(2,15),b=ri(1,9)*(Math.random()<.5?1:-1);
-  var q=c+" "+MINUS+" ("+xs(1,b)+")";
-  var ok=expr([[c,false],[-1,true],[-b,false]]);
-  var opts=[[ok,1,""],
-    [expr([[c,false],[-1,true],[b,false]]),0,"Minus framför parentesen byter tecken på <b>alla</b> termer – även "+term(b,false,true)+" blir "+term(-b,false,true)+"."],
-    [expr([[c,false],[1,true],[-b,false]]),0,"Minus framför parentesen gör att <i>x</i> blir "+MINUS+"<i>x</i>."],
-    [expr([[c,false],[1,true],[b,false]]),0,"Parentesen försvann men tecknen ändrades inte. Minus framför byter tecken på alla termer."],
-    [expr([[-c,true],[-c*b,false]]),0,c+" "+MINUS+" (…) betyder inte "+c+" gånger parentesen. Det står minus, inte gånger."]];
-  return {q:q,opts:opts,tip:"Minus framför parentesen byter tecken på alla termer: "+q+" = "+ok};
-}
-function taskPlus(){ // c + (x − b)
-  var c=ri(2,15),b=ri(1,9)*(Math.random()<.5?1:-1);
-  var q=c+" + ("+xs(1,b)+")";
-  var ok=expr([[c,false],[1,true],[b,false]]);
-  var opts=[[ok,1,""],
-    [expr([[c,false],[-1,true],[-b,false]]),0,"Plus framför parentesen ändrar <b>inga</b> tecken. Allt står kvar som det var."],
-    [expr([[c,false],[1,true],[-b,false]]),0,"Plus framför parentesen ändrar inga tecken: "+term(b,false,true)+" står kvar."],
-    [expr([[c,true],[c*b,false]]),0,c+" + (…) betyder inte "+c+" gånger parentesen."]];
-  return {q:q,opts:opts,tip:"Plus framför parentesen ändrar inga tecken: "+q+" = "+ok};
-}
-function taskCK(){ // c − k(x ± b)
-  var c=ri(10,30),k=ri(2,6),b=ri(1,8)*(Math.random()<.5?1:-1);
-  var q=c+" "+MINUS+" "+k+"("+xs(1,b)+")";
-  var ok=expr([[c,false],[-k,true],[-k*b,false]]);
-  var opts=[[ok,1,""],
-    [expr([[c,false],[-k,true],[k*b,false]]),0,"Minus "+k+" gånger "+term(b,false,true)+" blir "+term(-k*b,false,true)+". Tecknet byts på alla termer."],
-    [expr([[c,false],[-k,true],[-b,false]]),0,k+" ska multipliceras med båda termerna i parentesen."],
-    [expr([[c,false],[k,true],[k*b,false]]),0,"Minus framför "+k+" gäller hela produkten: "+MINUS+k+" · <i>x</i> = "+MINUS+k+"<i>x</i>."],
-    [expr([[c-k,true],[(c-k)*b,false]]),0,"Man får inte räkna "+c+" "+MINUS+" "+k+" först. Multiplikation går före subtraktion."]];
-  return {q:q,opts:opts,tip:q+" = "+c+" "+MINUS+" "+k+" · <i>x</i> "+MINUS+" "+k+" · ("+term(b,false,true)+") = "+ok};
-}
-var LEVELS=[
-  {n:1,name:"Nivå 1",hint:"3(x + 4)",gen:[taskK],speed:45},
-  {n:2,name:"Nivå 2",hint:"3 − (x + 5)",gen:[taskMinus,taskMinus,taskPlus],speed:50},
-  {n:3,name:"Nivå 3",hint:"blandat",gen:[taskK,taskMinus,taskPlus,taskCK],speed:58}
-];
-function makeTask(L){
-  for(var tries=0;tries<50;tries++){
-    var t=pick(L.gen)();var seen={};var opts=[];
-    t.opts.forEach(function(o){if(!seen[o[0]]){seen[o[0]]=1;opts.push({t:o[0],ok:!!o[1],fb:o[2]});}});
-    if(opts[0].ok&&opts.length>=4){var right=opts[0];var wrong=shuffle(opts.slice(1)).slice(0,3);t.opts=shuffle([right].concat(wrong));return t;}
-  }
-}
-
-// ---- spel ----
-var $=function(id){return document.getElementById(id);};
-var arena=$("arena"),barrel=$("barrel"),overlay=$("overlay");
-var level=0,score=0,streak=0,lives=3,best=0,task=null,targets=[],shots=[],angle=0,running=false,last=0,lockUntil=0,answered=0;
-try{best=+localStorage.getItem("parentesjakten-best")||0;}catch(e){}
-function saveBest(){if(score>best){best=score;try{localStorage.setItem("parentesjakten-best",best);}catch(e){}}}
-function hud(){$("score").textContent=score;$("streak").textContent=streak;$("best").textContent=best;$("lives").textContent="❤️".repeat(lives)+"🤍".repeat(3-lives);}
-function renderLevels(){
-  $("levels").innerHTML=LEVELS.map(function(L,i){return '<button class="lv" data-i="'+i+'" aria-pressed="'+(i===level)+'">'+L.name+'<small>'+L.hint+'</small></button>';}).join("");
-  [].forEach.call($("levels").querySelectorAll(".lv"),function(b){b.onclick=function(){level=+b.dataset.i;renderLevels();showStart();};});
-}
-function W(){return arena.clientWidth;}function H(){return arena.clientHeight;}
-function clearTargets(){targets.forEach(function(t){t.el.remove();});targets=[];}
-function newTask(){
-  clearTargets();
-  task=makeTask(LEVELS[level]);
-  $("expr").innerHTML=task.q;
-  var rows=[0.16,0.36,0.56,0.74];var order=shuffle([0,1,2,3]);
-  var sp=LEVELS[level].speed+Math.min(answered,15)*3;
-  task.opts.forEach(function(o,i){
-    var el=document.createElement("div");el.className="target";el.innerHTML=o.t;arena.appendChild(el);
-    var dir=i%2?1:-1;
-    var t={o:o,el:el,x:Math.random()*W(),y:rows[order[i]]*H(),vx:dir*(sp*(0.8+Math.random()*0.5)),alive:true,w:0,h:0};
-    targets.push(t);
-  });
-  layout();
-}
-function layout(){targets.forEach(function(t){t.w=t.el.offsetWidth;t.h=t.el.offsetHeight;t.el.style.left=t.x+"px";t.el.style.top=t.y+"px";});}
-function aimAt(px,py){var cx=W()/2,cy=H()-8;angle=Math.atan2(px-cx,cy-py);angle=Math.max(-1.35,Math.min(1.35,angle));barrel.style.transform="rotate("+angle+"rad)";}
-function fire(){
-  if(!running||performance.now()<lockUntil||shots.length>1)return;
-  var cx=W()/2,cy=H()-40;var el=document.createElement("div");el.className="shot";arena.appendChild(el);
-  var v=760;shots.push({el:el,x:cx+Math.sin(angle)*30,y:cy-Math.cos(angle)*30,vx:Math.sin(angle)*v,vy:-Math.cos(angle)*v});
-}
-function popText(x,y,txt,cls){var p=document.createElement("div");p.className="pop "+cls;p.textContent=txt;p.style.left=x+"px";p.style.top=y+"px";arena.appendChild(p);setTimeout(function(){p.remove();},900);}
-function hit(t){
-  t.alive=false;var fb=$("fb");
-  if(t.o.ok){
-    answered++;streak++;var pts=10+Math.min(streak-1,5)*2;score+=pts;saveBest();
-    t.el.classList.add("hit-ok");popText(t.x,t.y,"+"+pts,"ok");
-    fb.className="fb ok";fb.innerHTML="<b>Rätt!</b> "+task.tip;
-    targets.forEach(function(o){if(o!==t){o.alive=false;o.el.style.opacity=".25";}});
-    lockUntil=performance.now()+900;
-    setTimeout(function(){if(running)newTask();},900);
-  }else{
-    streak=0;lives--;t.el.classList.add("hit-bad");popText(t.x,t.y,"Fel","bad");
-    fb.className="fb bad";fb.innerHTML="<b>Inte riktigt.</b> "+t.o.fb;
-    setTimeout(function(){t.el.remove();},450);
-    if(lives<=0){hud();gameOver();return;}
-  }
-  hud();
-}
-function loop(ts){
-  if(!running)return;
-  var dt=Math.min(0.05,(ts-last)/1000||0);last=ts;var w=W();
-  targets.forEach(function(t){if(!t.alive)return;t.x+=t.vx*dt;var half=t.w/2+10;
-    if(t.x>w+half)t.x=-half;if(t.x<-half)t.x=w+half;t.el.style.left=t.x+"px";});
-  shots=shots.filter(function(s){
-    s.x+=s.vx*dt;s.y+=s.vy*dt;s.el.style.left=s.x+"px";s.el.style.top=s.y+"px";
-    for(var i=0;i<targets.length;i++){var t=targets[i];if(!t.alive)continue;
-      if(Math.abs(s.x-t.x)<t.w/2+5&&Math.abs(s.y-t.y)<t.h/2+5){s.el.remove();hit(t);return false;}}
-    if(s.y<-20||s.x<-20||s.x>w+20){s.el.remove();return false;}
-    return true;});
-  requestAnimationFrame(loop);
-}
-function start(){
-  score=0;streak=0;lives=3;answered=0;shots.forEach(function(s){s.el.remove();});shots=[];
-  overlay.style.display="none";running=true;hud();
-  $("fb").className="fb";$("fb").innerHTML="Skjut den bubbla som visar rätt utveckling av <b>"+"parentesen"+"</b>.";
-  newTask();last=performance.now();requestAnimationFrame(loop);
-}
-function showStart(){
-  running=false;clearTargets();$("expr").innerHTML="&nbsp;";
-  var L=LEVELS[level];
-  overlay.innerHTML='<div class="box"><h2>'+L.name+'</h2><p>'+({1:"Multiplicera in talet framför parentesen, t.ex. 3(<i>x</i> + 4).",2:"Minus eller plus framför parentesen, t.ex. 3 "+MINUS+" (<i>x</i> + 5).",3:"Allt blandat – och uppgifter som 20 "+MINUS+" 3(<i>x</i> + 2)."})[L.n]+'</p><p>Du har 3 liv. Rätt i rad ger bonuspoäng.</p><button class="btn" id="go">Starta ▶</button></div>';
-  overlay.style.display="flex";$("go").onclick=start;hud();
-}
-function gameOver(){
-  running=false;saveBest();hud();
-  overlay.innerHTML='<div class="box"><h2>Slut på liv!</h2><p>Du fick <b>'+score+'</b> poäng och klarade '+answered+' uppgifter.</p><p>Rekord: '+best+'</p><button class="btn" id="again">Spela igen</button> '+(level<LEVELS.length-1?'<button class="btn ghost" id="nextLv">Prova '+LEVELS[level+1].name+'</button>':'')+'</div>';
-  overlay.style.display="flex";$("again").onclick=start;
-  if($("nextLv"))$("nextLv").onclick=function(){level++;renderLevels();showStart();};
-}
-arena.addEventListener("pointermove",function(e){var r=arena.getBoundingClientRect();aimAt(e.clientX-r.left,e.clientY-r.top);});
-arena.addEventListener("pointerdown",function(e){if(e.target.closest&&e.target.closest(".overlay"))return;var r=arena.getBoundingClientRect();aimAt(e.clientX-r.left,e.clientY-r.top);fire();});
-document.addEventListener("keydown",function(e){
-  if(!running)return;
-  if(e.key==="ArrowLeft"){angle=Math.max(-1.35,angle-0.08);barrel.style.transform="rotate("+angle+"rad)";e.preventDefault();}
-  else if(e.key==="ArrowRight"){angle=Math.min(1.35,angle+0.08);barrel.style.transform="rotate("+angle+"rad)";e.preventDefault();}
-  else if(e.key===" "||e.key==="Enter"){fire();e.preventDefault();}
-});
-window.addEventListener("resize",layout);
-renderLevels();showStart();
-})();
-</script>
+<div class="site-nav"><div class="bar"><a class="brand" href="index.html">Matte <b>7B</b></a><button class="burger" type="button" aria-expanded="false" aria-controls="menu">Meny ☰</button><div class="menu" id="menu"><div class="grp" style="--c:#18223d"><a class="top" href="index.html">Startsida</a></div><div class="grp" style="--c:#1f4fd1"><a class="top" href="tal.html">Tal</a><button class="tog" type="button" aria-label="Visa undersidor till Tal" aria-expanded="false">▾</button><div class="dd"><a href="primtal.html">Primtal</a><a href="primtradet.html">Primträdet</a><a href="avrundning.html">Avrundning</a><a href="negativa-tal.html">Negativa tal (8)</a></div></div><div class="grp" style="--c:#17824a"><a class="top" href="geometri.html">Geometri</a><button class="tog" type="button" aria-label="Visa undersidor till Geometri" aria-expanded="false">▾</button><div class="dd"><a href="figurer-och-kroppar.html">Figurer och kroppar</a><a href="trianglar.html">Trianglar</a><a href="area.html">Area</a><a href="volym.html">Volym</a><a href="begransningsarea.html">Begränsningsarea</a><a href="vinklar.html">Vinklar</a></div></div><div class="grp cur" style="--c:#6a3fc8"><a class="top" href="algebra.html">Algebra</a><button class="tog" type="button" aria-label="Visa undersidor till Algebra" aria-expanded="false">▾</button><div class="dd"><a href="forenkla-uttryck.html">Förenkla uttryck</a><a href="utveckla-parenteser.html">Utveckla parenteser</a><a href="ekvationer.html">Ekvationer</a><a href="problemlosning.html">Problemlösning</a><a href="parentesjakten.html" class="here" aria-current="page">Parentesjakten</a><a href="parentespusslet.html">Parentespusslet</a><a href="para-ihop-uttryck.html">Para ihop uttryck</a></div></div><div class="grp" style="--c:#c2410c"><a class="top" href="brak.html">Bråk</a><button class="tog" type="button" aria-label="Visa undersidor till Bråk" aria-expanded="false">▾</button><div class="dd"><a href="brakfabriken.html">Bråkfabriken (7)</a></div></div></div></div></div>
+<main>
+<iframe src="innehall-parentesjakten.html" title="Parentesjakten" loading="eager"></iframe>
+</main>
+<script>(function () {
+    var nav = document.querySelector('.site-nav');
+    nav.querySelector('.burger').addEventListener('click', function () {
+      var on = nav.classList.toggle('show'); this.setAttribute('aria-expanded', on);
+    });
+    nav.querySelectorAll('.tog').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var g = b.parentNode, on = !g.classList.contains('open');
+        nav.querySelectorAll('.grp.open').forEach(function (x) { x.classList.remove('open'); x.querySelector('.tog').setAttribute('aria-expanded', 'false'); });
+        if (on) { g.classList.add('open'); b.setAttribute('aria-expanded', 'true'); }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!nav.contains(e.target)) nav.querySelectorAll('.grp.open').forEach(function (x) { x.classList.remove('open'); });
+    });
+    function navH() { return nav.getBoundingClientRect().height; }
+    function contentHeight(d) {
+      var b = d.body; if (!b) return 0;
+      var w = d.defaultView, max = 0;
+      for (var i = 0; i < b.children.length; i++) {
+        var el = b.children[i], cs = w.getComputedStyle(el);
+        if (cs.position === 'fixed' || cs.display === 'none') continue;
+        var r = el.getBoundingClientRect();
+        max = Math.max(max, r.bottom + (parseFloat(cs.marginBottom) || 0));
+      }
+      var bs = w.getComputedStyle(b);
+      max += (parseFloat(bs.paddingBottom) || 0) + (parseFloat(bs.marginBottom) || 0) + (parseFloat(bs.borderBottomWidth) || 0);
+      return Math.ceil(max + w.scrollY);
+    }
+    document.querySelectorAll('main iframe').forEach(function (f) {
+      function fit() {
+        try {
+          var h = contentHeight(f.contentDocument);
+          if (h > 50 && Math.abs(h - f.offsetHeight) > 2) f.style.height = h + 'px';
+        } catch (e) {}
+      }
+      function hook() {
+        var d; try { d = f.contentDocument; } catch (e) { return; }
+        if (!d) return;
+        fit();
+        try { new ResizeObserver(fit).observe(d.body); } catch (e) {}
+        try { new MutationObserver(fit).observe(d.body, { childList: true, subtree: true, attributes: true, characterData: true }); } catch (e) {}
+        d.defaultView.addEventListener('resize', fit);
+        setTimeout(fit, 300); setTimeout(fit, 1200); setTimeout(fit, 3000);
+        if (d.fonts && d.fonts.ready) d.fonts.ready.then(fit);
+        d.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a || e.defaultPrevented) return;
+          var href = a.getAttribute('href');
+          if (href.charAt(0) === '#') {
+            e.preventDefault();
+            if (href === '#' || href === '#top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            var t = d.getElementById(decodeURIComponent(href.slice(1)));
+            if (t) {
+              var y = f.getBoundingClientRect().top + window.scrollY + t.getBoundingClientRect().top - navH() - 10;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+            return;
+          }
+          if (a.target === '_blank') return;
+          e.preventDefault();
+          window.location.href = new URL(href, f.contentWindow.location.href).href;
+        });
+        d.defaultView.Element.prototype.scrollIntoView = function () {
+          var y = f.getBoundingClientRect().top + window.scrollY + this.getBoundingClientRect().top - navH() - 10;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        };
+      }
+      f.addEventListener('load', hook);
+      if (f.contentDocument && f.contentDocument.readyState === 'complete') hook();
+    });
+  })();</script>
 </body>
 </html>

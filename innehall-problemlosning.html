@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ekvationsdetektiven – problemlösning med ekvationer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1e7; --paper:#fffdf8; --ink:#23312b; --muted:#6b7a72; --line:#e4dccb;
+    --board:#2d4a3e; --chalk:#f4f1e8;
+    --accent:#ff7a59; --accent-d:#e45f3f; --ok:#2f9e5b; --bad:#d9483b; --alt:#c98a00;
+    --blue:#1d6fb8; --hl:#ffe9a8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:17px;line-height:1.5;min-height:100vh;
+    background-image:radial-gradient(#e9e1cf 1px,transparent 1px);background-size:22px 22px}
+  button{font:inherit;cursor:pointer;color:inherit}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .logo{font-family:Fredoka;font-weight:700;font-size:26px;display:flex;align-items:center;gap:10px;cursor:pointer}
+  .logo .badge{background:var(--board);color:var(--chalk);border-radius:12px;padding:2px 10px;font-size:20px;transform:rotate(-4deg)}
+  .logo small{font-family:Nunito;font-weight:700;font-size:14px;color:var(--muted)}
+  h1,h2,h3{font-family:Fredoka;font-weight:600;line-height:1.2;margin:0 0 10px}
+  h1{font-size:32px} h2{font-size:24px} h3{font-size:20px}
+  p{margin:0 0 12px}
+  .lead{color:var(--muted);font-weight:600}
+  .card{background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 3px 0 var(--line)}
+  .btn{border:none;border-radius:14px;padding:11px 20px;font-family:Fredoka;font-weight:600;font-size:18px;background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-d);transition:transform .08s,box-shadow .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-d)}
+  .btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+  .btn.small{padding:7px 14px;font-size:15px;border-radius:11px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .screen{display:none;animation:fade .25s ease}
+  .screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .m{font-family:Fredoka;font-weight:500;white-space:nowrap}
+  .m i, .nb i{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;font-size:1.08em}
+
+  /* HOME */
+  .hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-bottom:22px}
+  .strategy{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  .sstep{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px 10px;font-size:14px;font-weight:700}
+  .sstep b{display:block;font-family:Fredoka;font-size:17px;font-weight:600;color:var(--accent-d)}
+  .key{background:var(--board);color:var(--chalk);border-radius:20px;padding:18px 20px;border:8px solid #8a6a46;box-shadow:0 4px 0 #6f5436}
+  .key h3{color:#ffd36b}
+  .key table{width:100%;border-collapse:collapse;font-size:15px}
+  .key td{padding:5px 4px;border-bottom:1px dashed rgba(255,255,255,.18);vertical-align:top}
+  .key td:last-child{font-family:Fredoka;font-size:17px;color:#8fd0ff;text-align:right;white-space:nowrap}
+  .probs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .prob{text-align:left;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 4px 0 var(--line);transition:transform .12s;position:relative}
+  .prob:hover{transform:translateY(-3px)}
+  .prob .em{font-size:30px;display:block;margin-bottom:4px}
+  .prob .t{font-family:Fredoka;font-weight:600;font-size:19px;display:block}
+  .prob .d{font-size:14px;color:var(--muted);display:block}
+  .prob .lvl{font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  .prob .done{position:absolute;top:12px;right:12px;background:#e9f7ee;color:var(--ok);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
+
+  /* PROBLEM */
+  .ptop{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .x-btn{width:40px;height:40px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:20px;font-weight:800;flex:none}
+  .stepper{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+  .pill{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:99px;padding:4px 12px 4px 5px;font-size:14px;font-weight:700;color:var(--muted)}
+  .pill span{width:24px;height:24px;border-radius:50%;background:#e8e0cf;display:grid;place-items:center;font-family:Fredoka;font-size:14px;color:var(--ink)}
+  .pill.cur{border-color:var(--accent);color:var(--ink)}
+  .pill.cur span{background:var(--accent);color:#fff}
+  .pill.done span{background:var(--ok);color:#fff}
+  .miss{font-weight:800;font-size:14px;color:var(--muted);background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px 12px}
+  .pgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+  .ptext{font-size:19px;line-height:1.7}
+  .ptext .tag{font-size:13px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+  .hl{border-radius:6px;padding:1px 2px;transition:background .3s, box-shadow .3s}
+  .hl.on{background:var(--hl);box-shadow:0 0 0 3px var(--hl)}
+  .work{margin-top:16px}
+  .stephead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .stephead .n{width:34px;height:34px;border-radius:11px;background:var(--board);color:var(--chalk);display:grid;place-items:center;font-family:Fredoka;font-weight:700;font-size:18px;flex:none}
+  .stephead h2{margin:0;font-size:22px}
+  .think{background:#fff7dc;border:2px dashed #f0d58a;border-radius:14px;padding:10px 14px;font-size:15px;font-weight:600;margin:10px 0 14px}
+  .q{font-family:Fredoka;font-weight:500;font-size:20px;margin:4px 0 12px}
+  .mopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mopt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:13px 14px;text-align:left;box-shadow:0 3px 0 var(--line);font-weight:700;font-size:16px;transition:transform .08s}
+  .mopt.math{font-family:Fredoka;font-weight:500;font-size:21px;text-align:center}
+  .mopt:hover:not(:disabled){border-color:#c9bea6}
+  .mopt:active:not(:disabled){transform:translateY(2px)}
+  .mopt.right{border-color:var(--ok);background:#e9f7ee;box-shadow:0 3px 0 #b9e3c8}
+  .mopt.wrong{border-color:var(--bad);background:#fdecea;box-shadow:0 3px 0 #f2c3be;opacity:.75;animation:shake .35s}
+  .mopt.altc{border-color:var(--alt);background:#fff5d6;box-shadow:0 3px 0 #f0d58a}
+  .mopt:disabled{cursor:default}
+  @keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+  .fb{margin-top:12px;border-radius:14px;padding:12px 14px;border:2px solid;font-weight:600;display:none;animation:fade .2s}
+  .fb.on{display:block}
+  .fb.good{background:#effaf3;border-color:#b9e3c8}
+  .fb.bad{background:#fff3f1;border-color:#f2c3be}
+  .fb.alt{background:#fff8e1;border-color:#f0d58a}
+  .fb b.h{font-family:Fredoka;font-weight:600;font-size:18px;display:block}
+  .fb.good b.h{color:var(--ok)} .fb.bad b.h{color:var(--bad)} .fb.alt b.h{color:var(--alt)}
+  .fb .row{margin-top:10px}
+
+  .solve{background:var(--board);color:var(--chalk);border:8px solid #8a6a46;border-radius:16px;padding:14px 18px;margin-bottom:14px;box-shadow:inset 0 0 30px rgba(0,0,0,.25)}
+  .sline{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:Fredoka;font-size:clamp(22px,4.5vw,30px);padding:2px 0;animation:fade .3s}
+  .sline .op{font-size:.75em;color:#ffd36b;white-space:nowrap}
+  .sline.final{color:#a8eb9f}
+  .solve .lbl{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;font-weight:800}
+
+  .checks{display:grid;gap:10px}
+  .crow{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px}
+  .crow .lab{font-weight:800}
+  .crow .ex{font-family:Fredoka;font-size:20px}
+  .crow input{width:100px;font-family:Fredoka;font-size:20px;padding:6px 10px;border:2px solid var(--line);border-radius:10px;text-align:center}
+  .crow.ok{border-color:var(--ok);background:#effaf3}
+  .crow.ok input{border-color:var(--ok)}
+  .crow.no{border-color:var(--bad);background:#fff3f1}
+  .crow .tip{grid-column:1/-1;font-size:14px;color:var(--bad);font-weight:700;display:none}
+  .crow.no .tip{display:block}
+  .concl{margin-top:12px}
+
+  /* notebook */
+  .nb{position:sticky;top:12px;background:#fff;border-radius:6px 18px 18px 6px;border:2px solid var(--line);box-shadow:0 3px 0 var(--line);padding:16px 16px 18px 46px;min-height:300px;
+      background-image:linear-gradient(90deg,transparent 32px,#f5b8b0 32px,#f5b8b0 34px,transparent 34px),repeating-linear-gradient(#fff 0 31px,#dfe8f2 31px 32px);background-position:0 0,0 6px;font-family:"Patrick Hand",Fredoka,cursive;font-size:21px;line-height:32px}
+  .nb h3{font-family:Fredoka;font-size:16px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:0 0 0;line-height:32px}
+  .nb .e{animation:fade .3s;display:flex;justify-content:space-between;gap:10px}
+  .nb .e.sec{color:var(--accent-d);font-size:16px;font-family:Nunito;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .nb .e .op{color:var(--blue);white-space:nowrap;flex:none}
+  .nb .e.ans{color:var(--ok)}
+  .nb .empty{color:#a9b3ad;font-size:18px}
+
+  .finish{text-align:center;padding:26px}
+  .finish .big{font-size:56px;line-height:1;margin-bottom:8px}
+
+  @media (max-width:880px){
+    .pgrid{grid-template-columns:1fr}
+    .nb{position:static}
+    .hero{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .mopts{grid-template-columns:1fr}
+    .strategy{grid-template-columns:repeat(2,1fr)}
+    .crow{grid-template-columns:1fr auto}
+    .crow .lab{grid-column:1/-1}
+    .pill{padding:4px 5px}
+    .pill em{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo" id="logo"><span class="badge">x = ?</span> Ekvationsdetektiven <small>åk 7–8</small></div>
+  </header>
+
+  <!-- HOME -->
+  <section class="screen on" id="s-home">
+    <div class="hero">
+      <div class="card">
+        <h1>Lös problem med ekvationer</h1>
+        <p class="lead">Varje uppgift löser du steg för steg, precis som en detektiv. Appen guidar dig och ditt lösningsblad fylls i medan du arbetar.</p>
+        <div class="strategy">
+          <div class="sstep"><b>1. Förstå</b>Vad frågas efter? Vad är x?</div>
+          <div class="sstep"><b>2. Översätt</b>Gör om text till uttryck</div>
+          <div class="sstep"><b>3. Ställ upp</b>Skriv ekvationen</div>
+          <div class="sstep"><b>4. Lös</b>Samma sak på båda sidor</div>
+          <div class="sstep"><b>5. Svara</b>Svara på frågan – med enhet</div>
+          <div class="sstep"><b>6. Kontrollera</b>Stämmer det med texten?</div>
+        </div>
+      </div>
+      <div class="key">
+        <h3>Översättningsnyckel</h3>
+        <table>
+          <tr><td>5 fler / mer / äldre / längre än x</td><td>x + 5</td></tr>
+          <tr><td>5 färre / mindre / yngre än x</td><td>x − 5</td></tr>
+          <tr><td>dubbelt så mycket som x</td><td>2x</td></tr>
+          <tr><td>tre gånger så många som x</td><td>3x</td></tr>
+          <tr><td>hälften av x</td><td>x / 2</td></tr>
+          <tr><td>tillsammans / totalt / summan</td><td>… + … = </td></tr>
+          <tr><td>lika mycket som</td><td>=</td></tr>
+        </table>
+      </div>
+    </div>
+    <h2>Välj en uppgift</h2>
+    <div class="probs" id="probs"></div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="screen" id="s-prob">
+    <div class="ptop">
+      <button class="x-btn" id="backBtn" aria-label="Tillbaka till uppgifterna">×</button>
+      <div class="stepper" id="stepper"></div>
+      <div class="miss" id="miss">Misstag: 0</div>
+    </div>
+    <div class="pgrid">
+      <div>
+        <div class="card ptext" id="ptext"></div>
+        <div class="card work" id="work"></div>
+      </div>
+      <aside class="nb" id="nb"></aside>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- helpers ----------
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const M='−';
+const O=(t,ok=0,fb='')=>({t,ok,fb});
+const mx=s=>String(s).replace(/-/g,M).replace(/x/g,'<i>x</i>');
+const mxl=s=>String(s).replace(/\bx\b/g,'<i>x</i>');
+function lin(a,b){
+  let s='';
+  if(a) s+=(a===1?'':a===-1?M:a)+'x';
+  if(b){ if(s) s+=(b<0?' '+M+' ':' + ')+Math.abs(b); else s+=(b<0?M:'')+Math.abs(b); }
+  return s||'0';
+}
+
+// ---------- problems ----------
+const PROBS=[
+ {id:'alder',emoji:'👫',title:'Syskonens åldrar',desc:'Äldre än, tillsammans',lvl:'Nivå 1',gen(){
+   const o=ri(9,14),d=ri(3,6),S=2*o+d;
+   return {tag:'Ålder',text:`Lisa och Omar är syskon. [[a|Lisa är ${d} år äldre än Omar.]] [[s|Tillsammans är de ${S} år.]] [[q|Hur gammal är Lisa?]]`,
+   ask:[O('Hur gammal Lisa är',1),O('Hur gammal Omar är',0,'Läs frågan i slutet igen – vem frågas det om?'),O(`Hur mycket äldre Lisa är`,0,`Det står redan i texten: ${d} år.`),O('Hur gamla de är tillsammans',0,`Det vet vi redan: ${S} år.`)],
+   xq:[O('Omars ålder',1,'Bra val! Lisa beskrivs utifrån Omar, så då blir uttrycken enkla.'),O('Lisas ålder',2,`Det går också – men då blir Omar x − ${d}. Det är oftast enklast att låta x vara den som de andra jämförs med. Vi låter x vara Omars ålder.`),O('Deras sammanlagda ålder',0,`Den vet vi redan (${S} år). x ska vara något vi inte vet.`)],
+   xdef:'Omars ålder (år)',given:[['Omar','x']],
+   tr:[{hl:'a',label:'Lisas ålder',opts:[O(`x + ${d}`,1),O(`x - ${d}`,0,'Lisa är äldre – hon har fler år än Omar. Äldre betyder plus.'),O(`${d}x`,0,`${d}x betyder ${d} gånger x. ”${d} år äldre” betyder ${d} år mer.`),O(`${d}`,0,'Lisas ålder beror på Omars ålder, så x måste vara med.')]}],
+   eq:{text:`x + (x + ${d}) = ${S}`,L:[2,d],R:[0,S],simple:false,
+     opts:[O(`x + (x + ${d}) = ${S}`,1),O(`x + ${d} = ${S}`,0,'Det är bara Lisas ålder. ”Tillsammans” betyder Omars ålder + Lisas ålder.'),O(`x + ${d}x = ${S}`,0,`Lisa är x + ${d}, inte ${d}x.`),O(`x + (x - ${d}) = ${S}`,0,`Lisa är äldre, så hennes ålder är x + ${d}.`)]},
+   x:o,
+   ans:[O(`Lisa är ${o+d} år.`,1),O(`x = ${o}`,0,'Rätt värde på x – men x är Omars ålder och frågan gäller Lisa. Svara med en hel mening!'),O(`Lisa är ${o} år.`,0,`${o} är x, alltså Omars ålder. Lisa är x + ${d}.`),O(`Omar är ${o} år.`,0,'Det stämmer, men frågan var hur gammal Lisa är.')],
+   check:[{label:'Omar',expr:'x',sub:`${o}`,val:o},{label:'Lisa',expr:`x + ${d}`,sub:`${o} + ${d}`,val:o+d},{label:'Tillsammans',expr:'Omar + Lisa',sub:`${o} + ${o+d}`,val:S}],
+   concl:`Lisa är ${d} år äldre än Omar och tillsammans är de ${S} år – precis som i texten.`};
+ }},
+ {id:'bio',emoji:'🎬',title:'Bio med kompisar',desc:'Pris per styck',lvl:'Nivå 1',gen(){
+   const n=pick([2,3,4]),p=pick([85,90,95,100,110,120]),q=pick([35,45,55,60]),T=n*p+q;
+   return {tag:'Pengar',text:`Mia går på bio med sina kompisar. [[a|Hon köper ${n} biobiljetter som kostar lika mycket]] [[b|och en stor popcorn för ${q} kr.]] [[s|Totalt betalar hon ${T} kr.]] [[q|Vad kostar en biobiljett?]]`,
+   ask:[O('Priset för en biljett',1),O('Priset för alla biljetterna',0,'Nästan – frågan gäller EN biljett.'),O('Hur mycket Mia betalar totalt',0,`Det står i texten: ${T} kr.`),O('Hur många biljetter hon köper',0,`Det står i texten: ${n} st.`)],
+   xq:[O('Priset för en biljett (kr)',1,'Precis – det är det vi inte vet och det frågan gäller.'),O('Priset för popcornen',0,`Popcornen kostar ${q} kr – det vet vi redan.`),O('Antalet biljetter',0,`Antalet vet vi: ${n} st.`)],
+   xdef:'priset för en biljett (kr)',given:[['En biljett','x']],
+   tr:[{hl:'a',label:`Priset för ${n} biljetter`,opts:[O(`${n}x`,1),O(`x + ${n}`,0,`${n} biljetter som kostar x kr styck: x + x${n>2?' + x':''}${n>3?' + x':''} = ${n}·x.`),O(`${n}`,0,'Priset beror på vad en biljett kostar – x måste vara med.'),O('x',0,'Det är priset för en biljett.')]},
+       {hl:'b',label:'Allt Mia köper',opts:[O(`${n}x + ${q}`,1),O(`${n}x - ${q}`,0,'Popcornen kostar pengar – den ska läggas till, inte dras bort.'),O(`${n}(x + ${q})`,0,`Då skulle hon köpa ${n} popcorn. Hon köper bara en.`),O(`x + ${q}`,0,`Hon köper ${n} biljetter, inte en.`)]}],
+   eq:{text:`${n}x + ${q} = ${T}`,L:[n,q],R:[0,T],simple:true,
+     opts:[O(`${n}x + ${q} = ${T}`,1),O(`${n}x = ${T}`,0,'Popcornen saknas i ekvationen.'),O(`x + ${q} = ${T}`,0,`Hon köpte ${n} biljetter.`),O(`${n}x + ${T} = ${q}`,0,`Det Mia köper kostar totalt ${T} kr – så ${T} ska stå ensamt på andra sidan.`)]},
+   x:p,
+   ans:[O(`En biobiljett kostar ${p} kr.`,1),O(`x = ${p}`,0,'Rätt värde – men svara på frågan med en hel mening och enhet (kr)!'),O(`En biobiljett kostar ${n*p} kr.`,0,`${n*p} kr är vad alla ${n} biljetterna kostar.`),O(`En biobiljett kostar ${T-q} kr.`,0,`Du har glömt att dela med ${n}.`)],
+   check:[{label:'Biljetterna',expr:`${n}x`,sub:`${n} · ${p}`,val:n*p},{label:'Totalt',expr:`${n}x + ${q}`,sub:`${n*p} + ${q}`,val:T}],
+   concl:`Biljetterna och popcornen kostar tillsammans ${T} kr – precis som i texten.`};
+ }},
+ {id:'tal',emoji:'🧠',title:'Tänk på ett tal',desc:'Multiplicera och subtrahera',lvl:'Nivå 1',gen(){
+   const x=ri(5,15),m=pick([3,4,5,6]),s=ri(3,12),R=m*x-s;
+   return {tag:'Tankenöt',text:`Jag tänker på ett tal. [[a|Om jag multiplicerar talet med ${m}]] [[b|och sedan subtraherar ${s}]] [[s|får jag ${R}.]] [[q|Vilket tal tänker jag på?]]`,
+   ask:[O('Det tal jag tänker på',1),O(`Talet ${R}`,0,`${R} är resultatet – det vet vi redan.`),O(`Vad ${m} gånger ${s} är`,0,'Läs frågan sist i texten igen.')],
+   xq:[O('Det tänkta talet',1,'Ja! Det är det okända talet.'),O('Resultatet',0,`Resultatet vet vi: ${R}.`),O(`Talet ${m}`,0,`${m} står i texten – det är inte okänt.`)],
+   xdef:'det tänkta talet',given:[],
+   tr:[{hl:'a',label:`Talet multiplicerat med ${m}`,opts:[O(`${m}x`,1),O(`x + ${m}`,0,'Multiplicera betyder gånger, inte plus.'),O(`x / ${m}`,0,'Det är division. Multiplicera betyder gånger.'),O(`${m}`,0,'Det okända talet måste vara med.')]},
+       {hl:'b',label:`… och sedan minus ${s}`,opts:[O(`${m}x - ${s}`,1),O(`${m}x + ${s}`,0,'Subtrahera betyder minus.'),O(`${s} - ${m}x`,0,`Ordningen spelar roll vid subtraktion: vi tar ${m}x och drar bort ${s}.`),O(`${m}(x - ${s})`,0,'Då subtraherar man först och multiplicerar sen. Här multiplicerar man först.')]}],
+   eq:{text:`${m}x - ${s} = ${R}`,L:[m,-s],R:[0,R],simple:true,
+     opts:[O(`${m}x - ${s} = ${R}`,1),O(`${m}x = ${R}`,0,`Du har glömt att subtrahera ${s}.`),O(`${m}x + ${s} = ${R}`,0,'Subtrahera betyder minus.'),O(`x - ${s} = ${R}`,0,`Talet ska först multipliceras med ${m}.`)]},
+   x:x,
+   ans:[O(`Jag tänker på talet ${x}.`,1),O(`Jag tänker på talet ${R}.`,0,`${R} var resultatet, inte talet du tänkte på.`),O(`Jag tänker på talet ${m*x}.`,0,`${m*x} är talet gånger ${m}.`),O(`x = ${x}`,0,'Rätt värde – men svara på frågan med en hel mening!')],
+   check:[{label:`Gånger ${m}`,expr:`${m}x`,sub:`${m} · ${x}`,val:m*x},{label:`Minus ${s}`,expr:`${m}x - ${s}`,sub:`${m*x} − ${s}`,val:R}],
+   concl:`Talet ${x} gånger ${m} minus ${s} blir ${R} – precis som i texten.`};
+ }},
+ {id:'spar',emoji:'🐷',title:'Spargrisen',desc:'Startbelopp + per vecka',lvl:'Nivå 2',gen(){
+   const s0=pick([80,100,120,150,200]),r=pick([25,30,35,40,50]),w=ri(4,12),goal=s0+r*w;
+   return {tag:'Sparande',text:`[[b|Ella har ${s0} kr i sin spargris.]] [[a|Hon sparar ${r} kr varje vecka.]] [[s|Hon vill köpa hörlurar som kostar ${goal} kr.]] [[q|Efter hur många veckor har hon råd?]]`,
+   ask:[O('Hur många veckor hon måste spara',1),O('Hur mycket hon sparar varje vecka',0,`Det står i texten: ${r} kr.`),O('Vad hörlurarna kostar',0,`Det står i texten: ${goal} kr.`)],
+   xq:[O('Antalet veckor',1,'Rätt – antalet veckor är okänt.'),O('Pengarna per vecka',0,`Det vet vi: ${r} kr.`),O('Pengarna i spargrisen från början',0,`Det vet vi: ${s0} kr.`)],
+   xdef:'antal veckor',given:[],
+   tr:[{hl:'a',label:'Det hon sparar på x veckor',opts:[O(`${r}x`,1),O(`${r} + x`,0,`${r} kr varje vecka i x veckor blir ${r}·x.`),O(`${s0}x`,0,`${s0} kr hade hon från början – det är ${r} kr som kommer varje vecka.`),O('x',0,'Det är antalet veckor, inte pengar.')]},
+       {hl:'b',label:'Pengar i spargrisen efter x veckor',opts:[O(`${s0} + ${r}x`,1),O(`${r}x`,0,`Glöm inte de ${s0} kr hon redan har.`),O(`${s0}x + ${r}`,0,'Det är byte av plats: det är veckosparandet som ska gångras med x.'),O(`(${s0} + ${r})x`,0,'Då skulle startpengarna läggas till varje vecka.')]}],
+   eq:{text:`${s0} + ${r}x = ${goal}`,L:[r,s0],R:[0,goal],simple:true,
+     opts:[O(`${s0} + ${r}x = ${goal}`,1),O(`${r}x = ${goal}`,0,`Startpengarna (${s0} kr) saknas.`),O(`${s0}x + ${r} = ${goal}`,0,`Det är de ${r} kronorna per vecka som ska gångras med x.`),O(`${s0} + ${r} = ${goal}x`,0,'x är antalet veckor – det hör ihop med veckosparandet.')]},
+   x:w,
+   ans:[O(`Efter ${w} veckor har hon råd.`,1),O(`Efter ${goal-s0} veckor har hon råd.`,0,`${goal-s0} är hur många kronor hon behöver spara, inte veckor.`),O(`x = ${w}`,0,'Rätt värde – men svara med en hel mening och enhet!'),O(`Efter ${Math.ceil(goal/r)} veckor har hon råd.`,0,`Du har glömt de ${s0} kr hon redan hade.`)],
+   check:[{label:'Sparat',expr:`${r}x`,sub:`${r} · ${w}`,val:r*w},{label:'I spargrisen',expr:`${s0} + ${r}x`,sub:`${s0} + ${r*w}`,val:goal}],
+   concl:`Efter ${w} veckor har Ella exakt ${goal} kr – precis vad hörlurarna kostar.`};
+ }},
+ {id:'rekt',emoji:'📐',title:'Rektangelns omkrets',desc:'Geometri med ekvation',lvl:'Nivå 2',gen(){
+   const w=ri(4,12),d=ri(2,6),P=4*w+2*d;
+   return {tag:'Geometri',text:`[[a|En rektangel är ${d} cm längre än den är bred.]] [[s|Rektangelns omkrets är ${P} cm.]] [[q|Hur lång är rektangeln?]]`,
+   ask:[O('Rektangelns längd',1),O('Rektangelns bredd',0,'Läs frågan: hur LÅNG är den?'),O('Rektangelns omkrets',0,`Den vet vi: ${P} cm.`)],
+   xq:[O('Bredden (cm)',1,'Bra! Längden beskrivs utifrån bredden.'),O('Längden (cm)',2,`Det går också – då blir bredden x − ${d}. Men det blir enklare om x är bredden, eftersom längden jämförs med den. Vi kör med bredden.`),O('Omkretsen',0,'Omkretsen vet vi redan.')],
+   xdef:'bredden (cm)',given:[['Bredd','x']],
+   tr:[{hl:'a',label:'Längden',opts:[O(`x + ${d}`,1),O(`x - ${d}`,0,'Längre betyder mer – alltså plus.'),O(`${d}x`,0,`${d}x betyder ${d} gånger bredden. Den är bara ${d} cm längre.`),O(`${d}`,0,'Längden beror på bredden – x måste vara med.')]},
+       {hl:'s',label:'Omkretsen',opts:[O(`x + x + (x + ${d}) + (x + ${d})`,1),O(`x + (x + ${d})`,0,'Det är bara två sidor. En rektangel har fyra sidor!'),O(`x · (x + ${d})`,0,'Det är arean. Omkretsen är summan av alla sidor.'),O(`4x`,0,`Två av sidorna är längden, x + ${d}.`)]}],
+   eq:{text:`x + x + (x + ${d}) + (x + ${d}) = ${P}`,L:[4,2*d],R:[0,P],simple:false,
+     opts:[O(`x + x + (x + ${d}) + (x + ${d}) = ${P}`,1),O(`x(x + ${d}) = ${P}`,0,'Det är arean. Texten handlar om omkretsen.'),O(`x + (x + ${d}) = ${P}`,0,'Omkretsen är alla fyra sidor.'),O(`4x = ${P}`,0,`Två av sidorna är x + ${d}.`)]},
+   x:w,
+   ans:[O(`Rektangeln är ${w+d} cm lång.`,1),O(`Rektangeln är ${w} cm lång.`,0,`${w} cm är x – alltså bredden. Längden är x + ${d}.`),O(`x = ${w}`,0,'x är bredden – men frågan gäller längden. Svara med en hel mening!'),O(`Rektangeln är ${P} cm lång.`,0,`${P} cm är omkretsen.`)],
+   check:[{label:'Bredd',expr:'x',sub:`${w}`,val:w},{label:'Längd',expr:`x + ${d}`,sub:`${w} + ${d}`,val:w+d},{label:'Omkrets',expr:'alla sidor',sub:`${w} + ${w} + ${w+d} + ${w+d}`,val:P}],
+   concl:`Längden är ${d} cm mer än bredden och omkretsen blir ${P} cm – precis som i texten.`};
+ }},
+ {id:'dela',emoji:'💰',title:'Dela på pengarna',desc:'Tre personer, dubbelt och mer',lvl:'Nivå 2',gen(){
+   const b=pick([40,50,60,70,80,90]),d=pick([20,30,40]),T=4*b+d;
+   return {tag:'Pengar',text:`[[s|Ali, Bo och Cia har tjänat ${T} kr tillsammans på att rensa ogräs.]] [[a|Ali får dubbelt så mycket som Bo.]] [[b|Cia får ${d} kr mer än Bo.]] [[q|Hur mycket får Ali?]]`,
+   ask:[O('Hur mycket Ali får',1),O('Hur mycket Bo får',0,'Läs frågan igen – vem gäller den?'),O('Hur mycket de får tillsammans',0,`Det vet vi: ${T} kr.`)],
+   xq:[O('Bos pengar',1,'Smart! Både Ali och Cia jämförs med Bo.'),O('Alis pengar',2,'Det går – men då får Bo x / 2 och det blir bråk. Både Ali och Cia jämförs med Bo, så vi låter x vara Bos pengar.'),O('Cias pengar',2,`Det går – men då blir Bo x − ${d} och Ali 2(x − ${d}). Krångligt! Vi låter x vara Bos pengar.`)],
+   xdef:'Bos pengar (kr)',given:[['Bo','x']],
+   tr:[{hl:'a',label:'Alis pengar',opts:[O('2x',1),O('x + 2',0,'Dubbelt så mycket betyder 2 gånger, inte 2 mer.'),O('x / 2',0,'Det är hälften så mycket.'),O('2',0,'Alis pengar beror på Bos – x måste vara med.')]},
+       {hl:'b',label:'Cias pengar',opts:[O(`x + ${d}`,1),O(`${d}x`,0,`${d}x betyder ${d} gånger. ”${d} kr mer” betyder plus ${d}.`),O(`x - ${d}`,0,'Mer betyder plus.'),O(`${d}`,0,'Cias pengar beror på Bos – x måste vara med.')]}],
+   eq:{text:`x + 2x + (x + ${d}) = ${T}`,L:[4,d],R:[0,T],simple:false,
+     opts:[O(`x + 2x + (x + ${d}) = ${T}`,1),O(`2x + (x + ${d}) = ${T}`,0,'Bo saknas! Tillsammans betyder allas pengar.'),O(`x + 2x + ${d}x = ${T}`,0,`Cia får x + ${d}, inte ${d}x.`),O(`x + 2 + (x + ${d}) = ${T}`,0,'Ali får 2x.')]},
+   x:b,
+   ans:[O(`Ali får ${2*b} kr.`,1),O(`Ali får ${b} kr.`,0,`${b} kr är x – Bos pengar. Ali får 2x.`),O(`x = ${b}`,0,'x är Bos pengar – frågan gäller Ali. Svara med en hel mening!'),O(`Ali får ${b+d} kr.`,0,`${b+d} kr är det Cia får.`)],
+   check:[{label:'Bo',expr:'x',sub:`${b}`,val:b},{label:'Ali',expr:'2x',sub:`2 · ${b}`,val:2*b},{label:'Cia',expr:`x + ${d}`,sub:`${b} + ${d}`,val:b+d},{label:'Tillsammans',expr:'Bo + Ali + Cia',sub:`${b} + ${2*b} + ${b+d}`,val:T}],
+   concl:`Ali får dubbelt så mycket som Bo, Cia ${d} kr mer än Bo, och totalt blir det ${T} kr – precis som i texten.`};
+ }},
+ {id:'vinkel',emoji:'🔺',title:'Triangelns vinklar',desc:'Vinkelsumman 180°',lvl:'Nivå 3',gen(){
+   const d=pick([20,40,60]),x=(180-d)/4,v2=2*x,v3=x+d,big=Math.max(v2,v3),other=Math.min(v2,v3);
+   return {tag:'Geometri',text:`En triangel har tre vinklar. [[a|Den andra vinkeln är dubbelt så stor som den första.]] [[b|Den tredje vinkeln är ${d}° större än den första.]] [[s|Vinkelsumman i en triangel är alltid 180°.]] [[q|Hur stor är den största vinkeln?]]`,
+   ask:[O('Hur stor den största vinkeln är',1),O('Hur stor den första vinkeln är',0,'Läs frågan sist i texten igen.'),O('Vinkelsumman',0,'Den vet vi: 180°.')],
+   xq:[O('Den första vinkeln',1,'Ja! De andra vinklarna jämförs med den första.'),O('Den största vinkeln',0,'Vi vet inte än vilken som är störst! Låt x vara den som de andra jämförs med.'),O('Vinkelsumman',0,'Den vet vi redan: 180°.')],
+   xdef:'den första vinkeln (grader)',given:[['Vinkel 1','x']],
+   tr:[{hl:'a',label:'Vinkel 2',opts:[O('2x',1),O('x + 2',0,'Dubbelt så stor betyder 2 gånger.'),O('x / 2',0,'Det är hälften så stor.'),O('2',0,'Vinkeln beror på den första vinkeln – x måste vara med.')]},
+       {hl:'b',label:'Vinkel 3',opts:[O(`x + ${d}`,1),O(`${d}x`,0,`”${d}° större” betyder plus ${d}.`),O(`x - ${d}`,0,'Större betyder plus.'),O(`${d}`,0,'Vinkeln beror på den första vinkeln.')]}],
+   eq:{text:`x + 2x + (x + ${d}) = 180`,L:[4,d],R:[0,180],simple:false,
+     opts:[O(`x + 2x + (x + ${d}) = 180`,1),O(`x + 2x + (x + ${d}) = 360`,0,'Vinkelsumman i en triangel är 180°. (360° gäller fyrhörningar.)'),O(`2x + (x + ${d}) = 180`,0,'Den första vinkeln saknas!'),O(`x + 2x + ${d}x = 180`,0,`Vinkel 3 är x + ${d}.`)]},
+   x:x,
+   ans:[O(`Den största vinkeln är ${big}°.`,1),O(`Den största vinkeln är ${x}°.`,0,`${x}° är x – den första vinkeln. Räkna ut alla tre och jämför.`),O(`Den största vinkeln är ${other}°.`,0,'Jämför alla tre vinklarna – vilken är störst?'),O(`x = ${x}`,0,'x är den första vinkeln – frågan gäller den största. Svara med en hel mening!')],
+   check:[{label:'Vinkel 1',expr:'x',sub:`${x}`,val:x},{label:'Vinkel 2',expr:'2x',sub:`2 · ${x}`,val:v2},{label:'Vinkel 3',expr:`x + ${d}`,sub:`${x} + ${d}`,val:v3},{label:'Summa',expr:'alla vinklar',sub:`${x} + ${v2} + ${v3}`,val:180}],
+   concl:`Vinklarna är ${x}°, ${v2}° och ${v3}°. Summan blir 180° och den största är ${big}°.`};
+ }},
+ {id:'lika',emoji:'⚖️',title:'Vem har mest?',desc:'x på båda sidor',lvl:'Nivå 3',gen(){
+   let a0,ar,br,w,b0;
+   do{a0=pick([200,240,300]);ar=pick([15,20,25]);br=ar+pick([15,20,30]);w=ri(4,8);b0=a0-(br-ar)*w;}while(b0<20||b0===br||b0===ar);
+   const V=a0+ar*w;
+   return {tag:'Sparande',text:`[[a|Adam har ${a0} kr och sparar ${ar} kr i veckan.]] [[b|Bea har ${b0} kr och sparar ${br} kr i veckan.]] [[s|Efter ett tag har de lika mycket pengar.]] [[q|Efter hur många veckor händer det?]]`,
+   ask:[O('Antal veckor tills de har lika mycket',1),O('Hur mycket pengar de har då',0,'Det kan vi räkna ut efteråt – men frågan är NÄR det händer.'),O('Vem som sparar mest',0,'Det står i texten: Bea.')],
+   xq:[O('Antal veckor',1,'Rätt – både Adams och Beas pengar beror på antalet veckor.'),O('Adams pengar',0,'Adams pengar ändras varje vecka. Det som är okänt är antalet veckor.'),O('Skillnaden mellan dem',0,'Vi letar efter antalet veckor.')],
+   xdef:'antal veckor',given:[],
+   tr:[{hl:'a',label:'Adams pengar efter x veckor',opts:[O(`${a0} + ${ar}x`,1),O(`${ar} + ${a0}x`,0,`Det är veckosparandet (${ar} kr) som ska gångras med x.`),O(`${ar}x`,0,`Glöm inte de ${a0} kr han har från början.`),O(`(${a0} + ${ar})x`,0,'Då läggs startpengarna till varje vecka.')]},
+       {hl:'b',label:'Beas pengar efter x veckor',opts:[O(`${b0} + ${br}x`,1),O(`${br} + ${b0}x`,0,`Det är veckosparandet (${br} kr) som ska gångras med x.`),O(`${br}x`,0,`Glöm inte de ${b0} kr hon har från början.`),O(`${b0}x + ${br}`,0,'x hör ihop med veckosparandet.')]}],
+   eq:{text:`${b0} + ${br}x = ${a0} + ${ar}x`,L:[br,b0],R:[ar,a0],simple:true,
+     opts:[O(`${b0} + ${br}x = ${a0} + ${ar}x`,1,'Beas pengar = Adams pengar.'),O(`${a0} + ${b0} = ${ar}x + ${br}x`,0,'Varje sida ska vara EN persons pengar. ”Lika mycket” betyder Beas pengar = Adams pengar.'),O(`${br}x = ${ar}x`,0,'Startpengarna saknas.'),O(`${b0} + ${br}x = ${a0}`,0,'Adam sparar också varje vecka.')]},
+   x:w,
+   ans:[O(`Efter ${w} veckor har de lika mycket.`,1),O(`De har ${V} kr var.`,0,'Det stämmer faktiskt – men frågan var efter hur många veckor!'),O(`x = ${w}`,0,'Rätt värde – men svara med en hel mening och enhet!'),O(`Efter ${a0-b0} veckor har de lika mycket.`,0,`${a0-b0} är skillnaden i kronor från början.`)],
+   check:[{label:'Adam',expr:`${a0} + ${ar}x`,sub:`${a0} + ${ar} · ${w}`,val:V},{label:'Bea',expr:`${b0} + ${br}x`,sub:`${b0} + ${br} · ${w}`,val:V}],
+   concl:`Efter ${w} veckor har både Adam och Bea ${V} kr – lika mycket, precis som texten säger.`};
+ }},
+
+ {id:'gard',emoji:'🐷',title:'Grisar och höns',desc:'Huvuden och ben',lvl:'Nivå 3',gen(){
+   let H,g;do{H=ri(14,24);g=ri(4,H-5);}while(2*g===H);const B=4*g+2*(H-g);
+   return {tag:'Djur',text:`[[s|På en bondgård finns bara grisar och höns.]] [[b|Tillsammans har djuren ${H} huvuden]] [[a|och ${B} ben.]] [[q|Hur många grisar finns det?]]`,
+   ask:[O('Hur många grisar det finns',1),O('Hur många höns det finns',0,'Läs frågan i slutet igen – vilka djur frågas det om?'),O('Hur många ben det finns',0,`Det står redan i texten: ${B} ben.`),O('Hur många djur det finns',0,`Varje djur har ett huvud, så det vet vi: ${H} djur.`)],
+   xq:[O('Antalet grisar',1,'Bra! Det är grisarna frågan gäller, och då blir hönsen resten av djuren.'),O('Antalet höns',2,`Det går också – då blir grisarna ${H} − x. Men frågan gäller grisarna, så vi låter x vara antalet grisar.`),O('Antalet ben',0,`Det vet vi redan (${B}). x ska vara något vi inte vet.`)],
+   xdef:'antalet grisar',given:[['Grisar','x']],
+   tr:[{hl:'b',label:'Antalet höns',opts:[O(`${H} - x`,1),O(`x - ${H}`,0,`Hönsen är resten av de ${H} djuren: ${H} minus grisarna.`),O(`${H} + x`,0,`Det finns ${H} djur totalt. Hönsen är de som inte är grisar, alltså ${H} − x.`),O(`${H}`,0,`${H} är alla djuren, både grisar och höns.`)]},
+       {hl:'a',label:'Grisarnas ben',opts:[O('4x',1),O('x + 4',0,'Varje gris har 4 ben. x grisar har 4 · x ben.'),O('2x',0,'En gris har 4 ben, inte 2.'),O('4',0,'Det är benen på en enda gris.')]},
+       {hl:'a',label:'Hönsens ben',opts:[O(`2(${H} - x)`,1),O(`2 · ${H} - x`,0,'Alla höns har 2 ben var. Parentesen behövs så att hela antalet höns multipliceras med 2.'),O(`4(${H} - x)`,0,'Höns har 2 ben, inte 4.'),O(`${H} - 2x`,0,`Antalet höns är ${H} − x, och varje höna har 2 ben: 2(${H} − x).`)]}],
+   eq:{text:`4x + 2(${H} - x) = ${B}`,L:[2,2*H],R:[0,B],simple:false,
+     opts:[O(`4x + 2(${H} - x) = ${B}`,1),O(`x + (${H} - x) = ${B}`,0,`Det räknar djuren, inte benen. Djuren är ${H}, inte ${B}.`),O(`4x + 2x = ${B}`,0,`Hönsen är inte x – de är ${H} − x.`),O(`4x + 2(${H} - x) = ${H}`,0,`Vänsterledet räknar ben, så högerledet ska vara antalet ben: ${B}.`)]},
+   x:g,
+   ans:[O(`Det finns ${g} grisar.`,1),O(`Det finns ${H-g} grisar.`,0,`${H-g} är antalet höns (${H} − x).`),O(`x = ${g}`,0,'Rätt värde – men svara med en hel mening!'),O(`Det finns ${H} grisar.`,0,`${H} är alla djuren, både grisar och höns.`)],
+   check:[{label:'Grisar',expr:'x',sub:`${g}`,val:g},{label:'Höns',expr:`${H} - x`,sub:`${H} − ${g}`,val:H-g},{label:'Ben totalt',expr:`4 · ${g} + 2 · ${H-g}`,sub:`${4*g} + ${2*(H-g)}`,val:B}],
+   concl:`${g} grisar och ${H-g} höns blir ${H} huvuden och ${B} ben – precis som i texten.`};
+ }},
+ {id:'biljett',emoji:'🎟️',title:'Barn och vuxna på bio',desc:'Två biljettpriser',lvl:'Nivå 2',gen(){
+   const pv=pick([90,100,110,120]),pb=pick([50,60,70]),N=ri(9,15);let v;do{v=ri(2,N-3);}while(2*v===N);const T=pv*v+pb*(N-v);
+   return {tag:'Biljetter',text:`[[a|En vuxenbiljett kostar ${pv} kr och en barnbiljett ${pb} kr.]] [[b|Ett sällskap på ${N} personer går på bio]] [[s|och betalar ${T} kr tillsammans.]] [[q|Hur många vuxna är med?]]`,
+   ask:[O('Hur många vuxna som är med',1),O('Hur många barn som är med',0,'Läs frågan igen – vilka frågas det om?'),O('Vad biljetterna kostar totalt',0,`Det står i texten: ${T} kr.`)],
+   xq:[O('Antalet vuxna',1,'Bra! Frågan gäller de vuxna, och då blir barnen resten.'),O('Antalet barn',2,`Det går också – då blir de vuxna ${N} − x. Vi låter x vara antalet vuxna, eftersom det är det frågan gäller.`),O('Priset för alla biljetter',0,`Det vet vi redan (${T} kr).`)],
+   xdef:'antalet vuxna',given:[['Vuxna','x']],
+   tr:[{hl:'b',label:'Antalet barn',opts:[O(`${N} - x`,1),O(`${N} + x`,0,`Det är ${N} personer totalt. Barnen är de som inte är vuxna: ${N} − x.`),O('x',0,'Då skulle det vara lika många barn som vuxna. Det vet vi inte.'),O(`x - ${N}`,0,`Det blir negativt. Barnen är ${N} minus de vuxna.`)]},
+       {hl:'a',label:'Vuxnas biljetter (kr)',opts:[O(`${pv}x`,1),O(`x + ${pv}`,0,`Varje vuxen betalar ${pv} kr. x vuxna betalar ${pv} · x.`),O(`${pv}`,0,'Det är priset för en enda vuxen.')]},
+       {hl:'a',label:'Barnens biljetter (kr)',opts:[O(`${pb}(${N} - x)`,1),O(`${pb}x`,0,`Barnen är inte x stycken – de är ${N} − x.`),O(`${pb} · ${N} - x`,0,'Parentesen behövs: alla barnen ska multipliceras med priset.')]}],
+   eq:{text:`${pv}x + ${pb}(${N} - x) = ${T}`,L:[pv-pb,pb*N],R:[0,T],simple:false,
+     opts:[O(`${pv}x + ${pb}(${N} - x) = ${T}`,1),O(`${pv}x + ${pb}x = ${T}`,0,`Barnen är ${N} − x, inte x.`),O(`x + (${N} - x) = ${T}`,0,`Det räknar personer. Personerna är ${N}, inte ${T}.`),O(`${pv}x + ${pb}(${N} - x) = ${N}`,0,`Vänsterledet är kronor, så högerledet ska vara ${T} kr.`)]},
+   x:v,
+   ans:[O(`${v} vuxna är med.`,1),O(`${N-v} vuxna är med.`,0,`${N-v} är antalet barn (${N} − x).`),O(`x = ${v}`,0,'Rätt värde – men svara med en hel mening!'),O(`${pv*v} vuxna är med.`,0,`${pv*v} kr är vad de vuxna betalar.`)],
+   check:[{label:'Vuxna',expr:'x',sub:`${v}`,val:v},{label:'Barn',expr:`${N} - x`,sub:`${N} − ${v}`,val:N-v},{label:'Kostnad (kr)',expr:`${pv} · ${v} + ${pb} · ${N-v}`,sub:`${pv*v} + ${pb*(N-v)}`,val:T}],
+   concl:`${v} vuxna och ${N-v} barn är ${N} personer, och biljetterna kostar ${T} kr – precis som i texten.`};
+ }},
+ {id:'mynt',emoji:'🪙',title:'Mynten i burken',desc:'Femkronor och tiokronor',lvl:'Nivå 3',gen(){
+   const N=ri(14,26);let t;do{t=ri(4,N-4);}while(2*t===N);const T=10*t+5*(N-t);
+   return {tag:'Pengar',text:`[[b|I en burk ligger ${N} mynt.]] [[a|Det är bara femkronor och tiokronor.]] [[s|Tillsammans är mynten värda ${T} kr.]] [[q|Hur många tiokronor finns det?]]`,
+   ask:[O('Hur många tiokronor det finns',1),O('Hur många femkronor det finns',0,'Läs frågan igen.'),O('Hur mycket pengarna är värda',0,`Det vet vi: ${T} kr.`)],
+   xq:[O('Antalet tiokronor',1,'Bra! Då blir femkronorna resten av mynten.'),O('Antalet femkronor',2,`Det går – då blir tiokronorna ${N} − x. Vi väljer det frågan gäller: tiokronorna.`),O('Värdet av alla mynt',0,`Det vet vi redan (${T} kr).`)],
+   xdef:'antalet tiokronor',given:[['Tiokronor','x']],
+   tr:[{hl:'b',label:'Antalet femkronor',opts:[O(`${N} - x`,1),O(`${N} + x`,0,`Det finns ${N} mynt totalt. Femkronorna är resten: ${N} − x.`),O('5x',0,'Det är inte antalet – fråga dig hur många av de '+N+' mynten som inte är tiokronor.')]},
+       {hl:'a',label:'Tiokronornas värde (kr)',opts:[O('10x',1),O('x + 10',0,'Varje tiokrona är värd 10 kr. x stycken är värda 10 · x.'),O('10',0,'Det är värdet av en enda tiokrona.')]},
+       {hl:'a',label:'Femkronornas värde (kr)',opts:[O(`5(${N} - x)`,1),O('5x',0,`Femkronorna är ${N} − x stycken, inte x.`),O(`5 · ${N} - x`,0,'Parentesen behövs: alla femkronorna är värda 5 kr var.')]}],
+   eq:{text:`10x + 5(${N} - x) = ${T}`,L:[5,5*N],R:[0,T],simple:false,
+     opts:[O(`10x + 5(${N} - x) = ${T}`,1),O(`10x + 5x = ${T}`,0,`Femkronorna är ${N} − x, inte x.`),O(`x + (${N} - x) = ${T}`,0,`Det räknar mynt, inte kronor.`),O(`10x + 5(${N} - x) = ${N}`,0,`Vänsterledet är kronor, så högerledet ska vara ${T}.`)]},
+   x:t,
+   ans:[O(`Det finns ${t} tiokronor.`,1),O(`Det finns ${N-t} tiokronor.`,0,`${N-t} är antalet femkronor.`),O(`x = ${t}`,0,'Rätt värde – men svara med en hel mening!'),O(`Det finns ${10*t} tiokronor.`,0,`${10*t} kr är vad tiokronorna är värda.`)],
+   check:[{label:'Tiokronor',expr:'x',sub:`${t}`,val:t},{label:'Femkronor',expr:`${N} - x`,sub:`${N} − ${t}`,val:N-t},{label:'Värde (kr)',expr:`10 · ${t} + 5 · ${N-t}`,sub:`${10*t} + ${5*(N-t)}`,val:T}],
+   concl:`${t} tiokronor och ${N-t} femkronor är ${N} mynt värda ${T} kr – precis som i texten.`};
+ }},
+ {id:'taxi',emoji:'🚕',title:'Taxiresan',desc:'Startavgift + pris per km',lvl:'Nivå 1',gen(){
+   const s=pick([40,45,50,55,60]),p=pick([12,14,15,18,20]),k=ri(5,18),T=s+p*k;
+   return {tag:'Resa',text:`[[b|En taxi tar ${s} kr i startavgift]] [[a|och sedan ${p} kr per kilometer.]] [[s|Resan kostade ${T} kr.]] [[q|Hur många kilometer åkte de?]]`,
+   ask:[O('Hur långt de åkte (km)',1),O('Vad resan kostade',0,`Det står i texten: ${T} kr.`),O('Vad en kilometer kostar',0,`Det står i texten: ${p} kr.`)],
+   xq:[O('Antalet kilometer',1,'Bra! Det är det vi inte vet och det frågan gäller.'),O('Priset för resan',0,`Det vet vi redan (${T} kr).`),O('Startavgiften',0,`Den vet vi redan (${s} kr).`)],
+   xdef:'antalet kilometer',given:[['Kilometer','x']],
+   tr:[{hl:'a',label:'Kostnad för kilometrarna (kr)',opts:[O(`${p}x`,1),O(`x + ${p}`,0,`Varje kilometer kostar ${p} kr. x kilometer kostar ${p} · x.`),O(`${p}`,0,'Det är priset för en enda kilometer.')]},
+       {hl:'a b',label:'Hela resan (kr)',opts:[O(`${p}x + ${s}`,1),O(`${p}x`,0,`Glöm inte startavgiften på ${s} kr.`),O(`${s}x + ${p}`,0,`Startavgiften betalas en gång. Det är kilometerpriset som gånger x.`)]}],
+   eq:{text:`${p}x + ${s} = ${T}`,L:[p,s],R:[0,T],simple:true,
+     opts:[O(`${p}x + ${s} = ${T}`,1),O(`${p}x = ${T}`,0,`Startavgiften saknas.`),O(`${s}x + ${p} = ${T}`,0,'Startavgiften och kilometerpriset har bytt plats.'),O(`${p} + ${s} = ${T}`,0,'x saknas – det är antalet kilometer vi söker.')]},
+   x:k,
+   ans:[O(`De åkte ${k} km.`,1),O(`x = ${k}`,0,'Rätt värde – men svara med en hel mening och enhet!'),O(`De åkte ${T-s} km.`,0,`${T-s} kr är vad kilometrarna kostade, inte antalet km.`),O(`Resan kostade ${T} kr.`,0,'Det vet vi redan. Frågan gällde sträckan.')],
+   check:[{label:'Kilometer',expr:'x',sub:`${k}`,val:k},{label:'Pris (kr)',expr:`${p} · ${k} + ${s}`,sub:`${p*k} + ${s}`,val:T}],
+   concl:`${k} km kostar ${p*k} kr, och med startavgiften blir det ${T} kr – precis som i texten.`};
+ }},
+ {id:'kulor',emoji:'🔵',title:'Kulorna',desc:'Gånger så många, tillsammans',lvl:'Nivå 1',gen(){
+   const k=pick([3,4,5]),l=ri(6,18),S=(k+1)*l;
+   return {tag:'Antal',text:`[[a|Maja har ${k} gånger så många kulor som Liam.]] [[s|Tillsammans har de ${S} kulor.]] [[q|Hur många kulor har Maja?]]`,
+   ask:[O('Hur många kulor Maja har',1),O('Hur många kulor Liam har',0,'Läs frågan igen – vem gäller den?'),O('Hur många kulor de har tillsammans',0,`Det vet vi: ${S}.`)],
+   xq:[O('Liams kulor',1,'Bra val! Maja beskrivs utifrån Liam.'),O('Majas kulor',2,`Det går – men då blir Liam x / ${k}, och det blir bråk. Vi låter x vara Liams kulor.`),O('Alla kulor',0,`Det vet vi redan (${S}).`)],
+   xdef:'Liams kulor',given:[['Liam','x']],
+   tr:[{hl:'a',label:'Majas kulor',opts:[O(`${k}x`,1),O(`x + ${k}`,0,`”${k} gånger så många” betyder ${k} · x, inte ${k} fler.`),O(`x / ${k}`,0,'Maja har fler kulor än Liam, inte färre.'),O(`${k}`,0,'Majas antal beror på Liams, så x måste vara med.')]}],
+   eq:{text:`x + ${k}x = ${S}`,L:[k+1,0],R:[0,S],simple:false,
+     opts:[O(`x + ${k}x = ${S}`,1),O(`${k}x = ${S}`,0,'Det är bara Majas kulor. ”Tillsammans” betyder Liams + Majas.'),O(`x + (x + ${k}) = ${S}`,0,`Maja har ${k} gånger så många, alltså ${k}x.`)]},
+   x:l,
+   ans:[O(`Maja har ${k*l} kulor.`,1),O(`Maja har ${l} kulor.`,0,`${l} är x, alltså Liams kulor.`),O(`x = ${l}`,0,'x är Liams kulor, och frågan gäller Maja.'),O(`Liam har ${l} kulor.`,0,'Det stämmer, men frågan var hur många Maja har.')],
+   check:[{label:'Liam',expr:'x',sub:`${l}`,val:l},{label:'Maja',expr:`${k}x`,sub:`${k} · ${l}`,val:k*l},{label:'Tillsammans',expr:`${l} + ${k*l}`,sub:`${l} + ${k*l}`,val:S}],
+   concl:`Maja har ${k} gånger så många som Liam, och tillsammans har de ${S} kulor – precis som i texten.`};
+ }},
+ {id:'foljd',emoji:'🔢',title:'Tre tal i rad',desc:'Tal som följer på varandra',lvl:'Nivå 2',gen(){
+   const n=ri(12,60),S=3*n+3;
+   return {tag:'Tal',text:`[[a|Tre heltal följer direkt på varandra, som 7, 8 och 9.]] [[s|Summan av talen är ${S}.]] [[q|Vilket är det största talet?]]`,
+   ask:[O('Vilket det största talet är',1),O('Vilket det minsta talet är',0,'Läs frågan igen – det är det största talet som efterfrågas.'),O('Vad summan är',0,`Det vet vi: ${S}.`)],
+   xq:[O('Det minsta talet',1,'Bra! Då är de andra talen x + 1 och x + 2.'),O('Det mittersta talet',2,'Smart – då blir talen x − 1, x och x + 1. Men vi väljer det minsta talet som x.'),O('Det största talet',2,'Det går – då blir talen x − 2, x − 1 och x. Vi väljer det minsta talet som x.')],
+   xdef:'det minsta talet',given:[['Minsta talet','x']],
+   tr:[{hl:'a',label:'Mittersta talet',opts:[O('x + 1',1),O('2x',0,'Nästa heltal är 1 större, inte dubbelt så stort.'),O('x - 1',0,'Talen kommer i ordning, så nästa tal är större.')]},
+       {hl:'a',label:'Största talet',opts:[O('x + 2',1),O('x + 3',0,'Det är 2 steg från det minsta till det största: 7, 8, 9.'),O('3x',0,'Tre gånger så stort blir alldeles för mycket. Det är 2 mer.')]}],
+   eq:{text:`x + (x + 1) + (x + 2) = ${S}`,L:[3,3],R:[0,S],simple:false,
+     opts:[O(`x + (x + 1) + (x + 2) = ${S}`,1),O(`x + 1 + 2 = ${S}`,0,'Det är bara ett tal. Summan av alla tre talen ska vara med.'),O(`x + 2x + 3x = ${S}`,0,'Talen följer på varandra: x, x + 1 och x + 2.'),O(`3x = ${S}`,0,'Du har glömt +1 och +2.')]},
+   x:n,
+   ans:[O(`Det största talet är ${n+2}.`,1),O(`Det största talet är ${n}.`,0,`${n} är x, det minsta talet.`),O(`x = ${n}`,0,'x är det minsta talet, och frågan gäller det största.'),O(`Det största talet är ${n+1}.`,0,`${n+1} är det mittersta talet.`)],
+   check:[{label:'Minsta talet',expr:'x',sub:`${n}`,val:n},{label:'Största talet',expr:'x + 2',sub:`${n} + 2`,val:n+2},{label:'Summan',expr:`${n} + ${n+1} + ${n+2}`,sub:`${n} + ${n+1} + ${n+2}`,val:S}],
+   concl:`${n} + ${n+1} + ${n+2} = ${S} – precis som i texten.`};
+ }},
+ {id:'cykel',emoji:'🚲',title:'Hyra cykel',desc:'När kostar de lika mycket?',lvl:'Nivå 3',gen(){
+   const pa=pick([20,25,30]),add=pick([10,15,20]),pb=pa+add;let h;do{h=ri(3,8);}while(add*h===pa);const f=add*h;
+   return {tag:'Jämföra',text:`[[a|Cykelfirma A tar ${f} kr i grundavgift och ${pa} kr per timme.]] [[b|Cykelfirma B har ingen grundavgift men tar ${pb} kr per timme.]] [[q|Efter hur många timmar kostar de lika mycket?]]`,
+   ask:[O('Hur många timmar det tar innan priset är lika',1),O('Vad det kostar att hyra hos A',0,'Det beror på hur länge man cyklar. Läs frågan igen.'),O('Vilken firma som är billigast',0,'Frågan gäller när de kostar lika mycket.')],
+   xq:[O('Antalet timmar',1,'Bra! Priset hos båda firmorna beror på antalet timmar.'),O('Priset hos A',0,'Priset beror på timmarna. Låt x vara antalet timmar.'),O('Grundavgiften',0,`Den vet vi redan (${f} kr).`)],
+   xdef:'antalet timmar',given:[['Timmar','x']],
+   tr:[{hl:'a',label:'Pris hos A (kr)',opts:[O(`${pa}x + ${f}`,1),O(`${f}x + ${pa}`,0,'Grundavgiften betalas en gång. Det är timpriset som gånger x.'),O(`${pa}x`,0,`Glöm inte grundavgiften på ${f} kr.`)]},
+       {hl:'b',label:'Pris hos B (kr)',opts:[O(`${pb}x`,1),O(`${pb}`,0,'Det är priset för en timme. x timmar kostar '+pb+' · x.'),O(`x + ${pb}`,0,`${pb} kr per timme betyder ${pb} · x.`)]}],
+   eq:{text:`${pb}x = ${pa}x + ${f}`,L:[pb,0],R:[pa,f],simple:true,
+     opts:[O(`${pb}x = ${pa}x + ${f}`,1),O(`${pb}x + ${pa}x = ${f}`,0,'Priserna ska vara lika – då står A på ena sidan och B på den andra.'),O(`${pb}x = ${f}`,0,`Glöm inte timpriset hos A (${pa}x).`),O(`${pb} = ${pa}x + ${f}`,0,'B kostar '+pb+' kr per timme, alltså '+pb+'x.')]},
+   x:h,
+   ans:[O(`Efter ${h} timmar kostar de lika mycket.`,1),O(`x = ${h}`,0,'Rätt värde – men svara med en hel mening och enhet!'),O(`Efter ${pb*h} timmar kostar de lika mycket.`,0,`${pb*h} kr är priset – inte antalet timmar.`),O(`Firma B är alltid billigast.`,0,`Efter ${h} timmar kostar de lika mycket. Sedan blir A billigare.`)],
+   check:[{label:'Firma A (kr)',expr:`${pa} · ${h} + ${f}`,sub:`${pa*h} + ${f}`,val:pa*h+f},{label:'Firma B (kr)',expr:`${pb} · ${h}`,sub:`${pb} · ${h}`,val:pb*h}],
+   concl:`Efter ${h} timmar kostar båda ${pb*h} kr – precis som frågan ville.`};
+ }},
+ {id:'bak',emoji:'🍪',title:'Bakförsäljningen',desc:'Dubbelt så många, två priser',lvl:'Nivå 2',gen(){
+   const pc=pick([6,8,10]),pk=pick([4,5]),c=ri(8,25),T=pc*c+pk*2*c;
+   return {tag:'Pengar',text:`[[a|På skolans bakförsäljning kostar en chokladboll ${pc} kr och en kaka ${pk} kr.]] [[b|Klassen sålde dubbelt så många kakor som chokladbollar]] [[s|och fick in ${T} kr.]] [[q|Hur många kakor sålde de?]]`,
+   ask:[O('Hur många kakor de sålde',1),O('Hur många chokladbollar de sålde',0,'Läs frågan igen.'),O('Hur mycket pengar de fick',0,`Det vet vi: ${T} kr.`)],
+   xq:[O('Antalet chokladbollar',1,'Bra val! Kakorna beskrivs utifrån chokladbollarna.'),O('Antalet kakor',2,'Det går – men då blir chokladbollarna x / 2 och det blir bråk. Vi låter x vara antalet chokladbollar.'),O('Pengarna de fick',0,`Det vet vi redan (${T} kr).`)],
+   xdef:'antalet chokladbollar',given:[['Chokladbollar','x']],
+   tr:[{hl:'b',label:'Antalet kakor',opts:[O('2x',1),O('x + 2',0,'Dubbelt så många betyder 2 gånger, inte 2 fler.'),O('x / 2',0,'Det säljs fler kakor, inte färre.')]},
+       {hl:'a',label:'Pengar för chokladbollarna (kr)',opts:[O(`${pc}x`,1),O(`x + ${pc}`,0,`Varje chokladboll kostar ${pc} kr. x stycken kostar ${pc} · x.`)]},
+       {hl:'a b',label:'Pengar för kakorna (kr)',opts:[O(`${pk} · 2x`,1),O(`${pk}x`,0,'Kakorna är 2x stycken, inte x.'),O(`${pk} + 2x`,0,`Varje kaka kostar ${pk} kr: ${pk} · 2x.`)]}],
+   eq:{text:`${pc}x + ${pk} · 2x = ${T}`,L:[pc+2*pk,0],R:[0,T],simple:false,
+     opts:[O(`${pc}x + ${pk} · 2x = ${T}`,1),O(`${pc}x + ${pk}x = ${T}`,0,'Kakorna är 2x stycken.'),O(`x + 2x = ${T}`,0,`Det räknar bakverk, inte kronor.`),O(`${pc}x + ${pk} + 2x = ${T}`,0,`Kakornas pris ska gångras med antalet: ${pk} · 2x.`)]},
+   x:c,
+   ans:[O(`De sålde ${2*c} kakor.`,1),O(`De sålde ${c} kakor.`,0,`${c} är x, antalet chokladbollar.`),O(`x = ${c}`,0,'x är chokladbollarna, och frågan gäller kakorna.'),O(`De sålde ${pk*2*c} kakor.`,0,`${pk*2*c} kr är vad kakorna gav.`)],
+   check:[{label:'Chokladbollar',expr:'x',sub:`${c}`,val:c},{label:'Kakor',expr:'2x',sub:`2 · ${c}`,val:2*c},{label:'Pengar (kr)',expr:`${pc} · ${c} + ${pk} · ${2*c}`,sub:`${pc*c} + ${pk*2*c}`,val:T}],
+   concl:`${c} chokladbollar och ${2*c} kakor ger ${T} kr – precis som i texten.`};
+ }},
+];
+
+const STEPS=['Förstå','Översätt','Ställ upp','Lös','Svara','Kontrollera'];
+const THINK=[
+  'Läs hela texten. Frågan står oftast sist. x ska vara något vi inte vet – gärna det som andra saker jämförs med.',
+  'Ord blir matte: <b>fler, mer, äldre, längre</b> → +   <b>färre, mindre, yngre</b> → −   <b>dubbelt, gånger</b> → ·   <b>tillsammans, totalt</b> → summa.',
+  'En ekvation har ett likhetstecken. På ena sidan står det du byggt med x, på andra sidan det kända värdet från texten.',
+  'Gör samma sak på båda sidor av likhetstecknet – som en våg som ska vara i balans. Använd motsatt räknesätt: + tas bort med −, · tas bort med ÷.',
+  'Läs frågan igen! Är det x som efterfrågas – eller något annat? Svara med en hel mening och rätt enhet.',
+  'Sätt in ditt värde på x i texten – inte bara i ekvationen. Stämmer allt som står i texten?'
+];
+
+// ---------- state ----------
+let done={};try{done=JSON.parse(localStorage.getItem('ekv-done'))||{}}catch(e){}
+const saveDone=()=>{try{localStorage.setItem('ekv-done',JSON.stringify(done))}catch(e){}};
+let P=null,cur=null,step=0,miss=0;
+const $=id=>document.getElementById(id);
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));window.scrollTo(0,0);if(id==='home')renderHome();}
+$('logo').onclick=()=>show('home');$('backBtn').onclick=()=>show('home');
+
+function renderHome(){
+  const el=$('probs');el.innerHTML='';
+  PROBS.forEach((p,i)=>{
+    const b=document.createElement('button');b.className='prob';
+    const d=done[p.id];
+    b.innerHTML=`${d!=null?`<span class="done">✓ ${d===0?'felfritt':'klar'}</span>`:''}<span class="em">${p.emoji}</span><span class="lvl">${p.lvl}</span><span class="t">${p.title}</span><span class="d">${p.desc}</span>`;
+    b.onclick=()=>start(i);el.appendChild(b);
+  });
+}
+
+function start(i){
+  cur=i;P=PROBS[i].gen();step=0;miss=0;
+  $('ptext').innerHTML=`<span class="tag">${PROBS[i].emoji} ${P.tag} · ${PROBS[i].title}</span>`+P.text.replace(/\[\[(\w)\|([^\]]+)\]\]/g,'<span class="hl" data-k="$1">$2</span>');
+  $('nb').innerHTML=`<h3>📓 Mitt lösningsblad</h3><div id="nbBody"><div class="empty">Här skriver du ner din lösning steg för steg…</div></div>`;
+  show('prob');runStep(0);
+}
+function hl(k){document.querySelectorAll('.hl').forEach(s=>s.classList.toggle('on',!!k&&k.includes(s.dataset.k)));}
+function renderStepper(){
+  $('stepper').innerHTML=STEPS.map((s,i)=>`<div class="pill ${i===step?'cur':''} ${i<step?'done':''}"><span>${i<step?'✓':i+1}</span><em>${s}</em></div>`).join('');
+  $('miss').textContent='Misstag: '+miss;
+}
+function nb(html,cls='',op=''){
+  const b=$('nbBody');const e=b.querySelector('.empty');if(e)e.remove();
+  const d=document.createElement('div');d.className='e '+cls;d.innerHTML=`<span>${html}</span>${op?`<span class="op">${op}</span>`:''}`;b.appendChild(d);return d;
+}
+function head(){
+  return `<div class="stephead"><div class="n">${step+1}</div><h2>${STEPS[step]}</h2></div><div class="think">💡 ${THINK[step]}</div>`;
+}
+
+// multiple choice
+function mc({q,opts,math,onDone}){
+  const w=$('work');
+  w.innerHTML=head()+`<div class="q">${q}</div><div class="mopts" id="mopts"></div><div class="fb" id="mfb"></div>`;
+  const box=$('mopts');const fb=$('mfb');
+  // ta bort dubbletter (samma text, eller samma uttryck med termerna i annan ordning)
+  const norm=t=>{let x=String(t).replace(/\s/g,'').replace(/−/g,'-');if(!/^[+-]/.test(x))x='+'+x;return x.split(/(?=[+-])/).sort().join('');};
+  const seen=new Set();
+  opts=[...opts.filter(o=>o.ok===1),...opts.filter(o=>o.ok!==1)].filter(o=>{const k=norm(o.t);if(seen.has(k))return false;seen.add(k);return true;});
+  shuffle(opts).forEach(o=>{
+    const b=document.createElement('button');b.className='mopt'+(math?' math':'');b.innerHTML=math?mx(o.t):o.t;
+    b.onclick=()=>{
+      if(o.ok===0){
+        miss++;renderStepper();b.classList.add('wrong');b.disabled=true;
+        fb.className='fb on bad';fb.innerHTML=`<b class="h">Inte riktigt</b>${o.fb||'Läs texten igen och försök en gång till.'}`;
+        return;
+      }
+      [...box.children].forEach(x=>x.disabled=true);
+      const good=o.ok===1;
+      b.classList.add(good?'right':'altc');
+      if(!good){[...box.children].forEach((x,i)=>{});}
+      const correct=opts.find(x=>x.ok===1);
+      fb.className='fb on '+(good?'good':'alt');
+      fb.innerHTML=`<b class="h">${good?pick(['Rätt!','Snyggt!','Precis!','Bra tänkt!']):'Det fungerar – men…'}</b>${o.fb||''}<div class="row"><button class="btn small" id="cont">Fortsätt ▶</button></div>`;
+      $('cont').onclick=()=>onDone(correct);$('cont').focus({preventScroll:true});
+      fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+    };
+    box.appendChild(b);
+  });
+}
+
+function runStep(n){
+  step=n;renderStepper();
+  if(n===0){
+    hl('q');
+    mc({q:'Vad frågar uppgiften efter?',opts:P.ask,onDone:()=>{
+      hl('');
+      mc({q:'Vad är smart att låta <i style="font-family:Georgia">x</i> stå för?',opts:P.xq,onDone:()=>{
+        nb('Förstå','sec');nb(`Låt <i>x</i> = ${P.xdef}`);
+        P.given.forEach(([l,e])=>nb(`${l}: ${mx(e)}`));
+        runStep(1);
+      }});
+    }});
+  }
+  else if(n===1){
+    let i=0;nb('Översätt','sec');
+    const next=()=>{
+      if(i>=P.tr.length) return runStep(2);
+      const t=P.tr[i];hl(t.hl);
+      mc({q:`Skriv <b>${mxl(t.label)}</b> som ett uttryck med <i style="font-family:Georgia">x</i>:`,opts:t.opts,math:true,onDone:c=>{nb(`${mxl(t.label)}: ${mx(c.t)}`);i++;next();}});
+    };next();
+  }
+  else if(n===2){
+    hl('s');
+    mc({q:'Vilken ekvation beskriver problemet?',opts:P.eq.opts,math:true,onDone:()=>{hl('');nb('Ekvation','sec');runStep(3);}});
+  }
+  else if(n===3) solver();
+  else if(n===4){
+    hl('q');
+    mc({q:`Du vet nu att <span class="m">${mx('x = '+P.x)}</span> (${P.xdef}). Vilket svar besvarar frågan?`,opts:P.ans,onDone:c=>{hl('');nb('Svar','sec');nb(c.t,'ans');runStep(5);}});
+  }
+  else if(n===5) checker();
+}
+
+
+// ---------- utveckla parenteser ----------
+function expandEq(text){
+  const i=text.indexOf('=');const L=text.slice(0,i).trim(),R=text.slice(i+1).trim();
+  if(L.indexOf('(')<0) return null;
+  const re=/([+-]?)\s*(\d*)\s*\(([^()]*)\)/g;const groups=[];let m;
+  while((m=re.exec(L))){
+    const parts=(m[3].trim().match(/[+-]?\s*[^+-]+/g)||[]).map(p=>{p=p.trim();let sg=1;if(p[0]==='-'){sg=-1;p=p.slice(1).trim();}else if(p[0]==='+'){p=p.slice(1).trim();}return {sg,body:p};});
+    groups.push({full:m[0],idx:m.index,sign:m[1]==='-'?-1:1,hasSign:!!m[1],k:m[2]?+m[2]:1,parts});
+  }
+  const mul=(k,body)=>{if(/x$/.test(body)){const c=k*(body==='x'?1:+body.slice(0,-1));return c===1?'x':c+'x';}return String(k*(+body));};
+  function render(kind){
+    let out=L;
+    groups.slice().reverse().forEach(g=>{
+      let ts=g.parts.map((p,j)=>{
+        const last=j===g.parts.length-1;
+        let sg=g.sign*p.sg,str=mul(g.k,p.body);
+        if(kind==='flip'&&last) sg=-sg;
+        if(kind==='first'&&j>0) str=p.body;
+        if(kind==='ignk') str=p.body;
+        if(kind==='drop'&&last&&g.parts.length>1) return null;
+        return {sg,str};
+      }).filter(Boolean);
+      let s='';
+      ts.forEach((t,j)=>{
+        const lead=(j===0&&!g.hasSign&&g.idx===0);
+        if(lead) s+=(t.sg<0?'-':'')+t.str;
+        else s+=(t.sg<0?' - ':' + ')+t.str;
+      });
+      const before=out.slice(0,g.idx).replace(/\s+$/,'');
+      out=before+(before?'':'')+s+out.slice(g.idx+g.full.length);
+    });
+    return out.replace(/\s+/g,' ').replace(/^\s*\+\s*/,'').trim()+' = '+R;
+  }
+  const hasK=groups.some(g=>g.k>1);
+  const ok=render('ok');
+  const cand=hasK?[['flip','Kolla tecknen! Ett minus inne i parentesen följer med när du multiplicerar: '+groups.find(g=>g.k>1).k+' · (−x) blir −'+groups.find(g=>g.k>1).k+'x.'],['first','Talet framför parentesen ska multipliceras med alla termer i parentesen – även den sista.'],['ignk','Du har glömt att multiplicera med talet framför parentesen.']]
+                 :[['flip','Kolla tecknen! Plus framför en parentes ändrar inga tecken – allt står kvar som det var.'],['drop','Ingen term får försvinna när parentesen tas bort.']];
+  const opts=[O(ok,1)];
+  cand.forEach(c=>{const t=render(c[0]);if(t!==ok&&!opts.some(o=>o.t===t))opts.push(O(t,0,c[1]));});
+  const g1=groups.find(g=>g.k>1);
+  const label=hasK?'Utveckla parentesen: multiplicera '+g1.k+' med varje term i parentesen':(groups.length>1?'Ta bort parenteserna (det står plus framför dem)':'Ta bort parentesen (det står plus framför den)');
+  return {text:ok,opts,label};
+}
+
+// ---------- solver ----------
+function solver(){
+  const s={La:P.eq.L[0],Lb:P.eq.L[1],Ra:P.eq.R[0],Rb:P.eq.R[1],simple:P.eq.simple};
+  const EXP=P.eq.simple?null:expandEq(P.eq.text);s.expanded=!EXP;
+  const lines=[{eq:mx(P.eq.text),op:''}];
+  const nbLines=[nb(mx(P.eq.text))];
+  const w=$('work');
+  w.innerHTML=head()+`<div class="solve"><div class="lbl">Ekvationen</div><div id="slines"></div></div><div class="q" id="sq">Vad är ett bra nästa steg?</div><div class="mopts" id="mopts"></div><div class="fb" id="mfb"></div>`;
+  const eqStr=()=>mx(lin(s.La,s.Lb)+' = '+lin(s.Ra,s.Rb));
+  const isDone=()=>s.simple&&s.Ra===0&&s.Lb===0&&s.La===1;
+  function draw(){
+    $('slines').innerHTML=lines.map((l,i)=>`<div class="sline ${isDone()&&i===lines.length-1?'final':''}"><span>${l.eq}</span><span class="op">${l.op?'| '+l.op:''}</span></div>`).join('');
+  }
+  function moves(){
+    const out=[];
+    if(!s.simple&&!s.expanded){
+      out.push({ok:1,label:EXP.label,op:'utveckla',sub:true});
+      out.push({label:'Förenkla vänsterledet: samla x-termerna och talen',fb:'Börja med parentesen! Termerna inne i parentesen kan inte läggas ihop med de andra förrän parentesen är borta.'});
+      out.push({label:`Subtrahera ${s.Rb} från båda leden`,fb:'Då blir högerledet 0 och det hjälper inte. Ta först bort parentesen.'});
+      out.push({label:'Dividera båda leden med 2',fb:'Ta först bort parentesen och förenkla innan du dividerar.'});
+    } else if(!s.simple){
+      out.push({ok:1,label:'Förenkla vänsterledet: samla x-termerna och talen',op:'förenkla',apply(){s.simple=true}});
+      out.push({label:`Subtrahera ${s.Rb} från båda leden`,fb:'Då blir högerledet 0 och det hjälper inte. Förenkla först vänsterledet genom att räkna ihop alla x-termer och alla tal.'});
+      out.push({label:'Dividera båda leden med 2',fb:'Förenkla först! Räkna ihop alla x-termer för sig och alla tal för sig i vänsterledet.'});
+      
+    } else if(s.Ra!==0){
+      out.push({ok:1,label:`Subtrahera ${s.Ra}x från båda leden`,op:`${M}${s.Ra}x`,apply(){s.La-=s.Ra;s.Ra=0}});
+      out.push({label:`Subtrahera ${s.Ra}x bara från högerledet`,fb:'Det du gör på ena sidan måste du göra på den andra – annars är vågen inte i balans längre.'});
+      out.push({label:`Addera ${s.Ra}x till båda leden`,fb:`Då får du ännu fler x i högerledet. För att bli av med +${s.Ra}x använder vi motsatt räknesätt: subtraktion.`});
+      out.push({label:`Dividera båda leden med ${s.La}`,fb:'Det finns x på båda sidor. Samla alla x på ena sidan först.'});
+    } else if(s.Lb!==0){
+      const b=s.Lb,a=Math.abs(b);
+      if(b>0){
+        out.push({ok:1,label:`Subtrahera ${a} från båda leden`,op:`${M}${a}`,apply(){s.Rb-=s.Lb;s.Lb=0}});
+        out.push({label:`Addera ${a} till båda leden`,fb:`Då får du ${s.La===1?'':s.La}x + ${2*a}. För att bli av med +${a} använder vi motsatt räknesätt: subtraktion.`});
+      } else {
+        out.push({ok:1,label:`Addera ${a} till båda leden`,op:`+${a}`,apply(){s.Rb-=s.Lb;s.Lb=0}});
+        out.push({label:`Subtrahera ${a} från båda leden`,fb:`Då får du ${s.La}x ${M} ${2*a}. För att bli av med ${M}${a} använder vi motsatt räknesätt: addition.`});
+      }
+      out.push({label:`${b>0?'Subtrahera':'Addera'} ${a} bara i vänsterledet`,fb:'Det du gör på ena sidan måste du göra på den andra – annars är det inte lika längre.'});
+      if(s.La!==1) out.push({label:`Dividera båda leden med ${s.La}`,fb:`Det är tillåtet, men då måste du dela även ${a} med ${s.La} och det kan bli krångligt. Bli av med talet ${a} först.`});
+      else out.push({label:`Subtrahera ${s.Rb} från båda leden`,fb:'Vi vill få x ensamt. Det är talet bredvid x som ska bort.'});
+    } else if(s.La!==1){
+      const a=s.La;
+      out.push({ok:1,label:`Dividera båda leden med ${a}`,op:`÷${a}`,apply(){s.Rb/=s.La;s.La=1}});
+      out.push({label:`Subtrahera ${a} från båda leden`,fb:`${a}x betyder ${a} gånger x. Motsatsen till gånger är division.`});
+      out.push({label:`Multiplicera båda leden med ${a}`,fb:`Då blir det ${a*a}x. Motsatsen till gånger är division.`});
+      out.push({label:`Dividera bara vänsterledet med ${a}`,fb:'Det du gör på ena sidan måste du göra på den andra.'});
+    }
+    return shuffle(out);
+  }
+  function askExpand(){
+    const box=$('mopts'),fb=$('mfb');fb.className='fb';box.innerHTML='';
+    $('sq').textContent='Vilken utveckling är rätt?';
+    shuffle(EXP.opts).forEach(o=>{
+      const b=document.createElement('button');b.className='mopt';b.innerHTML=mx(o.t);
+      b.onclick=()=>{
+        if(!o.ok){miss++;renderStepper();b.classList.add('wrong');b.disabled=true;fb.className='fb on bad';fb.innerHTML=`<b class="h">Inte riktigt</b>${mxl(o.fb)}`;return;}
+        lines[lines.length-1].op='utveckla';nbLines[nbLines.length-1].insertAdjacentHTML('beforeend',`<span class="op">| utveckla</span>`);
+        s.expanded=true;lines.push({eq:mx(EXP.text),op:''});nbLines.push(nb(mx(EXP.text)));
+        $('sq').textContent='Vad är ett bra nästa steg?';round();
+      };
+      box.appendChild(b);
+    });
+  }
+  function round(){
+    draw();
+    const box=$('mopts'),fb=$('mfb');box.innerHTML='';fb.className='fb';
+    if(isDone()){
+      $('sq').textContent='';box.remove();
+      fb.className='fb on good';fb.innerHTML=`<b class="h">Ekvationen är löst! 🎉</b>x står ensamt: <span class="m">${mx('x = '+s.Rb)}</span>. Men är det svaret på frågan? Det tar vi i nästa steg.<div class="row"><button class="btn small" id="cont">Fortsätt ▶</button></div>`;
+      $('cont').onclick=()=>runStep(4);return;
+    }
+    moves().forEach(m=>{
+      const b=document.createElement('button');b.className='mopt';b.innerHTML=mxl(m.label);
+      b.onclick=()=>{
+        if(!m.ok){miss++;renderStepper();b.classList.add('wrong');b.disabled=true;fb.className='fb on bad';fb.innerHTML=`<b class="h">Inte det bästa steget</b>${mxl(m.fb)}`;return;}
+        if(m.sub){askExpand();return;}
+        lines[lines.length-1].op=m.op;nbLines[nbLines.length-1].insertAdjacentHTML('beforeend',`<span class="op">| ${m.op}</span>`);
+        m.apply();lines.push({eq:eqStr(),op:''});nbLines.push(nb(eqStr(),isDone()?'ans':''));
+        round();
+      };
+      box.appendChild(b);
+    });
+  }
+  round();
+}
+
+// ---------- check ----------
+function checker(){
+  hl('a b s');
+  const w=$('work');
+  w.innerHTML=head()+`<div class="q">Sätt in <span class="m">${mx('x = '+P.x)}</span> och räkna ut – stämmer det med texten?</div><div class="checks" id="checks"></div><div class="row" style="margin-top:12px"><button class="btn" id="chk">Kontrollera ✓</button></div><div class="fb" id="mfb"></div>`;
+  const box=$('checks');
+  P.check.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='crow';
+    d.innerHTML=`<span class="lab">${r.label}</span><span class="ex">${mx(r.expr)} = <input type="number" inputmode="numeric" aria-label="${r.label}"></span><span></span><span class="tip">Räkna: ${r.sub} = ?</span>`;
+    box.appendChild(d);
+  });
+  box.querySelector('input').focus();
+  box.addEventListener('keydown',e=>{if(e.key==='Enter')$('chk').click();});
+  $('chk').onclick=()=>{
+    let all=true;
+    [...box.children].forEach((d,i)=>{
+      const v=d.querySelector('input').value.trim().replace(',','.');
+      const ok=v!==''&&Number(v)===P.check[i].val;
+      if(!ok){all=false;if(v!==''&&!d.classList.contains('no'))miss++;}
+      d.classList.toggle('ok',ok);d.classList.toggle('no',!ok&&v!=='');
+      d.querySelector('input').disabled=ok;
+    });
+    renderStepper();
+    const fb=$('mfb');
+    if(!all){fb.className='fb on bad';fb.innerHTML='<b class="h">Inte klart än</b>Fyll i alla rutor. Där det blev fel visas en ledtråd.';return;}
+    hl('');$('chk').remove();
+    nb('Kontroll','sec');
+    P.check.forEach(r=>nb(`${r.label}: ${r.sub} = ${r.val}`));
+    nb('Det stämmer! ✓','ans');
+    fb.className='fb on good';fb.innerHTML=`<b class="h">Det stämmer! ✓</b>${P.concl}<div class="row"><button class="btn small" id="cont">Avsluta uppgiften ▶</button></div>`;
+    $('cont').onclick=finish;fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+}
+
+function finish(){
+  step=6;renderStepper();
+  const id=PROBS[cur].id;if(done[id]==null||miss<done[id]){done[id]=miss;saveDone();}
+  const nextI=(cur+1)%PROBS.length;
+  $('work').innerHTML=`<div class="finish"><div class="big">${miss===0?'🏆':miss<=3?'🌟':'💪'}</div><h2>${miss===0?'Felfritt – du är en riktig ekvationsdetektiv!':'Uppgiften är löst!'}</h2>
+    <p class="lead">${miss===0?'Du gick igenom alla sex stegen utan ett enda misstag.':`Du gjorde ${miss} misstag på vägen – och lärde dig av dem. Prova samma typ med nya tal!`}</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="fNext">Nästa uppgift ▶</button><button class="btn ghost" id="fAgain">Samma typ, nya tal</button><button class="btn ghost" id="fHome">Alla uppgifter</button></div></div>`;
+  $('fNext').onclick=()=>start(nextI);$('fAgain').onclick=()=>start(cur);$('fHome').onclick=()=>show('home');
+  $('work').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+renderHome();
+</script>
+</body>
+</html>
+  

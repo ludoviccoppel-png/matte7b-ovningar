@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinkeljakten - Räkna vinklar i trianglar</title>
+    <!-- Tailwind CSS för modern och responsiv design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti för firande vid rätt svar -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome för fina ikoner -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Anpassad pulserande effekt för vinkel-frågetecken */
+        @keyframes pulse-glow {
+            0%, 100% { fill: #ef4444; filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.6)); }
+            50% { fill: #dc2626; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)); }
+        }
+        .target-angle {
+            animation: pulse-glow 1.8s infinite;
+            font-weight: 800;
+        }
+
+        /* Skak-animation vid fel svar */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 p-3 sm:p-6">
+
+    <!-- ÖVERSTA HEADER / NAV -->
+    <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-4 sm:mb-6 px-2">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-200">
+                <i class="fa-solid fa-shapes text-2xl sm:text-3xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-indigo-900 tracking-wide">Vinkeljakten</h1>
+                <p class="text-xs sm:text-sm text-indigo-600 font-semibold">Triangelgeometri för Åk 7</p>
+            </div>
+        </div>
+        
+        <!-- Ljud och Hjälp-knappar -->
+        <div class="flex gap-2">
+            <button id="soundToggleBtn" onclick="toggleSound()" class="p-3 bg-white hover:bg-slate-50 text-slate-700 rounded-xl shadow-sm border border-slate-200 btn-bounce text-lg" title="Muta/Sätt på ljud">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-indigo-600"></i>
+            </button>
+            <button onclick="openRulesModal()" class="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold rounded-xl btn-bounce flex items-center gap-2 text-sm sm:text-base">
+                <i class="fa-solid fa-book-open"></i>
+                <span class="hidden sm:inline">Regler</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME AREA -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col gap-4 sm:gap-6">
+        
+        <!-- POÄNGBARR OCH STATISTIK -->
+        <div class="glass-card rounded-2xl p-4 flex flex-wrap justify-between items-center gap-3 border-b-4 border-indigo-500">
+            <!-- Poäng -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-amber-50 px-3 sm:px-4 py-2 rounded-xl border border-amber-200">
+                <i class="fa-solid fa-trophy text-amber-500 text-xl sm:text-2xl"></i>
+                <div>
+                    <div class="text-xs text-amber-700 font-bold uppercase tracking-wider">Poäng</div>
+                    <div id="scoreText" class="text-xl sm:text-2xl font-black text-amber-900">0</div>
+                </div>
+            </div>
+
+            <!-- Streak / I rad -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-rose-50 px-3 sm:px-4 py-2 rounded-xl border border-rose-200">
+                <i class="fa-solid fa-fire text-rose-500 text-xl sm:text-2xl"></i>
+                <div>
+                    <div class="text-xs text-rose-700 font-bold uppercase tracking-wider">Streak</div>
+                    <div id="streakText" class="text-xl sm:text-2xl font-black text-rose-900">0 🔥</div>
+                </div>
+            </div>
+
+            <!-- Timer / Tidselement -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-sky-50 px-3 sm:px-4 py-2 rounded-xl border border-sky-200">
+                <i class="fa-solid fa-clock text-sky-500 text-xl sm:text-2xl"></i>
+                <div>
+                    <div class="text-xs text-sky-700 font-bold uppercase tracking-wider">Timer</div>
+                    <div id="timerDisplay" class="text-xl sm:text-2xl font-black text-sky-900">Av</div>
+                </div>
+            </div>
+
+            <!-- Rätt / Totalt -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-emerald-50 px-3 sm:px-4 py-2 rounded-xl border border-emerald-200">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-xl sm:text-2xl"></i>
+                <div>
+                    <div class="text-xs text-emerald-700 font-bold uppercase tracking-wider">Lösta</div>
+                    <div id="solvedText" class="text-xl sm:text-2xl font-black text-emerald-900">0 / 0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NIVÅVÄLJARE OCH TIDS-LÄGE -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button onclick="setLevel(1)" id="lvlBtn1" class="lvl-btn glass-card p-3 rounded-xl border-2 text-left btn-bounce transition-all">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-slate-700">Nivå 1: Lätt</span>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">180° Regel</span>
+                </div>
+                <p class="text-xs text-slate-500">Två vinklar givna. Hitta den tredje vinkeln.</p>
+            </button>
+
+            <button onclick="setLevel(2)" id="lvlBtn2" class="lvl-btn glass-card p-3 rounded-xl border-2 text-left btn-bounce transition-all">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-slate-700">Nivå 2: Mellan</span>
+                    <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Special</span>
+                </div>
+                <p class="text-xs text-slate-500">Likbenta & rätvinkliga trianglar (90° symboler).</p>
+            </button>
+
+            <button onclick="setLevel(3)" id="lvlBtn3" class="lvl-btn glass-card p-3 rounded-xl border-2 text-left btn-bounce transition-all">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-slate-700">Nivå 3: Svår</span>
+                    <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold">Yttervinkel</span>
+                </div>
+                <p class="text-xs text-slate-500">Yttervinklar och raka vinklar (180° sidor).</p>
+            </button>
+        </div>
+
+        <!-- SPELKORT: GEOMETRIVISNING & INPUT -->
+        <div id="gameCard" class="glass-card rounded-3xl p-4 sm:p-6 flex flex-col items-center shadow-xl relative overflow-hidden">
+            
+            <!-- Timer toggle och Ledtråd -->
+            <div class="w-full flex justify-between items-center mb-2">
+                <button onclick="toggleTimerMode()" id="timerToggleBtn" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-stopwatch"></i> <span id="timerToggleText">Slå på Timer (60s)</span>
+                </button>
+                <button onclick="showHint()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb"></i> Ledtråd
+                </button>
+            </div>
+
+            <!-- Uppgiftsinstruktion -->
+            <div class="text-center mb-2">
+                <h2 id="questionPrompt" class="text-lg sm:text-xl font-bold text-indigo-950">
+                    Vad är värdet på den okända vinkeln x?
+                </h2>
+                <p id="subPrompt" class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                    Använd regeln om vinkelsumma i en triangel.
+                </p>
+            </div>
+
+            <!-- TRIANGEL SVG-CONTAINER -->
+            <div class="w-full max-w-lg h-64 sm:h-80 my-2 relative flex items-center justify-center bg-white/60 rounded-2xl border border-indigo-50 shadow-inner">
+                <svg id="triangleSvg" class="w-full h-full p-4 overflow-visible" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet">
+                    <!-- Triangeln och vinklarna ritas dynamiskt här med JS -->
+                </svg>
+            </div>
+
+            <!-- SVARS-INPUT & SKICKA -->
+            <div class="w-full max-w-md mt-2 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <input type="number" id="answerInput" placeholder="Skriv din vinkel (t.ex. 60)" 
+                           class="w-full px-5 py-3.5 text-xl font-bold rounded-2xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all text-center sm:text-left pr-10"
+                           onkeydown="if(event.key === 'Enter') checkAnswer()">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">°</span>
+                </div>
+                <button onclick="checkAnswer()" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-200 btn-bounce flex items-center justify-center gap-2">
+                    <span>Svara</span>
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+
+            <!-- FEEDBACK MEDDELANDE -->
+            <div id="feedbackBox" class="mt-4 w-full max-w-md min-h-[50px] rounded-2xl p-3 text-center text-sm font-bold transition-all hidden">
+                <p id="feedbackText"></p>
+                <p id="feedbackExplanation" class="text-xs font-normal mt-1 opacity-90"></p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: REGLER & TEORI -->
+    <div id="rulesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-lg w-full rounded-3xl p-6 bg-white shadow-2xl border-2 border-indigo-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-indigo-900 flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-indigo-600"></i> Geometriregler (Åk 7)
+                </h3>
+                <button onclick="closeRulesModal()" class="text-slate-400 hover:text-slate-600 text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-600">
+                <div class="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                    <h4 class="font-bold text-indigo-900 mb-1">1. Vinkelsumman i en triangel</h4>
+                    <p>Summan av alla tre vinklar i vilken triangel som helst är alltid exakt **180°**.</p>
+                    <p class="mt-1 font-mono text-xs bg-white p-2 rounded text-indigo-800 font-semibold">Vinkel A + Vinkel B + Vinkel C = 180°</p>
+                </div>
+
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <h4 class="font-bold text-emerald-900 mb-1">2. Rätvinklig triangel</h4>
+                    <p>En rät vinkel är **90°** och markeras ofta med en liten **kvadrat** i hörnet istället för en båge.</p>
+                </div>
+
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-100">
+                    <h4 class="font-bold text-amber-900 mb-1">3. Likbent triangel</h4>
+                    <p>En likbent triangel har två lika långa sidor och två **lika stora basvinklar**.</p>
+                </div>
+
+                <div class="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                    <h4 class="font-bold text-purple-900 mb-1">4. Raka vinklar och Yttervinklar</h4>
+                    <p>En rak linje bildar en vinkel på **180°**. Om en vinkel och en yttervinkel ligger på samma linje är deras summa 180°.</p>
+                </div>
+            </div>
+
+            <button onclick="closeRulesModal()" class="w-full mt-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl btn-bounce">
+                Jag förstår, låt mig spela!
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-4xl mx-auto w-full text-center py-4 text-xs text-slate-500 font-semibold">
+        Vinkeljakten &copy; Matematik för grundskolan åk 7
+    </footer>
+
+    <script>
+        /* ==========================================
+           LJUDKÄLLA VIA WEB AUDIO API (Syntetisk)
+           ========================================== */
+        class SoundEffects {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                // Spela en trevlig ackord/tonserie (C5 - E5 - G5)
+                [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.3);
+                });
+            }
+
+            playWrong() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+        }
+
+        const sound = new SoundEffects();
+
+        function toggleSound() {
+            sound.muted = !sound.muted;
+            const soundIcon = document.getElementById('soundIcon');
+            if (sound.muted) {
+                soundIcon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            } else {
+                soundIcon.className = 'fa-solid fa-volume-high text-indigo-600';
+            }
+        }
+
+        /* ==========================================
+           SPELILLSTÅND OCH VARIABLER
+           ========================================== */
+        let currentLevel = 1;
+        let score = 0;
+        let streak = 0;
+        let solvedCount = 0;
+        let totalCount = 0;
+        
+        let timerActive = false;
+        let timerSeconds = 60;
+        let timerInterval = null;
+
+        let currentProblem = null;
+
+        /* ==========================================
+           PROBLEM-GENERATORER
+           ========================================== */
+        
+        // Slumpa heltal mellan min och max inclusive
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateProblem(level) {
+            let problem = {
+                type: 'standard', // standard, isosceles, right, exterior
+                angles: [60, 60, 60],
+                unknownIndex: 0,
+                targetValue: 60,
+                labels: ['', '', ''],
+                sideEqualMarks: [], // index för likbenta markeringar
+                isRightAngle: false,
+                rightAngleIndex: -1,
+                hint: "",
+                // Specifikt för yttervinklar (Nivå 3)
+                exteriorInfo: null
+            };
+
+            if (level === 1) {
+                // NIVÅ 1: Hitta saknad 3:e vinkel i godtycklig triangel
+                let a = randInt(30, 100);
+                let b = randInt(30, 140 - a);
+                let c = 180 - (a + b);
+                
+                problem.angles = [a, b, c];
+                problem.unknownIndex = randInt(0, 2);
+                problem.targetValue = problem.angles[problem.unknownIndex];
+
+                problem.labels = problem.angles.map((val, idx) => 
+                    idx === problem.unknownIndex ? 'x' : `${val}°`
+                );
+
+                problem.hint = `Vinkelsumman i en triangel är alltid 180°. Subtrahera de kända vinklarna från 180°: (180 - ${problem.angles.filter((_, i) => i !== problem.unknownIndex).join(' - ')})`;
+
+            } else if (level === 2) {
+                // NIVÅ 2: Likbenta & Rätvinkliga
+                const subType = Math.random() < 0.5 ? 'right' : 'isosceles';
+
+                if (subType === 'right') {
+                    // Rätvinklig triangel (en vinkel är 90)
+                    let a = 90;
+                    let b = randInt(20, 70);
+                    let c = 90 - b;
+
+                    let rightIdx = randInt(0, 2);
+                    let remaining = [b, c];
+                    let finalAngles = [];
+                    for(let i=0; i<3; i++) {
+                        if(i === rightIdx) finalAngles.push(90);
+                        else finalAngles.push(remaining.pop());
+                    }
+
+                    problem.angles = finalAngles;
+                    problem.isRightAngle = true;
+                    problem.rightAngleIndex = rightIdx;
+
+                    let nonRightIndices = [0, 1, 2].filter(i => i !== rightIdx);
+                    problem.unknownIndex = nonRightIndices[randInt(0, 1)];
+                    problem.targetValue = problem.angles[problem.unknownIndex];
+
+                    problem.labels = problem.angles.map((val, idx) => {
+                        if (idx === rightIdx) return '90°';
+                        if (idx === problem.unknownIndex) return 'x';
+                        return `${val}°`;
+                    });
+
+                    problem.hint = `Kvadraten betyder att vinkeln är rät (90°). Summan av de spetsiga vinklarna är 90°, eller 180 - 90 - känd vinkel.`;
+
+                } else {
+                    // Likbent triangel
+                    let baseAngle = randInt(30, 75);
+                    let topAngle = 180 - (baseAngle * 2);
+
+                    let topIdx = randInt(0, 2);
+                    let angles = [];
+                    for(let i=0; i<3; i++) {
+                        if(i === topIdx) angles.push(topAngle);
+                        else angles.push(baseAngle);
+                    }
+
+                    problem.angles = angles;
+                    
+                    if (Math.random() < 0.6) {
+                        let baseIndices = [0, 1, 2].filter(i => i !== topIdx);
+                        problem.unknownIndex = baseIndices[0];
+                        problem.targetValue = baseAngle;
+                        
+                        problem.labels = angles.map((val, idx) => {
+                            if (idx === problem.unknownIndex) return 'x';
+                            if (idx === topIdx) return `${topAngle}°`;
+                            return `${baseAngle}°`;
+                        });
+                        problem.hint = `Detta är en likbent triangel. Basvinklarna (vinklarna vid de lika sidorna) är lika stora!`;
+                    } else {
+                        problem.unknownIndex = topIdx;
+                        problem.targetValue = topAngle;
+                        problem.labels = angles.map((val, idx) => {
+                            if (idx === topIdx) return 'x';
+                            return `${baseAngle}°`;
+                        });
+                        problem.hint = `Båda basvinklarna är ${baseAngle}°. Räkna ut toppvinkeln x med: 180 - ${baseAngle} - ${baseAngle}.`;
+                    }
+                }
+
+            } else if (level === 3) {
+                // NIVÅ 3: YTTERVINKLAR (KORREKT MATEMATIK & VARIANTER)
+                problem.type = 'exterior';
+                
+                let inA = randInt(35, 75); // Vinkel A (vänster)
+                let inB = randInt(35, 75); // Vinkel B (höger/hörn med yttervinkel)
+                let inC = 180 - (inA + inB); // Vinkel C (topp)
+                
+                let extAngleB = 180 - inB; // Yttervinkeln vid hörn B
+
+                problem.angles = [inA, inB, inC];
+
+                // Tre varianter för variation i träningen på yttervinklar:
+                const subType = randInt(1, 3);
+
+                if (subType === 1) {
+                    // Variant 1: Hitta yttervinkeln x när motstående inre vinklar ges
+                    // inA och inC ges, eller inA och inB ges.
+                    problem.targetValue = extAngleB;
+                    problem.exteriorInfo = {
+                        isTargetExterior: true,
+                        extValueLabel: 'x',
+                        showInnerB: false // Dölj den intilliggande inre vinkeln för att utmana
+                    };
+
+                    problem.labels = [
+                        `${inA}°`,
+                        '', // Inre B visas ej
+                        `${inC}°`
+                    ];
+
+                    problem.hint = `Yttervinkeln x är lika med summan av de två motstående inre vinklarna (${inA}° + ${inC}° = ${extAngleB}°), eller 180° minus den tredje inre vinkeln.`;
+
+                } else if (subType === 2) {
+                    // Variant 2: Yttervinkeln ges (t.ex. 130°), hitta den intilliggande inre vinkeln x (raka vinkeln)
+                    problem.targetValue = inB;
+                    problem.exteriorInfo = {
+                        isTargetExterior: false,
+                        extValueLabel: `${extAngleB}°`,
+                        showInnerB: true
+                    };
+
+                    problem.labels = [
+                        `${inA}°`,
+                        'x', // Inre B är x
+                        `${inC}°`
+                    ];
+
+                    problem.hint = `Yttervinkeln (${extAngleB}°) och den inre vinkeln x ligger på samma raka linje. En rak linje är alltid 180°, så x = 180° - ${extAngleB}°.`;
+
+                } else {
+                    // Variant 3: Yttervinkeln ges och en motstående inre vinkel ges. Hitta den andra motstående inre vinkeln x.
+                    problem.targetValue = inA;
+                    problem.exteriorInfo = {
+                        isTargetExterior: false,
+                        extValueLabel: `${extAngleB}°`,
+                        showInnerB: false
+                    };
+
+                    problem.labels = [
+                        'x', // Inre A är x
+                        '',
+                        `${inC}°`
+                    ];
+
+                    problem.hint = `Yttervinkeln (${extAngleB}°) är summan av de två motstående inre vinklarna (x + ${inC}°). Därför är x = ${extAngleB}° - ${inC}°.`;
+                }
+            }
+
+            return problem;
+        }
+
+        /* ==========================================
+           STREAMING_CHUNK:Rendering SVG Geometry and Angles...
+           SVG DYNAMISK GEOMETRI-RITARE
+           ========================================== */
+        
+        function renderTriangleSVG(problem) {
+            const svg = document.getElementById('triangleSvg');
+            svg.innerHTML = ''; // Rensa tidigare SVG
+
+            const A_deg = problem.angles[0];
+            const B_deg = problem.angles[1];
+            const C_deg = problem.angles[2];
+
+            const radA = (A_deg * Math.PI) / 180;
+            const radB = (B_deg * Math.PI) / 180;
+
+            let baseLength = 240;
+            
+            let Ax = 0, Ay = 0;
+            let Bx = baseLength, By = 0;
+
+            let radC = (C_deg * Math.PI) / 180;
+            let b_side = (baseLength * Math.sin(radB)) / Math.sin(radC);
+
+            let Cx = b_side * Math.cos(radA);
+            let Cy = -b_side * Math.sin(radA);
+
+            let minX = Math.min(Ax, Bx, Cx);
+            let maxX = Math.max(Ax, Bx, Cx);
+            let minY = Math.min(Ay, By, Cy);
+            let maxY = Math.max(Ay, By, Cy);
+
+            if (problem.type === 'exterior') {
+                maxX += 90; // Plats för förlängd baslinje för yttervinkeln
+            }
+
+            let triWidth = maxX - minX;
+            let triHeight = maxY - minY;
+
+            let scale = Math.min(310 / triWidth, 210 / triHeight);
+            let offsetX = (500 - triWidth * scale) / 2 - minX * scale;
+            let offsetY = (400 - triHeight * scale) / 2 - minY * scale + (problem.type === 'exterior' ? 15 : 0);
+
+            const pA = { x: Ax * scale + offsetX, y: Ay * scale + offsetY };
+            const pB = { x: Bx * scale + offsetX, y: By * scale + offsetY };
+            const pC = { x: Cx * scale + offsetX, y: Cy * scale + offsetY };
+
+            // 1. Förlängningslinje för yttervinkel på Nivå 3
+            if (problem.type === 'exterior') {
+                const extPointX = pB.x + 90;
+                const extLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                extLine.setAttribute('x1', pA.x);
+                extLine.setAttribute('y1', pA.y);
+                extLine.setAttribute('x2', extPointX);
+                extLine.setAttribute('y2', pB.y);
+                extLine.setAttribute('stroke', '#64748b');
+                extLine.setAttribute('stroke-width', '3');
+                extLine.setAttribute('stroke-dasharray', '6 6');
+                svg.appendChild(extLine);
+            }
+
+            // 2. Rita Huvudtriangeln
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y}`);
+            polygon.setAttribute('fill', 'rgba(99, 102, 241, 0.08)');
+            polygon.setAttribute('stroke', '#4f46e5');
+            polygon.setAttribute('stroke-width', '4');
+            polygon.setAttribute('stroke-linejoin', 'round');
+            svg.appendChild(polygon);
+
+            // 3. Rita Vinkelbågar och Text
+            const vertices = [pA, pB, pC];
+            
+            vertices.forEach((pt, idx) => {
+                let prevPt = vertices[(idx + 2) % 3];
+                let nextPt = vertices[(idx + 1) % 3];
+
+                // Nivå 3: Yttervinkel vid hörn B (index 1)
+                if (problem.type === 'exterior' && idx === 1) {
+                    const extInfo = problem.exteriorInfo;
+                    
+                    // Rita yttervinkelns båge och text
+                    drawExteriorArcAndLabel(svg, pB, pC, extInfo.extValueLabel, extInfo.isTargetExterior);
+
+                    // Rita inre bågen vid B om den har en label eller är mål
+                    if (problem.labels[1] !== '') {
+                        const isTarget = problem.labels[1] === 'x';
+                        drawAngleArc(svg, pB, pA, pC, 30, isTarget);
+                        placeAngleLabel(svg, pB, pA, pC, problem.labels[1], isTarget, false);
+                    }
+                    return;
+                }
+
+                const isRight = problem.isRightAngle && problem.rightAngleIndex === idx;
+                const labelText = problem.labels[idx];
+
+                if (labelText !== '') {
+                    const isTarget = labelText === 'x';
+
+                    if (isRight) {
+                        drawRightAngleSymbol(svg, pt, prevPt, nextPt);
+                    } else {
+                        drawAngleArc(svg, pt, prevPt, nextPt, 35, isTarget);
+                    }
+
+                    placeAngleLabel(svg, pt, prevPt, nextPt, labelText, isTarget, isRight);
+                }
+            });
+        }
+
+        /* Hjälpfunktioner för SVG Ritning */
+        function drawAngleArc(svg, vertex, p1, p2, radius, isTarget) {
+            let angle1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+            let angle2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+
+            let diff = angle2 - angle1;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+
+            let startA = angle1;
+            let endA = angle1 + diff;
+
+            let x1 = vertex.x + radius * Math.cos(startA);
+            let y1 = vertex.y + radius * Math.sin(startA);
+            let x2 = vertex.x + radius * Math.cos(endA);
+            let y2 = vertex.y + radius * Math.sin(endA);
+
+            let sweepFlag = diff > 0 ? 1 : 0;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${x1} ${y1} A ${radius} ${radius} 0 0 ${sweepFlag} ${x2} ${y2}`;
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', isTarget ? '#ef4444' : '#6366f1');
+            path.setAttribute('stroke-width', isTarget ? '3.5' : '2.5');
+            svg.appendChild(path);
+        }
+
+        function drawRightAngleSymbol(svg, vertex, p1, p2) {
+            const size = 18;
+            let v1 = { x: (p1.x - vertex.x), y: (p1.y - vertex.y) };
+            let v2 = { x: (p2.x - vertex.x), y: (p2.y - vertex.y) };
+
+            let len1 = Math.hypot(v1.x, v1.y);
+            let len2 = Math.hypot(v2.x, v2.y);
+
+            let u1 = { x: (v1.x / len1) * size, y: (v1.y / len1) * size };
+            let u2 = { x: (v2.x / len2) * size, y: (v2.y / len2) * size };
+
+            let pCorner1 = { x: vertex.x + u1.x, y: vertex.y + u1.y };
+            let pCorner2 = { x: vertex.x + u1.x + u2.x, y: vertex.y + u1.y + u2.y };
+            let pCorner3 = { x: vertex.x + u2.x, y: vertex.y + u2.y };
+
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            poly.setAttribute('points', `${pCorner1.x},${pCorner1.y} ${pCorner2.x},${pCorner2.y} ${pCorner3.x},${pCorner3.y}`);
+            poly.setAttribute('fill', 'rgba(79, 70, 229, 0.1)');
+            poly.setAttribute('stroke', '#4f46e5');
+            poly.setAttribute('stroke-width', '2.5');
+            svg.appendChild(poly);
+        }
+
+        function drawExteriorArcAndLabel(svg, vertex, topPt, labelText, isTarget) {
+            let inAngle = Math.atan2(topPt.y - vertex.y, topPt.x - vertex.x);
+
+            let radius = 42;
+            let x1 = vertex.x + radius * Math.cos(inAngle);
+            let y1 = vertex.y + radius * Math.sin(inAngle);
+            let x2 = vertex.x + radius;
+            let y2 = vertex.y;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`;
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', isTarget ? '#ef4444' : '#6366f1');
+            path.setAttribute('stroke-width', isTarget ? '3.5' : '2.5');
+            svg.appendChild(path);
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', vertex.x + 48);
+            text.setAttribute('y', vertex.y - 18);
+            text.setAttribute('font-size', isTarget ? '24' : '18');
+            text.setAttribute('font-family', 'Fredoka, sans-serif');
+            
+            if (isTarget) {
+                text.setAttribute('class', 'target-angle');
+            } else {
+                text.setAttribute('fill', '#334155');
+                text.setAttribute('font-weight', '700');
+            }
+            
+            text.textContent = labelText;
+            svg.appendChild(text);
+        }
+
+        function placeAngleLabel(svg, vertex, p1, p2, textStr, isTarget, isRight) {
+            if (isRight) return;
+
+            let a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+            let a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+
+            let diff = a2 - a1;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+
+            let midAngle = a1 + diff / 2;
+            let dist = 52;
+
+            let tx = vertex.x + dist * Math.cos(midAngle);
+            let ty = vertex.y + dist * Math.sin(midAngle) + 5;
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', tx);
+            text.setAttribute('y', ty);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            text.setAttribute('font-size', isTarget ? '24' : '18');
+            text.setAttribute('font-family', 'Fredoka, sans-serif');
+            
+            if (isTarget) {
+                text.setAttribute('class', 'target-angle');
+            } else {
+                text.setAttribute('fill', '#334155');
+                text.setAttribute('font-weight', '700');
+            }
+
+            text.textContent = textStr;
+            svg.appendChild(text);
+        }
+
+        /* ==========================================
+           STREAMING_CHUNK:Handling Game Logic and Interactivity...
+           SPEL-LOGIK & AVDELNINGS-HANTERING
+           ========================================== */
+
+        function loadNewProblem() {
+            currentProblem = generateProblem(currentLevel);
+            renderTriangleSVG(currentProblem);
+
+            // Nollställ input & feedback
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            input.focus();
+
+            const fb = document.getElementById('feedbackBox');
+            fb.classList.add('hidden');
+
+            // Uppdatera instruktionstext beroende på nivå
+            const prompt = document.getElementById('questionPrompt');
+            const sub = document.getElementById('subPrompt');
+
+            if (currentLevel === 1) {
+                prompt.textContent = "Hitta den saknade vinkeln x";
+                sub.textContent = "Kom ihåg: Summan av vinklarna i en triangel är alltid 180°.";
+            } else if (currentLevel === 2) {
+                prompt.textContent = "Beräkna den okända vinkeln x";
+                sub.textContent = currentProblem.isRightAngle ? 
+                    "Kvadraten markerar en rät vinkel (90°)." : 
+                    "Sidorna/basvinklarna visar att triangeln har symmetri.";
+            } else if (currentLevel === 3) {
+                prompt.textContent = "Vad är yttervinkeln x?";
+                sub.textContent = "En rak linje är 180°. Kombinera detta med triangelns vinkelsumma.";
+            }
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('answerInput');
+            const userVal = parseInt(input.value.trim(), 10);
+
+            if (isNaN(userVal)) {
+                showFeedback(false, "Skriv in ett tal innan du svarar!", "");
+                return;
+            }
+
+            totalCount++;
+
+            if (userVal === currentProblem.targetValue) {
+                // RÄTT SVAR
+                sound.playCorrect();
+                score += 10 + (streak * 2); // Bonuspoäng för streak
+                streak++;
+                solvedCount++;
+
+                // Fira med konfetti
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+
+                showFeedback(true, "Rätt svar! Snyggt jobbat! 🎉", `Vinkeln x är exakt ${currentProblem.targetValue}°.`);
+                updateStats();
+
+                // Ladda nytt problem efter kort fördröjning
+                setTimeout(() => {
+                    loadNewProblem();
+                }, 1600);
+
+            } else {
+                // FEL SVAR
+                sound.playWrong();
+                streak = 0; // Nollställ streak
+
+                // Skaka spelkortet
+                const card = document.getElementById('gameCard');
+                card.classList.add('animate-shake');
+                setTimeout(() => card.classList.remove('animate-shake'), 400);
+
+                showFeedback(false, `Tyvärr inte rätt (${userVal}°). Försök igen!`, currentProblem.hint);
+                updateStats();
+            }
+        }
+
+        function showFeedback(isCorrect, mainMsg, subMsg) {
+            const fb = document.getElementById('feedbackBox');
+            const fbText = document.getElementById('feedbackText');
+            const fbExp = document.getElementById('feedbackExplanation');
+
+            fb.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-300', 'bg-rose-100', 'text-rose-900', 'border-rose-300');
+
+            if (isCorrect) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-300');
+            } else {
+                fb.classList.add('bg-rose-100', 'text-rose-900', 'border', 'border-rose-300');
+            }
+
+            fbText.textContent = mainMsg;
+            fbExp.textContent = subMsg;
+        }
+
+        function showHint() {
+            showFeedback(false, "💡 Ledtråd", currentProblem.hint);
+        }
+
+        function setLevel(lvl) {
+            currentLevel = lvl;
+            
+            // Uppdatera knapp-stilar
+            [1, 2, 3].forEach(i => {
+                const btn = document.getElementById(`lvlBtn${i}`);
+                if (i === lvl) {
+                    btn.classList.add('border-indigo-500', 'bg-indigo-50/80', 'ring-2', 'ring-indigo-300');
+                    btn.classList.remove('border-transparent');
+                } else {
+                    btn.classList.remove('border-indigo-500', 'bg-indigo-50/80', 'ring-2', 'ring-indigo-300');
+                    btn.classList.add('border-transparent');
+                }
+            });
+
+            loadNewProblem();
+        }
+
+        function updateStats() {
+            document.getElementById('scoreText').textContent = score;
+            document.getElementById('streakText').textContent = `${streak} 🔥`;
+            document.getElementById('solvedText').textContent = `${solvedCount} / ${totalCount}`;
+        }
+
+        /* ==========================================
+           TIMER HLR (60 Sekunders Poängjakt)
+           ========================================== */
+        function toggleTimerMode() {
+            timerActive = !timerActive;
+            const btnText = document.getElementById('timerToggleText');
+            const display = document.getElementById('timerDisplay');
+
+            if (timerActive) {
+                btnText.textContent = "Stäng av Timer";
+                timerSeconds = 60;
+                display.textContent = `${timerSeconds}s`;
+                
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    display.textContent = `${timerSeconds}s`;
+
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        timerActive = false;
+                        btnText.textContent = "Starta Timer (60s)";
+                        display.textContent = "Slut!";
+                        alert(`Tiden är ute! Du samlade ihop ${score} poäng och löste ${solvedCount} uppgifter!`);
+                    }
+                }, 1000);
+            } else {
+                if (timerInterval) clearInterval(timerInterval);
+                btnText.textContent = "Slå på Timer (60s)";
+                display.textContent = "Av";
+            }
+        }
+
+        /* ==========================================
+           MODAL HANTERING
+           ========================================== */
+        function openRulesModal() {
+            document.getElementById('rulesModal').classList.remove('hidden');
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rulesModal').classList.add('hidden');
+        }
+
+        // Initiera vid start
+        window.onload = function() {
+            setLevel(1);
+        };
+    </script>
+</body>
+</html>

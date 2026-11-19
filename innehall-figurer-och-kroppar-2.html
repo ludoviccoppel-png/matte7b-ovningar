@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fyrhörningars Hierarki - Matte Quiz</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Fredoka & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%);
+            min-height: 100vh;
+        }
+
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Custom Checkbox Option Styling */
+        .option-checkbox-label {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .option-checkbox-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(99, 102, 241, 0.15);
+        }
+
+        .option-checkbox-input:checked + .option-box {
+            background-color: #6366f1;
+            border-color: #4f46e5;
+            color: white;
+        }
+
+        .option-checkbox-input:checked ~ .option-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* SVG shape path animation */
+        .shape-path {
+            transition: all 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-3 sm:p-6 text-gray-800">
+
+    <div id="app" class="w-full max-w-2xl glass-card rounded-3xl p-4 sm:p-8 flex flex-col gap-5 relative overflow-hidden my-auto">
+        
+        <!-- Header Bar: Stats, Score & Streaks -->
+        <div class="flex justify-between items-center bg-indigo-50/80 p-3 sm:p-4 rounded-2xl border border-indigo-100 shadow-inner">
+            <!-- Points -->
+            <div class="flex items-center gap-2">
+                <span class="text-2xl sm:text-3xl">⭐</span>
+                <div>
+                    <div class="text-[10px] sm:text-xs text-indigo-900 font-bold uppercase tracking-wider">Poäng</div>
+                    <div id="score" class="text-xl sm:text-2xl font-black text-indigo-600 font-outfit">0</div>
+                </div>
+            </div>
+
+            <!-- Streak -->
+            <div class="flex items-center gap-2">
+                <span class="text-2xl sm:text-3xl">🔥</span>
+                <div>
+                    <div class="text-[10px] sm:text-xs text-amber-900 font-bold uppercase tracking-wider">Streak</div>
+                    <div id="streak" class="text-xl sm:text-2xl font-black text-amber-500 font-outfit">0</div>
+                </div>
+            </div>
+
+            <!-- Progress Counter -->
+            <div class="flex items-center gap-2">
+                <span class="text-2xl sm:text-3xl">🎯</span>
+                <div>
+                    <div class="text-[10px] sm:text-xs text-purple-900 font-bold uppercase tracking-wider">Fråga</div>
+                    <div id="progress" class="text-xl sm:text-2xl font-black text-purple-600 font-outfit">1 / 10</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div id="progress-bar" class="bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500 h-full rounded-full transition-all duration-300" style="width: 10%"></div>
+        </div>
+
+        <!-- Question Header & Hint Button -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">Vilka namn passar på denna figur?</h1>
+                <p class="text-xs sm:text-sm text-indigo-600 font-medium mt-0.5">💡 Kryssa i ALLA alternativ som är korrekta!</p>
+            </div>
+            <button onclick="game.toggleHintModal()" class="self-start sm:self-auto px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors shadow-sm border border-amber-200">
+                <span>📖</span> Regelbok & Tips
+            </button>
+        </div>
+
+        <div class="relative bg-gradient-to-b from-sky-50/70 via-indigo-50/40 to-purple-50/70 rounded-2xl border-2 border-indigo-100 flex items-center justify-center p-4 min-h-[230px] sm:min-h-[260px] shadow-inner">
+            <svg id="geometry-svg" viewBox="0 0 400 240" class="w-full h-56 max-w-md drop-shadow-md overflow-visible">
+                <!-- SVG elements will be injected dynamically -->
+            </svg>
+            <div class="absolute bottom-2 right-3 text-[11px] bg-white/90 px-2.5 py-1 rounded-full text-indigo-700 font-semibold flex items-center gap-1.5 shadow-sm border border-indigo-100">
+                <span>📐</span> Multi-egenskaper
+            </div>
+        </div>
+
+        <form id="options-form" onsubmit="event.preventDefault();" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+            <!-- Dynamically populated checkbox buttons -->
+        </form>
+
+        <!-- Submit & Next Action Buttons -->
+        <div class="flex flex-col gap-2 mt-1">
+            <button id="submit-btn" onclick="game.validateAnswer()" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg transition duration-200 text-base sm:text-lg flex items-center justify-center gap-2">
+                <span>✅</span> Rätta mitt svar
+            </button>
+
+            <!-- Feedback Display Panel -->
+            <div id="feedback-card" class="hidden p-4 rounded-2xl transition-all duration-300 border-2">
+                <div id="feedback-title" class="text-base sm:text-lg font-bold flex items-center gap-2"></div>
+                <div id="feedback-text" class="text-xs sm:text-sm mt-1.5 text-gray-700 leading-relaxed font-outfit"></div>
+                <button id="next-btn" onclick="game.nextQuestion()" class="mt-3 w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-md transition duration-200 text-base flex items-center justify-center gap-2">
+                    Nästa figur ➔
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Rulebook / Hint Modal -->
+    <div id="hint-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-card max-w-lg w-full rounded-3xl p-5 sm:p-7 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span>📖</span> Fyrhörningars Hierarki
+                </h2>
+                <button onclick="game.toggleHintModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl px-2">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm text-gray-700 leading-relaxed">
+                <div class="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                    <strong class="text-rose-900 text-sm">🟩 Kvadrat:</strong><br>
+                    Är den mest specifika figuren! Den är SAMTIDIGT en <strong>Kvadrat</strong>, <strong>Rektangel</strong>, <strong>Romb</strong>, <strong>Parallellogram</strong> och <strong>Fyrhörning</strong>.
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <strong class="text-amber-900 text-sm">🟧 Rektangel:</strong><br>
+                    Alla vinklar är 90°. Den är även ett <strong>Parallellogram</strong> och en <strong>Fyrhörning</strong>.
+                </div>
+                <div class="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                    <strong class="text-yellow-900 text-sm">🟨 Romb:</strong><br>
+                    Alla sidor är lika långa. Den är även ett <strong>Parallellogram</strong> och en <strong>Fyrhörning</strong>.
+                </div>
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <strong class="text-emerald-900 text-sm">🟩 Parallellogram:</strong><br>
+                    Motstående sidor är parallella. Den är även en <strong>Fyrhörning</strong>.
+                </div>
+                <div class="p-3 bg-sky-50 rounded-xl border border-sky-200">
+                    <strong class="text-sky-900 text-sm">🟦 Parallelltrapets:</strong><br>
+                    Har minst ett par av parallella sidor. Den är även en <strong>Fyrhörning</strong>.
+                </div>
+                <div class="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                    <strong class="text-purple-900 text-sm">🟪 Allmän Fyrhörning:</strong><br>
+                    Har 4 raka sidor och 4 hörn (utan speciella parallella krav).
+                </div>
+            </div>
+
+            <button onclick="game.toggleHintModal()" class="mt-2 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">
+                Jag förstår! 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- Final Results Modal -->
+    <div id="final-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center gap-4">
+            <div class="text-6xl mb-1">🏆</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Mästare på Fyrhörningar!</h2>
+            <p class="text-sm text-gray-600">Du har koll på alla vinklar, parallella sidor och hierarkier!</p>
+            
+            <div class="bg-indigo-50/80 w-full p-4 rounded-2xl border border-indigo-100 flex justify-around my-2 font-outfit">
+                <div>
+                    <div class="text-[10px] text-indigo-900 font-bold uppercase tracking-wider">Slutpoäng</div>
+                    <div id="final-score" class="text-3xl font-black text-indigo-600">0</div>
+                </div>
+                <div class="border-r border-indigo-200"></div>
+                <div>
+                    <div class="text-[10px] text-amber-900 font-bold uppercase tracking-wider">Bästa Streak</div>
+                    <div id="final-streak" class="text-3xl font-black text-amber-500">0</div>
+                </div>
+            </div>
+
+            <button onclick="game.restart()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-lg font-bold rounded-2xl shadow-lg transition duration-200 transform hover:scale-[1.02]">
+                Spela Igen 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Web Audio Synthesizer for Interactive Sound Effects ---
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playCorrect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                // Arpeggio sound: C5 - E5 - G5 - C6
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.06);
+                    osc.stop(now + i * 0.06 + 0.25);
+                });
+            }
+
+            playPartial() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [440, 554.37].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.1);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.1);
+                    osc.stop(now + i * 0.1 + 0.2);
+                });
+            }
+
+            playIncorrect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(130, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        const sound = new SoundFX();
+
+        // --- All Category Options Available in the Quiz ---
+        const ALL_CATEGORIES = [
+            { id: 'fyrhorning', label: 'Fyrhörning' },
+            { id: 'parallelltrapets', label: 'Parallelltrapets' },
+            { id: 'parallellogram', label: 'Parallellogram' },
+            { id: 'romb', label: 'Romb' },
+            { id: 'rektangel', label: 'Rektangel' },
+            { id: 'kvadrat', label: 'Kvadrat' }
+        ];
+
+        // --- Quadrilaterals Data with Multi-Hierarchy Rules and Visual SVG Drawing ---
+        const QUADRILATERALS = [
+            {
+                id: 'kvadrat',
+                primaryName: 'Kvadrat',
+                validCategories: ['fyrhorning', 'parallelltrapets', 'parallellogram', 'romb', 'rektangel', 'kvadrat'],
+                explanation: 'En kvadrat uppfyller ALLA krav! Den har 4 raka sidor (fyrhörning), minst ett par parallella sidor (parallelltrapets), motstående sidor parallella (parallellogram), alla sidor lika långa (romb), samt alla vinklar 90° (rektangel).',
+                drawSVG: () => `
+                    <polygon points="130,50 270,50 270,190 130,190" fill="#fecdd3" stroke="#e11d48" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- 90 Deg Right Angle Symbols -->
+                    <path d="M 130,65 L 145,65 L 145,50" fill="none" stroke="#e11d48" stroke-width="2"/>
+                    <path d="M 270,65 L 255,65 L 255,50" fill="none" stroke="#e11d48" stroke-width="2"/>
+                    <path d="M 270,175 L 255,175 L 255,190" fill="none" stroke="#e11d48" stroke-width="2"/>
+                    <path d="M 130,175 L 145,175 L 145,190" fill="none" stroke="#e11d48" stroke-width="2"/>
+                    <!-- Ticks for equal sides -->
+                    <line x1="200" y1="44" x2="200" y2="56" stroke="#be123c" stroke-width="3"/>
+                    <line x1="200" y1="184" x2="200" y2="196" stroke="#be123c" stroke-width="3"/>
+                    <line x1="124" y1="120" x2="136" y2="120" stroke="#be123c" stroke-width="3"/>
+                    <line x1="264" y1="120" x2="276" y2="120" stroke="#be123c" stroke-width="3"/>
+                `
+            },
+            {
+                id: 'rektangel',
+                primaryName: 'Rektangel',
+                validCategories: ['fyrhorning', 'parallelltrapets', 'parallellogram', 'rektangel'],
+                explanation: 'En rektangel har alla vinklar 90°. Den är därför en Fyrhörning, Parallelltrapets och ett Parallellogram. Men den är INTE en romb eller kvadrat eftersom alla fyra sidor inte måste vara lika långa!',
+                drawSVG: () => `
+                    <polygon points="80,60 320,60 320,180 80,180" fill="#fed7aa" stroke="#ea580c" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- Right Angle Symbols -->
+                    <path d="M 80,75 L 95,75 L 95,60" fill="none" stroke="#ea580c" stroke-width="2"/>
+                    <path d="M 320,75 L 305,75 L 305,60" fill="none" stroke="#ea580c" stroke-width="2"/>
+                    <path d="M 320,165 L 305,165 L 305,180" fill="none" stroke="#ea580c" stroke-width="2"/>
+                    <path d="M 80,165 L 95,165 L 95,180" fill="none" stroke="#ea580c" stroke-width="2"/>
+                    <!-- Equal sides indicators -->
+                    <line x1="197" y1="54" x2="197" y2="66" stroke="#c2410c" stroke-width="2.5"/>
+                    <line x1="203" y1="54" x2="203" y2="66" stroke="#c2410c" stroke-width="2.5"/>
+                    <line x1="197" y1="174" x2="197" y2="186" stroke="#c2410c" stroke-width="2.5"/>
+                    <line x1="203" y1="174" x2="203" y2="186" stroke="#c2410c" stroke-width="2.5"/>
+                    <line x1="74" y1="120" x2="86" y2="120" stroke="#c2410c" stroke-width="2.5"/>
+                    <line x1="314" y1="120" x2="326" y2="120" stroke="#c2410c" stroke-width="2.5"/>
+                `
+            },
+            {
+                id: 'romb',
+                primaryName: 'Romb',
+                validCategories: ['fyrhorning', 'parallelltrapets', 'parallellogram', 'romb'],
+                explanation: 'En romb har alla 4 sidor lika långa och motstående sidor parallella. Den är därför en Fyrhörning, Parallelltrapets, Parallellogram och Romb. (Det är endast en rektangel/kvadrat om vinklarna är 90°).',
+                drawSVG: () => `
+                    <polygon points="150,40 290,40 250,190 110,190" fill="#fef08a" stroke="#ca8a04" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- Equal side ticks on all 4 sides -->
+                    <line x1="220" y1="34" x2="220" y2="46" stroke="#854d0e" stroke-width="3"/>
+                    <line x1="180" y1="184" x2="180" y2="196" stroke="#854d0e" stroke-width="3"/>
+                    <line x1="125" y1="112" x2="135" y2="118" stroke="#854d0e" stroke-width="3"/>
+                    <line x1="265" y1="112" x2="275" y2="118" stroke="#854d0e" stroke-width="3"/>
+                `
+            },
+            {
+                id: 'parallellogram',
+                primaryName: 'Parallellogram',
+                validCategories: ['fyrhorning', 'parallelltrapets', 'parallellogram'],
+                explanation: 'Ett parallellogram har motstående sidor parallella och lika långa. Den är därför en Fyrhörning, Parallelltrapets och Parallellogram.',
+                drawSVG: () => `
+                    <polygon points="100,50 320,50 270,180 50,180" fill="#bbf7d0" stroke="#16a34a" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- Parallel arrow indicators -->
+                    <path d="M 205,43 L 215,50 L 205,57" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 155,173 L 165,180 L 155,187" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 70,110 L 76,120 L 70,130" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 290,110 L 296,120 L 290,130" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+                `
+            },
+            {
+                id: 'parallelltrapets',
+                primaryName: 'Parallelltrapets',
+                validCategories: ['fyrhorning', 'parallelltrapets'],
+                explanation: 'En parallelltrapets har MINST ett par av parallella sidor (här topp och botten). Den är därför en Fyrhörning och Parallelltrapets.',
+                drawSVG: () => `
+                    <polygon points="140,50 260,50 330,180 70,180" fill="#bae6fd" stroke="#0284c7" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- Parallel indicator arrows on top and bottom -->
+                    <path d="M 195,43 L 205,50 L 195,57" fill="none" stroke="#0369a1" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 195,173 L 205,180 L 195,187" fill="none" stroke="#0369a1" stroke-width="3" stroke-linecap="round"/>
+                `
+            },
+            {
+                id: 'fyrhorning',
+                primaryName: 'Allmän / Oregelbunden Fyrhörning',
+                validCategories: ['fyrhorning'],
+                explanation: 'Denna figur har 4 raka sidor och 4 hörn, men inga parallella sidor eller räta vinklar. Den är endast en Fyrhörning.',
+                drawSVG: () => `
+                    <polygon points="110,40 310,70 260,200 60,150" fill="#ddd6fe" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" class="shape-path"/>
+                    <!-- Corner dots -->
+                    <circle cx="110" cy="40" r="5" fill="#6d28d9"/>
+                    <circle cx="310" cy="70" r="5" fill="#6d28d9"/>
+                    <circle cx="260" cy="200" r="5" fill="#6d28d9"/>
+                    <circle cx="60" cy="150" r="5" fill="#6d28d9"/>
+                `
+            }
+        ];
+
+        // --- STREAMING_CHUNK:Main Quiz Engine and Hierarchy Validation Logic ---
+        class HierarchyQuizGame {
+            constructor() {
+                this.score = 0;
+                this.streak = 0;
+                this.currentQuestionIndex = 0;
+                this.totalQuestions = 10;
+                this.currentShape = null;
+                this.isAnswered = false;
+                this.questionSequence = [];
+
+                this.generateSequence();
+                this.loadQuestion();
+            }
+
+            generateSequence() {
+                this.questionSequence = [];
+                for (let i = 0; i < this.totalQuestions; i++) {
+                    const randomShape = QUADRILATERALS[Math.floor(Math.random() * QUADRILATERALS.length)];
+                    this.questionSequence.push(randomShape);
+                }
+            }
+
+            loadQuestion() {
+                this.isAnswered = false;
+                this.currentShape = this.questionSequence[this.currentQuestionIndex];
+
+                // Update Progress UI
+                document.getElementById('progress').innerText = `${this.currentQuestionIndex + 1} / ${this.totalQuestions}`;
+                document.getElementById('progress-bar').style.width = `${((this.currentQuestionIndex + 1) / this.totalQuestions) * 100}%`;
+
+                // Reset Action Buttons & Feedback
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.classList.remove('hidden');
+                
+                const feedbackCard = document.getElementById('feedback-card');
+                feedbackCard.classList.add('hidden');
+
+                // Render SVG Image
+                const svgContainer = document.getElementById('geometry-svg');
+                svgContainer.innerHTML = this.currentShape.drawSVG();
+
+                // Render Option Checkboxes
+                this.renderCheckboxes();
+            }
+
+            renderCheckboxes() {
+                const optionsForm = document.getElementById('options-form');
+                optionsForm.innerHTML = '';
+
+                ALL_CATEGORIES.forEach(cat => {
+                    const label = document.createElement('label');
+                    label.className = 'option-checkbox-label relative flex items-center gap-2.5 p-3 sm:p-3.5 bg-white border-2 border-indigo-100 rounded-2xl cursor-pointer shadow-sm text-xs sm:text-sm font-bold text-gray-800';
+                    
+                    label.innerHTML = `
+                        <input type="checkbox" value="${cat.id}" class="option-checkbox-input hidden">
+                        <div class="option-box w-5 h-5 rounded-md border-2 border-indigo-300 flex items-center justify-center transition-colors flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 fill-current opacity-0 transition-all" viewBox="0 0 20 20">
+                                <path d="M0 11l2-2 5 5 L18 3l2 2L7 18z"/>
+                            </svg>
+                        </div>
+                        <span class="truncate">${cat.label}</span>
+                    `;
+
+                    // Add dynamic checkmark behavior
+                    const input = label.querySelector('input');
+                    input.addEventListener('change', () => {
+                        if (input.checked) {
+                            label.classList.add('border-indigo-500', 'bg-indigo-50/60');
+                            label.querySelector('.option-box').classList.add('bg-indigo-600', 'border-indigo-600', 'text-white');
+                            label.querySelector('svg').classList.remove('opacity-0');
+                        } else {
+                            label.classList.remove('border-indigo-500', 'bg-indigo-50/60');
+                            label.querySelector('.option-box').classList.remove('bg-indigo-600', 'border-indigo-600', 'text-white');
+                            label.querySelector('svg').classList.add('opacity-0');
+                        }
+                    });
+
+                    optionsForm.appendChild(label);
+                });
+            }
+
+            validateAnswer() {
+                if (this.isAnswered) return;
+
+                const selectedInputs = Array.from(document.querySelectorAll('.option-checkbox-input:checked')).map(cb => cb.value);
+                const validCategories = this.currentShape.validCategories;
+
+                if (selectedInputs.length === 0) {
+                    alert('Bocka i minst ett alternativ som du tycker stämmer!');
+                    return;
+                }
+
+                this.isAnswered = true;
+
+                // Disable input interaction
+                document.querySelectorAll('.option-checkbox-input').forEach(cb => cb.disabled = true);
+                document.querySelectorAll('.option-checkbox-label').forEach(lbl => lbl.classList.add('pointer-events-none', 'opacity-80'));
+
+                // Hide submit button
+                document.getElementById('submit-btn').classList.add('hidden');
+
+                // Evaluate exact match vs missing vs extra selection
+                const missingCategories = validCategories.filter(cat => !selectedInputs.includes(cat));
+                const extraCategories = selectedInputs.filter(cat => !validCategories.includes(cat));
+
+                const isFullyCorrect = missingCategories.length === 0 && extraCategories.length === 0;
+
+                const feedbackCard = document.getElementById('feedback-card');
+                const feedbackTitle = document.getElementById('feedback-title');
+                const feedbackText = document.getElementById('feedback-text');
+                const appCard = document.getElementById('app');
+
+                // Highlight options visually
+                document.querySelectorAll('.option-checkbox-label').forEach(label => {
+                    const cb = label.querySelector('input');
+                    const val = cb.value;
+
+                    if (validCategories.includes(val)) {
+                        // Should have been checked
+                        label.classList.remove('border-indigo-100', 'bg-white');
+                        label.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                        if (!cb.checked) {
+                            label.classList.add('ring-2', 'ring-emerald-400');
+                        }
+                    } else if (cb.checked) {
+                        // Incorrectly checked
+                        label.classList.remove('border-indigo-100', 'bg-white');
+                        label.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-900', 'line-through');
+                    }
+                });
+
+                if (isFullyCorrect) {
+                    // --- FULLY CORRECT ---
+                    sound.playCorrect();
+                    this.score += 15 + (this.streak * 3);
+                    this.streak += 1;
+
+                    confetti({
+                        particleCount: 90,
+                        spread: 75,
+                        origin: { y: 0.6 }
+                    });
+
+                    feedbackCard.className = 'p-4 rounded-2xl transition-all duration-300 border-2 bg-emerald-50 border-emerald-300 text-emerald-900 block';
+                    feedbackTitle.innerHTML = '<span>🎉</span> Fantastiskt! Alla rätta svar bockades i!';
+                    feedbackText.innerText = this.currentShape.explanation;
+
+                } else if (missingCategories.length > 0 && extraCategories.length === 0) {
+                    // --- PARTIAL (Missed some hierarchic labels) ---
+                    sound.playPartial();
+                    this.score += 5;
+
+                    feedbackCard.className = 'p-4 rounded-2xl transition-all duration-300 border-2 bg-amber-50 border-amber-300 text-amber-900 block';
+                    feedbackTitle.innerHTML = '<span>⭐</span> Nästan helt rätt! Du missade några giltiga namn.';
+                    
+                    const missingNames = missingCategories.map(id => ALL_CATEGORIES.find(c => c.id === id).label).join(', ');
+                    feedbackText.innerHTML = `Du hade rätt på dina val, men kom ihåg att figuren <strong>även</strong> är: <strong>${missingNames}</strong>.<br><span class="mt-1 block text-gray-600">${this.currentShape.explanation}</span>`;
+
+                } else {
+                    // --- INCORRECT (Checked wrong options) ---
+                    sound.playIncorrect();
+                    this.streak = 0;
+
+                    appCard.classList.add('animate-shake');
+                    setTimeout(() => appCard.classList.remove('animate-shake'), 450);
+
+                    feedbackCard.className = 'p-4 rounded-2xl transition-all duration-300 border-2 bg-rose-50 border-rose-300 text-rose-900 block';
+                    feedbackTitle.innerHTML = '<span>💡</span> Inte riktigt alla rätt!';
+                    feedbackText.innerText = this.currentShape.explanation;
+                }
+
+                document.getElementById('score').innerText = this.score;
+                document.getElementById('streak').innerText = this.streak;
+            }
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                if (this.currentQuestionIndex < this.totalQuestions) {
+                    this.loadQuestion();
+                } else {
+                    this.showFinalModal();
+                }
+            }
+
+            toggleHintModal() {
+                const modal = document.getElementById('hint-modal');
+                modal.classList.toggle('hidden');
+            }
+
+            showFinalModal() {
+                document.getElementById('final-score').innerText = this.score;
+                document.getElementById('final-streak').innerText = this.streak;
+                document.getElementById('final-modal').classList.remove('hidden');
+
+                confetti({
+                    particleCount: 160,
+                    spread: 100,
+                    origin: { y: 0.4 }
+                });
+            }
+
+            restart() {
+                this.score = 0;
+                this.streak = 0;
+                this.currentQuestionIndex = 0;
+                document.getElementById('score').innerText = '0';
+                document.getElementById('streak').innerText = '0';
+                document.getElementById('final-modal').classList.add('hidden');
+                this.generateSequence();
+                this.loadQuestion();
+            }
+        }
+
+        // Initialize Game App
+        let game = null;
+        window.onload = () => {
+            game = new HierarchyQuizGame();
+        };
+    </script>
+</body>
+</html>

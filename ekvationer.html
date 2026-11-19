@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ekvationer – Matte 7B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18223d;--muted:#56627f;--line:#cdd6e8;--paper:#f5f7fb;--grid:#dfe6f2}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font:16px/1.4 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+.site-nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:2px solid var(--ink)}
+.bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 14px;flex-wrap:wrap}
+.brand{font-family:"Bricolage Grotesque","Segoe UI",sans-serif;font-weight:800;font-size:21px;color:var(--ink);text-decoration:none;margin-right:10px;white-space:nowrap}
+.brand b{background:linear-gradient(transparent 55%,#ffe24d 55%)}
+.menu{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.grp{position:relative;display:flex;align-items:center;border-radius:10px}
+.grp .top{font-weight:700;color:var(--c);text-decoration:none;padding:7px 4px 7px 10px;border-radius:10px 0 0 10px}
+.grp:not(:has(.tog)) .top{padding-right:10px;border-radius:10px}
+.grp .tog{border:0;background:transparent;color:var(--c);font-size:14px;padding:7px 9px 7px 3px;cursor:pointer;border-radius:0 10px 10px 0}
+.grp.cur{background:color-mix(in srgb,var(--c) 12%,#fff)}
+.grp .top.here{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.grp:hover{background:color-mix(in srgb,var(--c) 12%,#fff)}
+.dd{display:none;position:absolute;top:100%;left:0;min-width:220px;background:#fff;border:2px solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 var(--c);padding:6px;margin-top:4px;z-index:101}
+.dd a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none}
+.dd a:hover,.dd a.here{background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);font-weight:700}
+.grp.open .dd{display:block}
+@media (hover:hover) and (min-width:761px){.grp:hover .dd,.grp:focus-within .dd{display:block}.grp .dd::before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px}}
+.burger{display:none;margin-left:auto;font:inherit;font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:6px 12px;cursor:pointer}
+@media (max-width:760px){.burger{display:block}.menu{display:none;width:100%;flex-direction:column;align-items:stretch;padding:6px 0 4px}.site-nav.show .menu{display:flex}.grp{flex-wrap:wrap}.grp .top{flex:1}.dd{position:static;display:none;width:100%;box-shadow:none;margin:2px 0 6px;border-width:1.5px}.grp.open .dd{display:block}}
+main{display:block}
+main iframe{display:block;width:100%;border:0;height:600px;background:transparent}
+.fig{max-width:900px;margin:10px auto;padding:0 16px}.fig img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:10px}
+.landing{max-width:900px;margin:0 auto;padding:30px 18px 50px}
+.landing h1{font-family:"Bricolage Grotesque","Segoe UI",sans-serif;font-size:42px;margin:0 0 6px}
+.landing p{color:var(--muted);margin:0 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.cards a{display:block;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:16px 18px;color:var(--ink);text-decoration:none;box-shadow:5px 5px 0 #c2410c;font-weight:700;font-size:19px}
+.cards a span{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.cards a:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 #c2410c}
+</style>
+</head>
+<body>
+<div class="site-nav"><div class="bar"><a class="brand" href="index.html">Matte <b>7B</b></a><button class="burger" type="button" aria-expanded="false" aria-controls="menu">Meny ☰</button><div class="menu" id="menu"><div class="grp" style="--c:#18223d"><a class="top" href="index.html">Startsida</a></div><div class="grp" style="--c:#1f4fd1"><a class="top" href="tal.html">Tal</a><button class="tog" type="button" aria-label="Visa undersidor till Tal" aria-expanded="false">▾</button><div class="dd"><a href="primtal.html">Primtal</a><a href="primtradet.html">Primträdet</a><a href="avrundning.html">Avrundning</a><a href="negativa-tal.html">Negativa tal (8)</a></div></div><div class="grp" style="--c:#17824a"><a class="top" href="geometri.html">Geometri</a><button class="tog" type="button" aria-label="Visa undersidor till Geometri" aria-expanded="false">▾</button><div class="dd"><a href="figurer-och-kroppar.html">Figurer och kroppar</a><a href="trianglar.html">Trianglar</a><a href="area.html">Area</a><a href="volym.html">Volym</a><a href="begransningsarea.html">Begränsningsarea</a><a href="vinklar.html">Vinklar</a></div></div><div class="grp cur" style="--c:#6a3fc8"><a class="top" href="algebra.html">Algebra</a><button class="tog" type="button" aria-label="Visa undersidor till Algebra" aria-expanded="false">▾</button><div class="dd"><a href="forenkla-uttryck.html">Förenkla uttryck</a><a href="utveckla-parenteser.html">Utveckla parenteser</a><a href="ekvationer.html" class="here" aria-current="page">Ekvationer</a><a href="problemlosning.html">Problemlösning</a><a href="parentesjakten.html">Parentesjakten</a><a href="parentespusslet.html">Parentespusslet</a><a href="para-ihop-uttryck.html">Para ihop uttryck</a></div></div><div class="grp" style="--c:#c2410c"><a class="top" href="brak.html">Bråk</a><button class="tog" type="button" aria-label="Visa undersidor till Bråk" aria-expanded="false">▾</button><div class="dd"><a href="brakfabriken.html">Bråkfabriken (7)</a></div></div></div></div></div>
+<main>
+<iframe src="innehall-ekvationer.html" title="Ekvationer" loading="eager"></iframe>
+</main>
+<script>(function () {
+    var nav = document.querySelector('.site-nav');
+    nav.querySelector('.burger').addEventListener('click', function () {
+      var on = nav.classList.toggle('show'); this.setAttribute('aria-expanded', on);
+    });
+    nav.querySelectorAll('.tog').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var g = b.parentNode, on = !g.classList.contains('open');
+        nav.querySelectorAll('.grp.open').forEach(function (x) { x.classList.remove('open'); x.querySelector('.tog').setAttribute('aria-expanded', 'false'); });
+        if (on) { g.classList.add('open'); b.setAttribute('aria-expanded', 'true'); }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!nav.contains(e.target)) nav.querySelectorAll('.grp.open').forEach(function (x) { x.classList.remove('open'); });
+    });
+    function navH() { return nav.getBoundingClientRect().height; }
+    function contentHeight(d) {
+      var b = d.body; if (!b) return 0;
+      var w = d.defaultView, max = 0;
+      for (var i = 0; i < b.children.length; i++) {
+        var el = b.children[i], cs = w.getComputedStyle(el);
+        if (cs.position === 'fixed' || cs.display === 'none') continue;
+        var r = el.getBoundingClientRect();
+        max = Math.max(max, r.bottom + (parseFloat(cs.marginBottom) || 0));
+      }
+      var bs = w.getComputedStyle(b);
+      max += (parseFloat(bs.paddingBottom) || 0) + (parseFloat(bs.marginBottom) || 0) + (parseFloat(bs.borderBottomWidth) || 0);
+      return Math.ceil(max + w.scrollY);
+    }
+    document.querySelectorAll('main iframe').forEach(function (f) {
+      function fit() {
+        try {
+          var h = contentHeight(f.contentDocument);
+          if (h > 50 && Math.abs(h - f.offsetHeight) > 2) f.style.height = h + 'px';
+        } catch (e) {}
+      }
+      function hook() {
+        var d; try { d = f.contentDocument; } catch (e) { return; }
+        if (!d) return;
+        fit();
+        try { new ResizeObserver(fit).observe(d.body); } catch (e) {}
+        try { new MutationObserver(fit).observe(d.body, { childList: true, subtree: true, attributes: true, characterData: true }); } catch (e) {}
+        d.defaultView.addEventListener('resize', fit);
+        setTimeout(fit, 300); setTimeout(fit, 1200); setTimeout(fit, 3000);
+        if (d.fonts && d.fonts.ready) d.fonts.ready.then(fit);
+        d.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a || e.defaultPrevented) return;
+          var href = a.getAttribute('href');
+          if (href.charAt(0) === '#') {
+            e.preventDefault();
+            if (href === '#' || href === '#top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            var t = d.getElementById(decodeURIComponent(href.slice(1)));
+            if (t) {
+              var y = f.getBoundingClientRect().top + window.scrollY + t.getBoundingClientRect().top - navH() - 10;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+            return;
+          }
+          if (a.target === '_blank') return;
+          e.preventDefault();
+          window.location.href = new URL(href, f.contentWindow.location.href).href;
+        });
+        d.defaultView.Element.prototype.scrollIntoView = function () {
+          var y = f.getBoundingClientRect().top + window.scrollY + this.getBoundingClientRect().top - navH() - 10;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        };
+      }
+      f.addEventListener('load', hook);
+      if (f.contentDocument && f.contentDocument.readyState === 'complete') hook();
+    });
+  })();</script>
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vinkelpar vid transversal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: ritbräda till vänster (två linjer + transversal), vinkelpanel till höger; staplas på mobil */
+:root{
+  --bg:#ecefeb; --panel:#ffffff; --panel-2:#f3f5f2; --ink:#18211c; --muted:#5b6a62; --line:#cfd8d2; --grid:#e0e6e1;
+  --pa:#2a62cc; --pb:#d06a12; --band:#2a62cc; --ok:#178a5a; --bad:#c8334f; --focus:#2a62cc;
+  --f-display:"Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --f-body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1512; --panel:#161e1a; --panel-2:#1c2621; --ink:#e3ebe6; --muted:#95a59c; --line:#2c3a33; --grid:#1c2620;
+    --pa:#74a4ff; --pb:#f39a4a; --band:#74a4ff; --ok:#4fcf92; --bad:#ff6f8a; --focus:#74a4ff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1512; --panel:#161e1a; --panel-2:#1c2621; --ink:#e3ebe6; --muted:#95a59c; --line:#2c3a33; --grid:#1c2620;
+  --pa:#74a4ff; --pb:#f39a4a; --band:#74a4ff; --ok:#4fcf92; --bad:#ff6f8a; --focus:#74a4ff; color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 40px;display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,4.2vw,44px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--muted);max-width:64ch}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.modes button{font-size:14px;padding:8px 13px;border-radius:999px}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:20px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage-ctrl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;padding:14px 16px;border-top:1px solid var(--line)}
+@media (max-width:560px){.stage-ctrl{grid-template-columns:minmax(0,1fr)}}
+.ctl{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.ctl .top{display:flex;justify-content:space-between;gap:8px}
+.ctl output{font-family:var(--f-mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+input[type=range]:disabled{opacity:.35}
+.checks{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font-size:14px;grid-column:1/-1}
+.checks label{display:flex;align-items:center;gap:7px;cursor:pointer}
+button{font:inherit;color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:500;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.card h3{font-family:var(--f-display);font-weight:700;font-size:24px;margin:0;line-height:1.15}
+.card p{margin:0}
+.shape{font-size:13px;color:var(--muted)}
+.rule{font-weight:600;padding:8px 12px;border-radius:8px;background:var(--panel-2)}
+.vals{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-family:var(--f-mono);font-size:20px;font-variant-numeric:tabular-nums}
+.vals .a{color:var(--pa);font-weight:600}.vals .b{color:var(--pb);font-weight:600}
+.verdict{font-size:14px;font-weight:600}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+.why{font-size:13.5px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+.pairnav{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pairnav span{font-size:13px;color:var(--muted);margin-right:4px}
+.pairnav button{font-family:var(--f-mono);font-size:13px;padding:4px 9px}
+.pairnav button[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
+.quiz-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.quiz-opts button{text-align:left;font-size:14px}
+.quiz-opts button.right{border-color:var(--ok);color:var(--ok);font-weight:600}
+.quiz-opts button.wrong{border-color:var(--bad);color:var(--bad)}
+.fb{font-size:14px;min-height:1.5em}
+.score{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.quizhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+/* svg */
+.gridln{stroke:var(--grid);stroke-width:1}
+.band{fill:var(--band);opacity:.07}
+.bandlbl{fill:var(--muted);font:500 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase}
+.ln{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+.tr{stroke:var(--ink);stroke-width:2.4;stroke-dasharray:none}
+.chev{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sector{fill:var(--ink);fill-opacity:0;cursor:pointer}
+.sector:hover{fill-opacity:.06}
+.arc{fill:var(--ink);fill-opacity:.05;stroke:var(--muted);stroke-width:1.2}
+.arc.A{fill:var(--pa);fill-opacity:.28;stroke:var(--pa);stroke-width:2.2}
+.arc.B{fill:var(--pb);fill-opacity:.28;stroke:var(--pb);stroke-width:2.2}
+.num{font:600 15px var(--f-mono);fill:var(--muted);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.num.A{fill:var(--pa)}.num.B{fill:var(--pb)}
+.deg{font:400 12px var(--f-mono);fill:var(--muted);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.deg.A{fill:var(--pa)}.deg.B{fill:var(--pb)}
+.dot{fill:var(--ink)}
+.hit{stroke:var(--ink);stroke-opacity:0;stroke-width:26;fill:none;pointer-events:stroke}
+.hit:hover{stroke-opacity:.07}
+.hit.hh{cursor:ew-resize}.hit.hv{cursor:ns-resize}
+svg.moving .sector{pointer-events:none}
+.handle{fill:var(--panel);stroke:var(--ink);stroke-width:2.4;cursor:grab}
+.handle:hover,.handle.drag{fill:var(--ink)}
+.hlbl{font:500 12px var(--f-body);fill:var(--muted)}
+.lname{font:italic 600 15px var(--f-body);fill:var(--muted)}
+/* ---------- 9C: kemiläge ---------- */
+header{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px 24px}
+header > div{min-width:0;flex:1 1 420px}
+.class-btn{flex:0 0 auto;font-family:var(--f-display);font-weight:700;font-size:16px;padding:10px 18px;border-radius:999px;border:2px solid var(--ink);background:var(--panel)}
+.class-btn[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.chem-groups{display:flex;flex-direction:column;gap:8px}
+.chem-groups .grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chem-groups .grp > span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);width:120px}
+.chem-groups button{font-family:var(--f-mono);font-size:15px;padding:7px 13px;border-radius:999px}
+.chem-groups button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.chem-tools{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;border-top:1px solid var(--line);align-items:center}
+.chem-tools .legend{margin-left:auto;display:flex;gap:14px;font-size:13px;color:var(--muted);align-items:center}
+.lg-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pa);vertical-align:-1px;margin-right:5px}
+.lg-x{font-family:var(--f-mono);font-weight:700;color:var(--pb);margin-right:5px}
+.status{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.status li{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:6px 10px;border-radius:8px;background:var(--panel-2)}
+.status li b{font-family:var(--f-mono)}
+.status li .ok{color:var(--ok);font-weight:600}
+.status li .no{color:var(--muted)}
+.status li .bad{color:var(--bad);font-weight:600}
+.cmsg{font-size:14.5px;font-weight:500;padding:10px 12px;border-radius:8px;background:var(--panel-2);margin:0}
+.cmsg.ok{color:var(--ok);background:color-mix(in srgb, var(--ok) 12%, var(--panel))}
+.cmsg.bad{color:var(--bad)}
+/* svg kemi */
+.c-bondzone{fill:var(--ink);fill-opacity:0;stroke:var(--muted);stroke-opacity:0;stroke-dasharray:4 4;stroke-width:1.5}
+#csv.picking .c-bondzone.allowed{stroke-opacity:.8;fill-opacity:.04}
+.c-bondguide{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 6;opacity:.6}
+.c-bond{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.c-atom{fill:var(--panel-2);stroke:var(--ink);stroke-width:2.2}
+.c-atom.full{stroke:var(--ok);stroke-width:3}
+.c-shell{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:2 5;opacity:.7}
+#csv.picking .c-shell.allowed{stroke:var(--ink);opacity:1;stroke-width:1.6}
+.c-sym{font:700 30px var(--f-display);fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.c-charge{font:700 20px var(--f-mono);fill:var(--ink);pointer-events:none}
+.c-count{font:500 13px var(--f-mono);fill:var(--muted);text-anchor:middle;pointer-events:none}
+.c-count.ok{fill:var(--ok);font-weight:600}
+.c-count.bad{fill:var(--bad);font-weight:600}
+.c-brack{fill:none;stroke:var(--ink);stroke-width:2}
+.c-e{cursor:grab}
+.c-e .hit{fill:transparent}
+.c-e .dot{fill:var(--pa)}
+.c-e .x{stroke:var(--pb);stroke-width:3;stroke-linecap:round}
+.c-e.sel .ring{fill:none;stroke:var(--ink);stroke-width:2}
+.c-e:focus-visible .ring{fill:none;stroke:var(--focus);stroke-width:2}
+.c-hint{font:500 13px var(--f-body);fill:var(--muted);text-anchor:middle}
+.c-formula{font:600 22px var(--f-mono);fill:var(--ink);text-anchor:middle}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+    <h1>Vinkelpar vid transversal</h1>
+    <p class="lede">När en linje skär två andra linjer bildas åtta vinklar. Välj en typ av vinkelpar, vrid transversalen i det runda handtaget och dra i linjerna för att flytta dem. Linjerna kan läggas på varandra och byta plats. Se vilka vinklar som alltid är lika stora.</p>
+    </div>
+    <button type="button" class="class-btn" id="classBtn" aria-pressed="false">Jag går i 9C och jobbar hellre med kemi</button>
+  </header>
+
+  <div class="modes angle-only" role="group" aria-label="Typ av vinkelpar">
+    <button type="button" data-mode="sido">Sidovinklar</button>
+    <button type="button" data-mode="vert">Vertikalvinklar</button>
+    <button type="button" data-mode="lik">Likbelägna vinklar</button>
+    <button type="button" data-mode="alt">Alternatvinklar</button>
+    <button type="button" data-mode="ytter">Yttre alternatvinklar</button>
+    <button type="button" data-mode="fri">Fri utforskning</button>
+  </div>
+
+  <div class="grid angle-only">
+    <div class="stage">
+      <svg id="sv" viewBox="0 0 800 520" aria-label="Två linjer som skärs av en transversal, med åtta numrerade vinklar"></svg>
+      <div class="stage-ctrl">
+        <div class="ctl">
+          <div class="top"><label for="rT">Transversalens vinkel mot linje 1</label><output id="oT">62°</output></div>
+          <input id="rT" type="range" min="15" max="165" step="1" value="62">
+        </div>
+        <div class="ctl">
+          <div class="top"><label for="rL">Lutning på linje 2</label><output id="oL">0°</output></div>
+          <input id="rL" type="range" min="-20" max="20" step="1" value="0" disabled>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="cPar" checked> Linjerna är parallella</label>
+          <label><input type="checkbox" id="cDeg" checked> Visa grader</label>
+          <button type="button" id="resetFig">Återställ figur</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <section class="card" id="info">
+        <h2 id="iKicker">Vinkelpar</h2>
+        <h3 id="iTitle"></h3>
+        <p id="iDef"></p>
+        <p class="shape" id="iShape"></p>
+        <p class="rule" id="iRule"></p>
+        <div class="pairnav" id="iPairs"></div>
+        <div class="vals" id="iVals"></div>
+        <p class="verdict" id="iVerdict"></p>
+        <p class="why" id="iWhy"></p>
+      </section>
+
+      <section class="card">
+        <div class="quizhead"><h2>Testa dig</h2><span class="score" id="qScore">0 av 0</span></div>
+        <p id="qText">Vilken typ av vinkelpar är markerat i figuren?</p>
+        <div class="quiz-opts" id="qOpts"></div>
+        <p class="fb" id="qFb" aria-live="polite"></p>
+        <div><button type="button" id="qNext">Starta övning</button></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modes" id="chemPicker" hidden>
+    <div class="chem-groups">
+      <div class="grp" role="group" aria-label="Kovalenta bindningar"><span>Kovalent bindning</span>
+        <button type="button" data-mol="H2">H₂</button>
+        <button type="button" data-mol="H2O">H₂O</button>
+        <button type="button" data-mol="NH3">NH₃</button>
+        <button type="button" data-mol="CH4">CH₄</button>
+        <button type="button" data-mol="O2">O₂</button>
+        <button type="button" data-mol="CO2">CO₂</button>
+        <button type="button" data-mol="N2">N₂</button>
+      </div>
+      <div class="grp" role="group" aria-label="Jonbindningar"><span>Jonbindning</span>
+        <button type="button" data-mol="NaCl">NaCl</button>
+        <button type="button" data-mol="MgO">MgO</button>
+        <button type="button" data-mol="MgCl2">MgCl₂</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" id="chemGrid" hidden>
+    <div class="stage">
+      <svg id="csv" viewBox="0 0 800 520" aria-label="Atomer med valenselektroner som kan flyttas"></svg>
+      <div class="chem-tools">
+        <button type="button" id="cHint">Ledtråd</button>
+        <button type="button" id="cSolve">Visa lösning</button>
+        <button type="button" id="cReset">Börja om</button>
+        <span class="legend"><span><span class="lg-dot"></span>elektron från en atom</span><span><span class="lg-x">×</span>från den andra</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <section class="card">
+        <h2 id="cKind">Kovalent bindning</h2>
+        <h3 id="cTitle">H₂O</h3>
+        <p id="cIntro"></p>
+        <p class="shape" id="cHow"></p>
+        <ul class="status" id="cStatus"></ul>
+        <p class="cmsg" id="cMsg" aria-live="polite"></p>
+      </section>
+      <section class="card">
+        <h2>Bra att veta</h2>
+        <p id="cFact"></p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const sv = $('sv'), NS='http://www.w3.org/2000/svg';
+
+const S = { mode:'alt', pair:0, theta:62, tilt:0, parallel:true, deg:true, free:[3,6], quiz:null };
+const P1 = [400,170], L2 = [400,350];
+
+const MODES = {
+  sido:{ title:'Sidovinklar', def:'Två vinklar bredvid varandra vid samma skärningspunkt. De har ett gemensamt ben, och de andra benen bildar tillsammans en rak linje.',
+    shape:'Tillsammans bildar de ett rakt streck, alltså ett halvt varv.', rule:'Sidovinklar är tillsammans alltid 180°.', kind:'sum', always:true,
+    pairs:[[1,2],[2,4],[4,3],[3,1],[5,6],[6,8],[8,7],[7,5]] },
+  vert:{ title:'Vertikalvinklar', def:'Två vinklar mitt emot varandra vid samma skärningspunkt. De har bara spetsen gemensam.',
+    shape:'Linjerna bildar ett X, och vinklarna ligger i var sin motsatt öppning.', rule:'Vertikalvinklar är alltid lika stora.', kind:'eq', always:true,
+    pairs:[[1,4],[2,3],[5,8],[6,7]] },
+  lik:{ title:'Likbelägna vinklar', def:'Vinklar som ligger på samma plats vid var sin skärningspunkt: på samma sida om transversalen och på samma sida om sin linje.',
+    shape:'Mönstret liknar bokstaven F.', rule:'Likbelägna vinklar är lika stora om linjerna är parallella.', kind:'eq', always:false,
+    pairs:[[1,5],[2,6],[3,7],[4,8]] },
+  alt:{ title:'Alternatvinklar', def:'Vinklar som ligger mellan de två linjerna, på var sin sida om transversalen.',
+    shape:'Mönstret liknar bokstaven Z.', rule:'Alternatvinklar är lika stora om linjerna är parallella.', kind:'eq', always:false,
+    get pairs(){ return upperIs2() ? [[1,8],[2,7]] : [[3,6],[4,5]]; } },
+  ytter:{ title:'Yttre alternatvinklar', def:'Vinklar som ligger utanför de två linjerna, på var sin sida om transversalen.',
+    shape:'Som alternatvinklar, fast på utsidan av linjerna.', rule:'Yttre alternatvinklar är lika stora om linjerna är parallella.', kind:'eq', always:false,
+    get pairs(){ return upperIs2() ? [[3,6],[4,5]] : [[1,8],[2,7]]; } },
+  fri:{ title:'Fri utforskning', def:'Klicka på två vinklar i figuren. Appen berättar vilken sorts vinkelpar de bildar.', shape:'', rule:'', pairs:[] }
+};
+const WHY = {
+  lik:p=>'',
+  alt:p=>{ const a=p.find(k=>k<=4), b=p.find(k=>k>4); const v = {1:4,4:1,2:3,3:2}[a]; return `Därför: ∠${a} = ∠${v} eftersom de är vertikalvinklar, och ∠${v} = ∠${b} eftersom de är likbelägna. Alltså är ∠${a} = ∠${b}.`; },
+  ytter:p=>{ const a=p.find(k=>k<=4), b=p.find(k=>k>4); const v = a+4; return `Därför: ∠${a} = ∠${v} eftersom de är likbelägna, och ∠${v} = ∠${b} eftersom de är vertikalvinklar. Alltså är ∠${a} = ∠${b}.`; },
+  sido:p=>'Ett rakt streck är 180°, och de två vinklarna delar upp det mellan sig.',
+  vert:p=>{ const [a,b]=p; return `Båda vinklarna är sidovinkel till samma tredje vinkel, så de måste vara lika stora.`; }
+};
+
+/* positioner: [sida om transversalen, över/under linjen] */
+const POS = {1:['V','ö'],2:['H','ö'],3:['V','u'],4:['H','u']};
+const pos = k => POS[k>4?k-4:k];
+const vtx = k => k>4?2:1;
+/* ligger linje 2 ovanför linje 1 där transversalen skär? */
+function upperIs2(){ return P2()[1] < P1[1] - 0.5; }
+/* en vinkel är inre om den pekar mot den andra linjen */
+function inside(k){ const atUpper = (vtx(k)===1) !== upperIs2(); return pos(k)[1] === (atUpper ? 'u' : 'ö'); }
+
+function relation(i,j){
+  if (i===j) return null;
+  const [pi,pj] = [pos(i),pos(j)];
+  if (vtx(i)===vtx(j)){
+    if (pi[0]!==pj[0] && pi[1]!==pj[1]) return 'vert';
+    return 'sido';
+  }
+  if (pi[0]===pj[0] && pi[1]===pj[1]) return 'lik';
+  const ii = inside(i), ij = inside(j);
+  if (ii!==ij) return 'ingen';
+  if (pi[0]!==pj[0]) return ii ? 'alt' : 'ytter';
+  return ii ? 'inreSamma' : 'yttreSamma';
+}
+const EXTRA = {
+  inreSamma:{ title:'Inre vinklar på samma sida', rule:'De ligger mellan linjerna på samma sida om transversalen. Om linjerna är parallella är summan 180°.', kind:'sum', always:false },
+  yttreSamma:{ title:'Yttre vinklar på samma sida', rule:'De ligger utanför linjerna på samma sida om transversalen. Om linjerna är parallella är summan 180°.', kind:'sum', always:false },
+  ingen:{ title:'Inget särskilt par', rule:'De här vinklarna ligger på olika platser och har ingen fast regel.', kind:'none' }
+};
+
+/* ---------- geometri ---------- */
+const rad = d => d*Math.PI/180;
+const dir = d => [Math.cos(rad(d)), -Math.sin(rad(d))];
+function alpha2(){ return S.parallel ? 0 : S.tilt; }
+function P2(){
+  const t = dir(S.theta), l = dir(alpha2());
+  // P1 + s*t = L2 + u*l
+  const det = t[0]*(-l[1]) - t[1]*(-l[0]);
+  const dx = L2[0]-P1[0], dy = L2[1]-P1[1];
+  const s = (dx*(-l[1]) - dy*(-l[0]))/det;
+  return [P1[0]+s*t[0], P1[1]+s*t[1]];
+}
+function clampTheta(th){
+  const a = alpha2();
+  return Math.max(Math.max(15, a+15), Math.min(Math.min(165, a+165), th));
+}
+function span(k){ const a = vtx(k)===1 ? 0 : alpha2(); const d = S.theta - a; const p = k>4?k-4:k; return (p===2||p===3) ? d : 180-d; }
+function startAng(k){
+  const a = vtx(k)===1 ? 0 : alpha2(), th = S.theta, p = k>4?k-4:k;
+  return {2:a, 1:th, 3:a+180, 4:th+180}[p];
+}
+
+/* ---------- rendering ---------- */
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||sv).appendChild(e); return e; }
+function pt(P,ang,r){ const d=dir(ang); return [P[0]+d[0]*r, P[1]+d[1]*r]; }
+function sectorPath(P,a0,a1,r){
+  const p0=pt(P,a0,r), p1=pt(P,a1,r), large = (a1-a0)>180?1:0;
+  return `M${P[0]},${P[1]} L${p0[0]},${p0[1]} A${r},${r} 0 ${large} 0 ${p1[0]},${p1[1]} Z`;
+}
+function currentPair(){
+  if (S.quiz && S.quiz.active) return S.quiz.pair;
+  if (S.mode==='fri') return S.free;
+  return MODES[S.mode].pairs[S.pair] || [];
+}
+function render(){
+  sv.innerHTML='';
+  // rutnät
+  for(let x=0;x<=800;x+=40) el('line',{x1:x,y1:0,x2:x,y2:520,class:'gridln'});
+  for(let y=0;y<=520;y+=40) el('line',{x1:0,y1:y,x2:800,y2:y,class:'gridln'});
+
+  const a2 = alpha2(), Q = P2(), d1 = dir(0), d2 = dir(a2), dt = dir(S.theta);
+  const pair = currentPair();
+  const showBand = ['alt','ytter'].includes(S.mode) || (S.quiz && S.quiz.active);
+
+  // inre område mellan linjerna
+  if (showBand && !(S.quiz&&S.quiz.active)){
+    const far=1200;
+    el('path',{class:'band', d:`M${P1[0]-far},${P1[1]} L${P1[0]+far},${P1[1]} L${L2[0]+far*d2[0]},${L2[1]+far*d2[1]} L${L2[0]-far*d2[0]},${L2[1]-far*d2[1]} Z`});
+    const yA = P1[1], yB = L2[1] - (24-L2[0])*Math.tan(rad(a2));
+    const up = Math.min(yA,yB), lo = Math.max(yA,yB);
+    if (lo-up > 34) el('text',{class:'bandlbl', x:24, y:(up+lo)/2+4}).textContent='inre område';
+    if (up > 50) el('text',{class:'bandlbl', x:24, y:up-28}).textContent='yttre område';
+    if (lo < 480) el('text',{class:'bandlbl', x:24, y:lo+36}).textContent='yttre område';
+  }
+
+  // linjer
+  const far=1200;
+  el('line',{class:'ln', x1:P1[0]-far, y1:P1[1], x2:P1[0]+far, y2:P1[1]});
+  el('line',{class:'ln', x1:L2[0]-far*d2[0], y1:L2[1]-far*d2[1], x2:L2[0]+far*d2[0], y2:L2[1]+far*d2[1]});
+  el('line',{class:'tr', x1:P1[0]-far*dt[0], y1:P1[1]-far*dt[1], x2:P1[0]+far*dt[0], y2:P1[1]+far*dt[1]});
+  // osynliga, breda träffytor för att flytta linjerna
+  const h1 = el('line',{class:'hit hv', x1:P1[0]-far, y1:P1[1], x2:P1[0]+far, y2:P1[1], 'aria-label':'Flytta linje 1'});
+  h1.addEventListener('pointerdown', e=>startMove(e,'l1'));
+  const h2 = el('line',{class:'hit hv', x1:L2[0]-far*d2[0], y1:L2[1]-far*d2[1], x2:L2[0]+far*d2[0], y2:L2[1]+far*d2[1], 'aria-label':'Flytta linje 2'});
+  h2.addEventListener('pointerdown', e=>startMove(e,'l2'));
+  const ht = el('line',{class:'hit hh', x1:P1[0]-far*dt[0], y1:P1[1]-far*dt[1], x2:P1[0]+far*dt[0], y2:P1[1]+far*dt[1], 'aria-label':'Flytta transversalen'});
+  ht.addEventListener('pointerdown', e=>startMove(e,'tr'));
+  el('text',{class:'lname', x:760, y:P1[1]-12, 'text-anchor':'end'}).textContent='linje 1';
+  const l2end = [L2[0]+340*d2[0], L2[1]+340*d2[1]];
+  el('text',{class:'lname', x:l2end[0], y:l2end[1]-12, 'text-anchor':'end'}).textContent='linje 2';
+  const tl = pt(P1, S.theta, 150);
+  el('text',{class:'lname', x:tl[0]+14, y:tl[1]-6}).textContent='transversal';
+
+  // parallellpilar
+  if (S.parallel){
+    [[P1,0],[L2,a2]].forEach(([P,a])=>{
+      const c = pt(P,a,-260);
+      const d = dir(a), n=[-d[1],d[0]];
+      const tip = c, b1=[c[0]-d[0]*9+n[0]*7, c[1]-d[1]*9+n[1]*7], b2=[c[0]-d[0]*9-n[0]*7, c[1]-d[1]*9-n[1]*7];
+      el('path',{class:'chev', d:`M${b1[0]},${b1[1]} L${tip[0]},${tip[1]} L${b2[0]},${b2[1]}`});
+    });
+  }
+
+  // vinklar
+  const gap = Math.hypot(P1[0]-Q[0], P1[1]-Q[1]), close = gap < 90;
+  if (close){
+    el('text',{class:'bandlbl', x:24, y:30}).textContent = gap < 3 ? 'Linjerna ligger på varandra: vinkel 1 och 5, 2 och 6 osv. sammanfaller' : 'Skärningspunkterna ligger nära varandra';
+  }
+  for(let k=1;k<=8;k++){
+    const P = vtx(k)===1 ? P1 : Q, a0 = startAng(k), sp = span(k), a1 = a0+sp, mid = a0+sp/2;
+    const role = pair[0]===k ? 'A' : pair[1]===k ? 'B' : '';
+    const off = (close && vtx(k)===2) ? 52 : 0;
+    const r = 34 + off;
+    el('path',{class:'arc '+role, d:sectorPath(P,a0,a1,r)});
+    const np = pt(P, mid, (sp<40? 62 : 52) + off);
+    el('text',{class:'num '+role, x:np[0], y:np[1]}).textContent = k;
+    if (S.deg){
+      const dp = pt(P, mid, (sp<40? 84 : 74) + off);
+      el('text',{class:'deg '+role, x:dp[0], y:dp[1]}).textContent = Math.round(sp)+'°';
+    }
+    const hit = el('path',{class:'sector', d:sectorPath(P,a0,a1,72+off), 'data-k':k, tabindex:0, role:'button', 'aria-label':'Vinkel '+k});
+    hit.addEventListener('click',()=>pick(k));
+    hit.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(k);} });
+  }
+  el('circle',{class:'dot', cx:P1[0], cy:P1[1], r:4});
+  el('circle',{class:'dot', cx:Q[0], cy:Q[1], r:4});
+
+  // handtag
+  const h = pt(P1, S.theta, 120);
+  const hd = el('circle',{class:'handle'+(dragging?' drag':''), cx:h[0], cy:h[1], r:11, id:'handle', tabindex:0, role:'slider', 'aria-label':'Vrid transversalen', 'aria-valuenow':S.theta});
+  hd.addEventListener('pointerdown', startDrag);
+  hd.addEventListener('keydown', e=>{ if(e.key==='ArrowLeft'||e.key==='ArrowUp'){S.theta=clampTheta(S.theta+1);sync();} if(e.key==='ArrowRight'||e.key==='ArrowDown'){S.theta=clampTheta(S.theta-1);sync();} });
+  if (!touchedHandle) el('text',{class:'hlbl', x:h[0]+18, y:h[1]+4}).textContent='vrid här';
+}
+
+/* ---------- info ---------- */
+function renderInfo(){
+  const pair = currentPair();
+  if (S.quiz && S.quiz.active){
+    $('iKicker').textContent='Övning'; $('iTitle').textContent='Vilket par är det?';
+    $('iDef').textContent='Titta på var de två markerade vinklarna ligger: vid samma punkt eller vid var sin, mellan linjerna eller utanför, och på vilken sida om transversalen.';
+    ['iShape','iVerdict','iWhy'].forEach(id=>$(id).textContent=''); $('iRule').hidden=true; $('iPairs').innerHTML='';
+    $('iVals').innerHTML=`<span class="a">∠${pair[0]} = ${Math.round(span(pair[0]))}°</span><span class="b">∠${pair[1]} = ${Math.round(span(pair[1]))}°</span>`;
+    return;
+  }
+  let key = S.mode, M = MODES[S.mode];
+  if (S.mode==='fri'){
+    $('iKicker').textContent='Fri utforskning';
+    if (pair.length<2){
+      $('iTitle').textContent = pair.length ? 'Välj en vinkel till' : 'Välj två vinklar';
+      $('iDef').textContent = MODES.fri.def; $('iShape').textContent=''; $('iRule').hidden=true;
+      $('iVals').innerHTML = pair.length ? `<span class="a">∠${pair[0]} = ${Math.round(span(pair[0]))}°</span>` : '';
+      $('iVerdict').textContent=''; $('iWhy').textContent=''; $('iPairs').innerHTML=''; return;
+    }
+    key = relation(pair[0],pair[1]);
+    M = MODES[key] || EXTRA[key];
+    $('iDef').textContent = MODES[key] ? MODES[key].def : '';
+    $('iShape').textContent = MODES[key] ? MODES[key].shape : '';
+    $('iPairs').innerHTML = '<button type="button" id="clrFree">Välj nya vinklar</button>';
+    $('clrFree').onclick=()=>{ S.free=[]; sync(); };
+  } else {
+    $('iKicker').textContent='Vinkelpar';
+    $('iDef').textContent = M.def; $('iShape').textContent = M.shape;
+    $('iPairs').innerHTML = '<span>Par:</span>' + M.pairs.map((p,i)=>`<button type="button" data-pi="${i}" aria-pressed="${i===S.pair}">${p[0]} & ${p[1]}</button>`).join('');
+    $('iPairs').querySelectorAll('[data-pi]').forEach(b=> b.onclick=()=>{ S.pair=+b.dataset.pi; sync(); });
+  }
+  $('iTitle').textContent = M.title;
+  $('iRule').hidden = !M.rule; $('iRule').textContent = M.rule;
+
+  const [i,j] = pair, vi = Math.round(span(i)), vj = Math.round(span(j));
+  const v = $('iVerdict');
+  if (M.kind==='eq'){
+    const eq = vi===vj;
+    $('iVals').innerHTML = `<span class="a">∠${i} = ${vi}°</span><span>${eq?'=':'≠'}</span><span class="b">∠${j} = ${vj}°</span>`;
+    v.className = 'verdict '+(eq?'ok':'bad');
+    v.textContent = eq ? (M.always ? 'Lika stora, hur du än vrider transversalen.' : 'Lika stora, eftersom linjerna är parallella.') : 'Inte lika stora. Linjerna är inte parallella, så regeln gäller inte.';
+  } else if (M.kind==='sum'){
+    const s = vi+vj, ok = s===180;
+    $('iVals').innerHTML = `<span class="a">∠${i} = ${vi}°</span><span>+</span><span class="b">∠${j} = ${vj}°</span><span>= ${s}°</span>`;
+    v.className = 'verdict '+(ok?'ok':'bad');
+    v.textContent = ok ? (M.always ? 'Summan blir alltid 180°.' : 'Summan blir 180°, eftersom linjerna är parallella.') : 'Summan är inte 180°, eftersom linjerna inte är parallella.';
+  } else {
+    $('iVals').innerHTML = `<span class="a">∠${i} = ${vi}°</span><span class="b">∠${j} = ${vj}°</span>`;
+    v.className='verdict'; v.textContent='';
+  }
+  const w = WHY[key]; $('iWhy').textContent = (w && (M.always || S.parallel)) ? w(pair) : ''; $('iWhy').hidden = !$('iWhy').textContent;
+}
+
+/* ---------- interaktion ---------- */
+let dragging=null, touchedHandle=false;
+function svgPoint(e){ const p=sv.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(sv.getScreenCTM().inverse()); }
+function fits(){
+  const Q=P2();
+  return isFinite(Q[0]) && Q[0]>50 && Q[0]<750 && Q[1]>25 && Q[1]<500 && P1[0]>60 && P1[0]<740;
+}
+function startDrag(e){ e.preventDefault(); dragging={type:'rot'}; touchedHandle=true; sv.setPointerCapture(e.pointerId); }
+function startMove(e,type){
+  e.preventDefault(); const p=svgPoint(e);
+  dragging={type, x0:p.x, y0:p.y, px:P1[0], p1y:P1[1], l2y:L2[1]};
+  sv.setPointerCapture(e.pointerId); sv.classList.add('moving');
+}
+sv.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  const p=svgPoint(e), D=dragging;
+  const keep=[P1[0],P1[1],L2[1],S.theta];
+  if (D.type==='rot'){
+    let ang = Math.atan2(P1[1]-p.y, p.x-P1[0])*180/Math.PI;
+    if (ang<0) ang+=180; // samma linje åt andra hållet
+    S.theta = clampTheta(Math.round(ang));
+  } else if (D.type==='tr'){
+    P1[0] = D.px + (p.x-D.x0);
+  } else if (D.type==='l1'){
+    P1[1] = Math.max(130, Math.min(470, D.p1y + (p.y-D.y0)));
+    if (Math.abs(P1[1]-L2[1])<10) P1[1]=L2[1];
+  } else if (D.type==='l2'){
+    L2[1] = Math.max(40, Math.min(480, D.l2y + (p.y-D.y0)));
+    if (Math.abs(P1[1]-L2[1])<10) L2[1]=P1[1];
+  }
+  if (!fits()){ [P1[0],P1[1],L2[1],S.theta]=keep; }
+  sync();
+});
+['pointerup','pointercancel'].forEach(t=>sv.addEventListener(t,()=>{ if(dragging){dragging=null; sv.classList.remove('moving'); render();} }));
+function resetFig(){ P1[0]=400; P1[1]=170; L2[1]=350; S.theta=62; S.tilt=0; S.parallel=true; $('cPar').checked=true; sync(); }
+$('resetFig').onclick=resetFig;
+
+function pick(k){
+  if (S.quiz && S.quiz.active) return;
+  if (S.mode==='fri'){
+    if (S.free.length>=2 || S.free.includes(k)) S.free=[k]; else S.free.push(k);
+  } else {
+    const ps = MODES[S.mode].pairs;
+    const idx = ps.map((p,i)=>[p,i]).filter(([p])=>p.includes(k)).map(([,i])=>i);
+    if (!idx.length){ // vinkeln saknar par i detta läge: byt till fri utforskning
+      S.mode='fri'; S.free=[k];
+    } else {
+      const cur = idx.indexOf(S.pair);
+      S.pair = cur===-1 ? idx[0] : idx[(cur+1)%idx.length];
+    }
+  }
+  sync();
+}
+document.querySelectorAll('[data-mode]').forEach(b=> b.onclick=()=>{ endQuiz(); S.mode=b.dataset.mode; S.pair=0; if(S.mode==='fri') S.free=[]; sync(); });
+$('rT').addEventListener('input',e=>{ const old=S.theta; S.theta=clampTheta(+e.target.value); if(!fits()) S.theta=old; sync(); });
+$('rL').addEventListener('input',e=>{ const old=[S.tilt,S.theta]; S.tilt=+e.target.value; S.theta=clampTheta(S.theta); if(!fits()) [S.tilt,S.theta]=old; sync(); });
+$('cPar').onchange=e=>{ S.parallel=e.target.checked; if(!S.parallel && S.tilt===0){ S.tilt=12; } S.theta=clampTheta(S.theta); if(!fits()){ S.tilt=0; S.parallel=true; e.target.checked=true; } sync(); };
+$('cDeg').onchange=e=>{ S.deg=e.target.checked; sync(); };
+
+function sync(){
+  $('rT').value=S.theta; $('oT').textContent=Math.round(S.theta)+'°';
+  $('rL').disabled=S.parallel; $('rL').value=S.parallel?0:S.tilt; $('oL').textContent=(S.parallel?0:S.tilt)+'°';
+  document.querySelectorAll('[data-mode]').forEach(b=> b.setAttribute('aria-pressed', String(!(S.quiz&&S.quiz.active) && b.dataset.mode===S.mode)));
+  render(); renderInfo();
+}
+
+/* ---------- övning ---------- */
+const QKEYS = ['sido','vert','lik','alt','ytter'];
+let score={r:0,n:0};
+function newQuiz(){
+  const key = QKEYS[Math.floor(Math.random()*QKEYS.length)];
+  const ps = MODES[key].pairs, p = ps[Math.floor(Math.random()*ps.length)].slice();
+  if (Math.random()<.5) p.reverse();
+  S.quiz = {active:true, key, pair:p, answered:false};
+  const old=S.theta; for(let i=0;i<20;i++){ S.theta = clampTheta(30+Math.floor(Math.random()*120)); if(fits()) break; S.theta=old; }
+  $('qOpts').innerHTML = QKEYS.map(k=>`<button type="button" data-q="${k}">${MODES[k].title}</button>`).join('');
+  $('qOpts').querySelectorAll('[data-q]').forEach(b=> b.onclick=()=>answer(b));
+  $('qFb').textContent=''; $('qText').textContent=`Vinklarna ${p[0]} och ${p[1]} är markerade. Vilken typ av vinkelpar är det?`;
+  $('qNext').textContent='Ny fråga';
+  sync();
+}
+function answer(btn){
+  const q=S.quiz; if(!q||q.answered) return; q.answered=true; score.n++;
+  const rk = relation(q.pair[0], q.pair[1]); if (MODES[rk]) q.key = rk;
+  const ok = btn.dataset.q===q.key; if(ok) score.r++;
+  $('qOpts').querySelectorAll('[data-q]').forEach(b=>{ if(b.dataset.q===q.key) b.classList.add('right'); else if(b===btn) b.classList.add('wrong'); });
+  $('qFb').textContent = ok ? 'Rätt! ' + MODES[q.key].rule : `Inte riktigt. Det är ${MODES[q.key].title.toLowerCase()}. ${MODES[q.key].shape}`;
+  $('qScore').textContent = `${score.r} av ${score.n}`;
+}
+function endQuiz(){
+  if (S.quiz){ S.quiz.active=false; S.quiz=null; $('qOpts').innerHTML=''; $('qFb').textContent=''; $('qText').textContent='Vilken typ av vinkelpar är markerat i figuren?'; $('qNext').textContent='Starta övning'; }
+}
+$('qNext').onclick=newQuiz;
+
+sync();
+})();
+</script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const csv = $('csv'), NS = 'http://www.w3.org/2000/svg';
+
+/* ---------- molekyler ----------
+   atom: el, x, y, v = valenselektroner, t = mål (2 för väte, 8 annars, 0 för metall som ger bort), m = prick/kryss
+   kovalent: bonds [i, j, antal par i lösningen]
+   jon: moves [från, till, antal] */
+const MOLS = {
+  H2:{ kind:'kov', f:'H₂', atoms:[{el:'H',x:310,y:250,v:1,t:2,m:'dot'},{el:'H',x:490,y:250,v:1,t:2,m:'x'}], bonds:[[0,1,1]],
+    hint:'Varje väteatom har 1 elektron men vill ha 2. Låt båda lägga sin elektron mellan atomerna.',
+    done:'Atomerna delar ett elektronpar. Det är en enkelbindning: H–H.',
+    fact:'Väte är den enda atomen här som nöjer sig med 2 elektroner, eftersom dess enda skal bara rymmer 2.' },
+  H2O:{ kind:'kov', f:'H₂O', atoms:[{el:'O',x:400,y:200,v:6,t:8,m:'dot'},{el:'H',x:245,y:320,v:1,t:2,m:'x'},{el:'H',x:555,y:320,v:1,t:2,m:'x'}], bonds:[[0,1,1],[0,2,1]],
+    hint:'Syre har 6 valenselektroner och behöver 2 till. Varje väte behöver 1 till. Bilda ett par mellan syret och varje väte.',
+    done:'Syret delar ett elektronpar med varje väte och har två fria elektronpar kvar. Därför är vattenmolekylen vinklad.',
+    fact:'De två fria elektronparen trycker isär bindningarna, så vattenmolekylen blir vinklad (ungefär 105°) i stället för rak.' },
+  NH3:{ kind:'kov', f:'NH₃', atoms:[{el:'N',x:400,y:190,v:5,t:8,m:'dot'},{el:'H',x:230,y:300,v:1,t:2,m:'x'},{el:'H',x:400,y:390,v:1,t:2,m:'x'},{el:'H',x:570,y:300,v:1,t:2,m:'x'}], bonds:[[0,1,1],[0,2,1],[0,3,1]],
+    hint:'Kväve har 5 valenselektroner och behöver 3 till, en från varje väte.',
+    done:'Kvävet bildar tre enkelbindningar och har ett fritt elektronpar kvar.',
+    fact:'Ammoniak luktar starkt och används för att tillverka konstgödsel.' },
+  CH4:{ kind:'kov', f:'CH₄', atoms:[{el:'C',x:400,y:232,v:4,t:8,m:'dot'},{el:'H',x:400,y:88,v:1,t:2,m:'x'},{el:'H',x:560,y:232,v:1,t:2,m:'x'},{el:'H',x:400,y:376,v:1,t:2,m:'x'},{el:'H',x:240,y:232,v:1,t:2,m:'x'}], bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]],
+    hint:'Kol har 4 valenselektroner och behöver 4 till. Det blir en bindning till varje väte.',
+    done:'Kolet bildar fyra enkelbindningar och har inga fria par kvar.',
+    fact:'Metan är huvuddelen av naturgas och biogas. Kol bildar nästan alltid fyra bindningar.' },
+  O2:{ kind:'kov', f:'O₂', atoms:[{el:'O',x:300,y:250,v:6,t:8,m:'dot'},{el:'O',x:500,y:250,v:6,t:8,m:'x'}], bonds:[[0,1,2]],
+    hint:'Varje syre har 6 och behöver 8. Ett delat par räcker inte. Prova att dela två par.',
+    done:'Syreatomerna delar två elektronpar. Det är en dubbelbindning: O=O.',
+    fact:'Luften vi andas in består till ungefär 21 % av syrgas, O₂.' },
+  CO2:{ kind:'kov', f:'CO₂', atoms:[{el:'O',x:200,y:250,v:6,t:8,m:'dot'},{el:'C',x:400,y:250,v:4,t:8,m:'x'},{el:'O',x:600,y:250,v:6,t:8,m:'dot'}], bonds:[[0,1,2],[1,2,2]],
+    hint:'Kol har 4 elektroner att dela och varje syre behöver 2. Det blir två par mot varje syre.',
+    done:'Kolet har en dubbelbindning till varje syre: O=C=O. Molekylen är rak.',
+    fact:'Koldioxid bildas när något förbränns, och växterna tar upp den vid fotosyntesen.' },
+  N2:{ kind:'kov', f:'N₂', atoms:[{el:'N',x:300,y:250,v:5,t:8,m:'dot'},{el:'N',x:500,y:250,v:5,t:8,m:'x'}], bonds:[[0,1,3]],
+    hint:'Varje kväve har 5 och behöver 3 till. Hur många par måste de dela?',
+    done:'Kväveatomerna delar tre elektronpar. Det är en trippelbindning: N≡N.',
+    fact:'Trippelbindningen är mycket stark. Därför reagerar kvävgasen i luften (78 %) nästan inte alls.' },
+  NaCl:{ kind:'jon', f:'NaCl', atoms:[{el:'Na',x:270,y:250,v:1,t:0,m:'x',metal:true},{el:'Cl',x:530,y:250,v:7,t:8,m:'dot'}], moves:[[0,1,1]],
+    hint:'Natrium har 1 valenselektron och klor har 7. Flytta natriumets elektron till kloret.',
+    done:'Natrium har gett bort en elektron och blivit Na⁺. Klor har fått 8 och blivit Cl⁻. Jonerna har motsatt laddning och dras till varandra.',
+    fact:'Natriumklorid är vanligt koksalt. I saltkristallen sitter miljontals Na⁺ och Cl⁻ i ett regelbundet mönster.' },
+  MgO:{ kind:'jon', f:'MgO', atoms:[{el:'Mg',x:270,y:250,v:2,t:0,m:'x',metal:true},{el:'O',x:530,y:250,v:6,t:8,m:'dot'}], moves:[[0,1,2]],
+    hint:'Magnesium har 2 valenselektroner och syre behöver 2 till.',
+    done:'Magnesium har gett bort 2 elektroner och blivit Mg²⁺. Syret har fått 2 och blivit O²⁻.',
+    fact:'Magnesium brinner med ett mycket starkt vitt sken, och det som bildas är magnesiumoxid.' },
+  MgCl2:{ kind:'jon', f:'MgCl₂', atoms:[{el:'Cl',x:180,y:250,v:7,t:8,m:'dot'},{el:'Mg',x:400,y:250,v:2,t:0,m:'x',metal:true},{el:'Cl',x:620,y:250,v:7,t:8,m:'dot'}], moves:[[1,0,1],[1,2,1]],
+    hint:'Magnesium har 2 elektroner att ge bort, men varje kloratom vill bara ha 1. Hur många kloratomer behövs?',
+    done:'Magnesium har gett en elektron till varje klor. Det bildas Mg²⁺ och två Cl⁻, och formeln blir MgCl₂.',
+    fact:'Laddningarna måste ta ut varandra: 2+ från Mg och 2 · 1− från Cl ger summan 0.' }
+};
+const INTRO = {
+  kov:{ k:'Kovalent bindning', i:'I en kovalent bindning (elektronparbindning) delar två atomer på ett elektronpar. Varje atom bidrar med en elektron till paret.',
+        h:'Dra en elektron till den streckade platsen mellan två atomer, eller tryck på elektronen och sedan på platsen. Målet: varje atom ska få 8 elektroner i yttersta skalet, väte 2. Delade elektroner räknas för båda atomerna.' },
+  jon:{ k:'Jonbindning', i:'I en jonbindning flyttas elektroner helt från en metallatom till en icke-metallatom. Då bildas joner med motsatt laddning som dras till varandra.',
+        h:'Dra metallens yttersta elektroner till icke-metallen. Målet: metallen ska ha tömt sitt yttersta skal och icke-metallen ska ha 8.' }
+};
+
+const C = { key:'H2O', E:[], sel:null };
+function M(){ return MOLS[C.key]; }
+
+function load(key){
+  C.key = key; C.sel = null; C.E = []; let id=0;
+  M().atoms.forEach((a,i)=>{ for(let n=0;n<a.v;n++) C.E.push({id:id++, owner:i, a:i, b:null}); });
+  render(); renderSide();
+}
+function countAt(i){
+  const m = M();
+  let n = C.E.filter(e=>e.b===null && e.a===i).length;
+  if (m.kind==='kov') m.bonds.forEach((b,k)=>{ if(b[0]===i||b[1]===i) n += C.E.filter(e=>e.b===k).length; });
+  return n;
+}
+function bondSplit(k){ const b=M().bonds[k]; return [C.E.filter(e=>e.b===k && e.owner===b[0]), C.E.filter(e=>e.b===k && e.owner===b[1])]; }
+function charge(i){ const a=M().atoms[i]; return a.v - countAt(i); }
+function chargeStr(q){ if(!q) return ''; const s = q>0?'+':'−'; return (Math.abs(q)>1?Math.abs(q):'')+s; }
+
+/* ---------- placering av elektroner ---------- */
+function bondDirs(i){
+  const m=M(); if(m.kind!=='kov') return [];
+  const A=m.atoms[i];
+  return m.bonds.filter(b=>b[0]===i||b[1]===i).map(b=>{ const o=m.atoms[b[0]===i?b[1]:b[0]]; return Math.atan2(o.y-A.y,o.x-A.x)*180/Math.PI; });
+}
+function angDist(a,b){ let d=Math.abs(a-b)%360; return d>180?360-d:d; }
+function lonePositions(i, n){
+  const A=M().atoms[i], dirs=bondDirs(i), R=58;
+  const all=[-90,0,90,180];
+  let sides = all.filter(s=>dirs.every(d=>angDist(s,d)>50));
+  const blocked = all.filter(s=>!sides.includes(s));
+  if (!sides.length) sides = all.slice();
+  // fler elektroner än platser: ta tillbaka blockerade sidor
+  while (n > sides.length*2 && blocked.length) sides.push(blocked.shift());
+  const cnt = sides.map(()=>0);
+  for(let k=0;k<n;k++) cnt[k%sides.length]++;
+  const pos=[];
+  sides.forEach((s,si)=>{
+    const r=s*Math.PI/180, u=[Math.cos(r),Math.sin(r)], p=[-u[1],u[0]], c=cnt[si];
+    for(let j=0;j<c;j++){ const o=(j-(c-1)/2)*17; pos.push([A.x+u[0]*R+p[0]*o, A.y+u[1]*R+p[1]*o]); }
+  });
+  return pos;
+}
+function bondGeom(k){
+  const b=M().bonds[k], A=M().atoms[b[0]], B=M().atoms[b[1]];
+  const L=Math.hypot(B.x-A.x,B.y-A.y), u=[(B.x-A.x)/L,(B.y-A.y)/L], n=[-u[1],u[0]];
+  return {A,B,u,n,m:[(A.x+B.x)/2,(A.y+B.y)/2]};
+}
+function positions(){
+  const P={}, m=M();
+  m.atoms.forEach((a,i)=>{ const es=C.E.filter(e=>e.b===null&&e.a===i).sort((x,y)=>x.owner-y.owner||x.id-y.id); lonePositions(i,es.length).forEach((p,j)=>P[es[j].id]=p); });
+  if (m.kind==='kov') m.bonds.forEach((b,k)=>{
+    const g=bondGeom(k), [ea,eb]=bondSplit(k), pc=Math.max(ea.length,eb.length);
+    for(let p=0;p<pc;p++){
+      const o=(p-(pc-1)/2)*17;
+      if(ea[p]) P[ea[p].id]=[g.m[0]-g.u[0]*8+g.n[0]*o, g.m[1]-g.u[1]*8+g.n[1]*o];
+      if(eb[p]) P[eb[p].id]=[g.m[0]+g.u[0]*8+g.n[0]*o, g.m[1]+g.u[1]*8+g.n[1]*o];
+    }
+  });
+  return P;
+}
+
+/* ---------- regler ---------- */
+function canGo(e, target){
+  const m=M();
+  if (m.kind==='jon') return target.a!==undefined;
+  if (target.a!==undefined) return target.a===e.owner;
+  const b=m.bonds[target.b]; return b[0]===e.owner || b[1]===e.owner;
+}
+function moveTo(e, target){
+  if (!canGo(e,target)) return false;
+  if (target.a!==undefined){ e.a=target.a; e.b=null; } else { e.b=target.b; e.a=null; }
+  return true;
+}
+function evaluate(){
+  const m=M(), msgs=[]; let ok=true;
+  m.atoms.forEach((a,i)=>{ const n=countAt(i); if(n!==a.t) ok=false; if(n>a.t && !a.metal) msgs.push(`${a.el} har ${n} elektroner, men får bara plats med ${a.t}.`); });
+  if (m.kind==='kov') m.bonds.forEach((b,k)=>{ const [ea,eb]=bondSplit(k); if(ea.length!==eb.length){ ok=false; if(ea.length+eb.length>0) msgs.push(`Mellan ${m.atoms[b[0]].el} och ${m.atoms[b[1]].el} saknar ett par en partner. Varje atom ska bidra med en elektron per par.`);} });
+  return {ok, msgs};
+}
+
+/* ---------- rendering ---------- */
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||csv).appendChild(e); return e; }
+let drag=null;
+function render(){
+  csv.innerHTML='';
+  const m=M(), P=positions(), ev=evaluate(), sel = C.E.find(e=>e.id===C.sel);
+  csv.classList.toggle('picking', !!(sel || (drag&&drag.moved)));
+  const active = sel || (drag && C.E.find(e=>e.id===drag.id));
+
+  // bindningar
+  if (m.kind==='kov') m.bonds.forEach((b,k)=>{
+    const g=bondGeom(k), [ea,eb]=bondSplit(k), pairs=Math.min(ea.length,eb.length);
+    const s=[g.A.x+g.u[0]*40, g.A.y+g.u[1]*40], t=[g.B.x-g.u[0]*40, g.B.y-g.u[1]*40];
+    if (!pairs) el('line',{class:'c-bondguide', x1:s[0],y1:s[1],x2:t[0],y2:t[1]});
+    for(let p=0;p<pairs;p++){ const o=(p-(pairs-1)/2)*17; el('line',{class:'c-bond', x1:s[0]+g.n[0]*o, y1:s[1]+g.n[1]*o, x2:t[0]+g.n[0]*o, y2:t[1]+g.n[1]*o}); }
+    const allowed = active && canGo(active,{b:k});
+    const z = el('circle',{class:'c-bondzone'+(allowed?' allowed':''), cx:g.m[0], cy:g.m[1], r:34});
+    z.addEventListener('click',()=>tapTarget({b:k}));
+  });
+
+  // atomer
+  m.atoms.forEach((a,i)=>{
+    const n=countAt(i), full = n===a.t, q=charge(i);
+    const allowed = active && canGo(active,{a:i});
+    const sh = el('circle',{class:'c-shell'+(allowed?' allowed':''), cx:a.x, cy:a.y, r:58});
+    const c = el('circle',{class:'c-atom'+(full?' full':''), cx:a.x, cy:a.y, r:36});
+    [sh,c].forEach(x=>x.addEventListener('click',()=>tapTarget({a:i})));
+    el('text',{class:'c-sym', x:a.x, y:a.y}).textContent=a.el;
+    if (m.kind==='jon' && q){
+      // jonparentes
+      const w=82; el('path',{class:'c-brack', d:`M${a.x-w+10},${a.y-w} h-10 v${2*w} h10 M${a.x+w-10},${a.y-w} h10 v${2*w} h-10`});
+      el('text',{class:'c-charge', x:a.x+w+4, y:a.y-w+10}).textContent=chargeStr(q);
+    }
+    let txt, cls;
+    if (a.metal){ txt = n===0 ? 'yttersta skalet tomt' : `${n} att ge bort`; cls = n===0?'ok':''; }
+    else { txt = `${n} / ${a.t}`; cls = full?'ok':(n>a.t?'bad':''); }
+    const ds = bondDirs(i); let vx=0, vy=0; ds.forEach(d=>{ vx+=Math.cos(d*Math.PI/180); vy+=Math.sin(d*Math.PI/180); });
+    const vl = Math.hypot(vx,vy); let lx=a.x, ly=a.y+(m.kind==='jon'&&q?104:84);
+    if (vl>0.3){ lx = a.x - vx/vl*84; ly = a.y - vy/vl*84 + 4; }
+    el('text',{class:'c-count '+cls, x:lx, y:ly}).textContent = txt;
+  });
+
+  // elektroner
+  C.E.forEach(e=>{
+    const p = (drag && drag.id===e.id && drag.moved) ? drag.p : P[e.id]; if(!p) return;
+    const g = el('g',{class:'c-e'+(C.sel===e.id?' sel':''), transform:`translate(${p[0]},${p[1]})`, tabindex:0, role:'button', 'aria-label':`Elektron från ${m.atoms[e.owner].el}`});
+    el('circle',{class:'hit', r:14},g);
+    el('circle',{class:'ring', r:11},g);
+    if (m.atoms[e.owner].m==='dot') el('circle',{class:'dot', r:6},g);
+    else el('path',{class:'x', d:'M-5,-5 L5,5 M5,-5 L-5,5'},g);
+    g.addEventListener('pointerdown',ev=>startDrag(ev,e));
+    g.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); C.sel = C.sel===e.id?null:e.id; render(); } });
+  });
+
+  // formel när klar
+  if (ev.ok){
+    el('text',{class:'c-formula', x:400, y:500}).textContent = m.kind==='jon'
+      ? m.atoms.map((a,i)=>a.el+supStr(charge(i))).join('   ')
+      : structural();
+  } else {
+    el('text',{class:'c-hint', x:400, y:502}).textContent = C.sel!==null ? 'Tryck där elektronen ska ligga' : 'Dra en elektron, eller tryck på den och sedan på målet';
+  }
+}
+function supStr(q){ const map={'0':'⁰','1':'¹','2':'²','3':'³','+':'⁺','−':'⁻'}; return chargeStr(q).split('').map(c=>map[c]||c).join(''); }
+function structural(){
+  const s = {H2:'H–H', H2O:'H–O–H', NH3:'NH₃: tre N–H', CH4:'CH₄: fyra C–H', O2:'O=O', CO2:'O=C=O', N2:'N≡N'};
+  return s[C.key] || M().f;
+}
+
+function renderSide(){
+  const m=M(), I=INTRO[m.kind], ev=evaluate();
+  $('cKind').textContent=I.k; $('cTitle').textContent=m.f; $('cIntro').textContent=I.i; $('cHow').textContent=I.h; $('cFact').textContent=m.fact;
+  $('cStatus').innerHTML = m.atoms.map((a,i)=>{
+    const n=countAt(i);
+    if (a.metal) return `<li><span>${a.el}${supStr(charge(i))}</span><span class="${n===0?'ok':'no'}">${n===0?'har gett bort alla':'har '+n+' kvar'}</span></li>`;
+    const cls = n===a.t?'ok':(n>a.t?'bad':'no');
+    return `<li><span>${a.el}${m.kind==='jon'?supStr(charge(i)):''}</span><span class="${cls}"><b>${n}</b> av ${a.t}${n===a.t?' · fullt':''}</span></li>`;
+  }).join('');
+  const msg=$('cMsg');
+  if (ev.ok){ msg.className='cmsg ok'; msg.textContent='Klart! '+m.done; }
+  else if (ev.msgs.length){ msg.className='cmsg bad'; msg.textContent=ev.msgs[0]; }
+  else { msg.className='cmsg'; msg.textContent = C.hint ? m.hint : 'Fördela elektronerna så att alla atomer får fullt yttersta skal.'; }
+}
+
+/* ---------- interaktion ---------- */
+function svgPt(ev){ const p=csv.createSVGPoint(); p.x=ev.clientX; p.y=ev.clientY; const q=p.matrixTransform(csv.getScreenCTM().inverse()); return [q.x,q.y]; }
+function startDrag(ev,e){
+  ev.preventDefault(); ev.stopPropagation();
+  drag={id:e.id, start:svgPt(ev), p:svgPt(ev), moved:false};
+  csv.setPointerCapture(ev.pointerId);
+}
+csv.addEventListener('pointermove',ev=>{
+  if(!drag) return; drag.p=svgPt(ev);
+  if(!drag.moved && Math.hypot(drag.p[0]-drag.start[0],drag.p[1]-drag.start[1])>5){ drag.moved=true; C.sel=null; }
+  if(drag.moved) render();
+});
+function targetAt(p){
+  const m=M();
+  if (m.kind==='kov') for(let k=0;k<m.bonds.length;k++){ const g=bondGeom(k); if(Math.hypot(p[0]-g.m[0],p[1]-g.m[1])<40) return {b:k}; }
+  for(let i=0;i<m.atoms.length;i++){ const a=m.atoms[i]; if(Math.hypot(p[0]-a.x,p[1]-a.y)<75) return {a:i}; }
+  return null;
+}
+function endDrag(){
+  if(!drag) return;
+  const e=C.E.find(x=>x.id===drag.id);
+  if (drag.moved){ const t=targetAt(drag.p); if(t) moveTo(e,t); }
+  else { C.sel = C.sel===e.id ? null : e.id; }
+  drag=null; C.hint=false; render(); renderSide();
+}
+csv.addEventListener('pointerup',endDrag);
+csv.addEventListener('pointercancel',()=>{ drag=null; render(); });
+function tapTarget(t){
+  if (C.sel===null) return;
+  const e=C.E.find(x=>x.id===C.sel);
+  if (moveTo(e,t)) C.sel=null;
+  C.hint=false; render(); renderSide();
+}
+
+$('cReset').onclick=()=>load(C.key);
+$('cHint').onclick=()=>{ C.hint=true; renderSide(); $('cMsg').className='cmsg'; $('cMsg').textContent=M().hint; };
+$('cSolve').onclick=()=>{
+  load(C.key); const m=M();
+  if (m.kind==='kov') m.bonds.forEach((b,k)=>{ for(let p=0;p<b[2];p++){ [b[0],b[1]].forEach(i=>{ const e=C.E.find(x=>x.owner===i && x.b===null); if(e) moveTo(e,{b:k}); }); } });
+  else m.moves.forEach(([f,t,n])=>{ for(let p=0;p<n;p++){ const e=C.E.find(x=>x.owner===f && x.a===f); if(e) moveTo(e,{a:t}); } });
+  render(); renderSide();
+};
+document.querySelectorAll('[data-mol]').forEach(b=> b.onclick=()=>{ document.querySelectorAll('[data-mol]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); load(b.dataset.mol); });
+
+/* ---------- 9C-knappen ---------- */
+const ANGLE = { title: document.querySelector('header h1').textContent, lede: document.querySelector('header .lede').textContent };
+function setChem(on){
+  $('classBtn').setAttribute('aria-pressed', String(on));
+  $('classBtn').textContent = on ? 'Tillbaka till vinklar' : 'Jag går i 9C och älskar kemi';
+  document.querySelectorAll('.angle-only').forEach(x=>x.hidden=on);
+  $('chemPicker').hidden = !on; $('chemGrid').hidden = !on;
+  document.querySelector('header h1').textContent = on ? 'Elektronbygget' : ANGLE.title;
+  document.querySelector('header .lede').textContent = on
+    ? 'Atomer binds ihop genom att dela eller flytta elektroner i yttersta skalet. Välj en molekyl eller ett salt och fördela elektronerna så att alla atomer blir nöjda.'
+    : ANGLE.lede;
+  document.title = on ? 'Elektronbygget' : 'Vinkelpar vid transversal';
+  try{ localStorage.setItem('mode9c', on?'1':'0'); }catch(_){}
+}
+$('classBtn').onclick=()=> setChem($('classBtn').getAttribute('aria-pressed')!=='true');
+document.querySelector('[data-mol="H2O"]').setAttribute('aria-pressed','true');
+load('H2O');
+let start=false; try{ start = localStorage.getItem('mode9c')==='1'; }catch(_){}
+setChem(start);
+})();
+</script>
+
+</body></html>

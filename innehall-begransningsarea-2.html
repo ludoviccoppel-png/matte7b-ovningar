@@ -1,0 +1,506 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vik ut kroppen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: rutat mattepapper, 3D-vy till vänster och räknetabell till höger (staplas på mobil) */
+:root {
+  --paper: #f5f7fb;
+  --grid: #dfe5f0;
+  --panel: #ffffff;
+  --ink: #1d2433;
+  --muted: #5d6779;
+  --line: #cfd6e3;
+  --accent: #1f4fd1;
+  --accent-soft: #e4ebfd;
+  --good: #1d7a46;
+  --good-soft: #e1f3e8;
+  --bad: #b42335;
+  --bad-soft: #fbe5e8;
+  --face-ink: #1b1f29;
+  --f-botten: #f4c64f;
+  --f-topp: #f39a56;
+  --f-fram: #6fa8ec;
+  --f-vanster: #6cc79a;
+  --f-bak: #b39af0;
+  --f-sned: #f07b97;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12161f; --grid: #1e2533; --panel: #181d28; --ink: #e8ecf4; --muted: #9aa4b6;
+    --line: #2c3445; --accent: #8fb0ff; --accent-soft: #1f2a46; --good: #6fd69b; --good-soft: #15301f;
+    --bad: #ff8b9a; --bad-soft: #3a1820; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12161f; --grid: #1e2533; --panel: #181d28; --ink: #e8ecf4; --muted: #9aa4b6;
+  --line: #2c3445; --accent: #8fb0ff; --accent-soft: #1f2a46; --good: #6fd69b; --good-soft: #15301f;
+  --bad: #ff8b9a; --bad-soft: #3a1820; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 40px; display: grid; gap: 20px; }
+
+header { display: grid; gap: 6px; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.lead { margin: 0; color: var(--muted); max-width: 62ch; }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: 1fr; } }
+
+.stage, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.stage { padding: 12px; display: grid; gap: 12px; }
+.canvas-box { position: relative; width: 100%; aspect-ratio: 4 / 3; max-width: 100%; touch-action: none; cursor: grab; }
+.canvas-box:active { cursor: grabbing; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hint { position: absolute; left: 8px; bottom: 6px; font-size: 13px; color: var(--muted); pointer-events: none; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.slider { display: flex; align-items: center; gap: 10px; flex: 1 1 240px; min-width: 0; }
+.slider label { font-weight: 700; white-space: nowrap; }
+input[type="range"] { flex: 1; accent-color: var(--accent); min-width: 0; }
+.pct { font-variant-numeric: tabular-nums; width: 3.2em; text-align: right; color: var(--muted); }
+
+button {
+  font: inherit; font-weight: 700; border-radius: 10px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.panel { padding: 18px; display: grid; gap: 14px; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 0; }
+.task { margin: 0; color: var(--muted); font-size: 15px; }
+
+.faces { display: grid; gap: 8px; }
+.row {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr) 112px; gap: 4px 10px; align-items: center;
+  padding: 8px 10px; border-radius: 10px; border: 1px solid transparent;
+}
+.row.active { border-color: var(--accent); background: var(--accent-soft); }
+.swatch { width: 18px; height: 18px; border-radius: 5px; border: 1px solid rgba(0,0,0,.25); }
+.name { font-weight: 700; cursor: pointer; }
+.dims { font-size: 14px; color: var(--muted); }
+.ans { display: flex; align-items: center; gap: 4px; }
+.ans input {
+  width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; text-align: right;
+  padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+}
+.ans input.ok { border-color: var(--good); background: var(--good-soft); }
+.ans input.no { border-color: var(--bad); background: var(--bad-soft); }
+.unit { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.sol { grid-column: 2 / 4; font-size: 14px; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.total { border-top: 2px solid var(--ink); padding-top: 10px; }
+.total .name { cursor: default; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.feedback { margin: 0; font-weight: 700; min-height: 1.5em; }
+.feedback.ok { color: var(--good); }
+.feedback.no { color: var(--bad); }
+
+.note { font-size: 14px; color: var(--muted); margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Diagnos Geometri 7B · Uppgift 6b</span>
+    <h1>Vik ut kroppen</h1>
+    <p class="lead">Dra i reglaget för att vika ut kroppen till en plan figur. Varje sida har en egen färg. Räkna ut arean för varje sida och lägg ihop dem till begränsningsytans area.</p>
+  </header>
+
+  <div class="main">
+    <section class="stage" aria-label="3D-modell av kroppen">
+      <div class="canvas-box" id="box">
+        <canvas id="cv" aria-label="Kroppen i 3D. Dra för att vrida."></canvas>
+        <span class="hint">Dra för att vrida · Klicka på en sida</span>
+      </div>
+      <div class="controls">
+        <div class="slider">
+          <label for="fold">Vik ut</label>
+          <input type="range" id="fold" min="0" max="100" value="100">
+          <span class="pct" id="pct">100 %</span>
+        </div>
+        <button id="toggle" class="primary">Vik ihop</button>
+        <button id="viewTop">Ovanifrån</button>
+        <button id="view3d">3D-vy</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Räkna arean">
+      <h2>Räkna arean</h2>
+      <p class="task">Alla mått är i meter. Bottenytan består av en rektangel (5 × 4) och en triangel (3 × 4 / 2).</p>
+      <div class="faces" id="faces"></div>
+      <div class="row total" id="totalRow">
+        <span></span>
+        <div><div class="name">Begränsningsyta</div><div class="dims">summan av alla sidor</div></div>
+        <div class="ans"><input id="in-total" inputmode="decimal" aria-label="Total area i kvadratmeter"><span class="unit">m²</span></div>
+        <div class="sol" id="sol-total" hidden>26 + 26 + 10 + 8 + 16 + 10 = 96 m²</div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="check">Kontrollera</button>
+        <button id="reveal">Visa lösning</button>
+        <button id="reset">Börja om</button>
+      </div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+      <p class="note">Tips: Klicka på en färgad sida i figuren så markeras den i listan.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Kroppen: bottenyta i planet z = 0, höjd 2 m ----------
+  // Utvikt nät (meter). Varje sida viks runt en gångjärnskant på sin "förälder".
+  const FACES = [
+    { id: "botten", name: "Botten", color: "--f-botten", parent: null,
+      poly: [[0,0],[5,0],[8,4],[0,4]], area: 26,
+      dims: "rektangel + triangel", sol: "5 · 4 + 3 · 4 / 2 = 20 + 6 = 26 m²",
+      center: [2.5, 2], dash: [[5,0],[5,4]],
+      edge: [[[2.5,0.35],"5"],[[0.45,2],"4"],[[6.55,3.6],"3"],[[6.15,2.3],"5"]] },
+    { id: "topp", name: "Topp", color: "--f-topp", parent: "bak", hinge: [[0,6],[8,6]],
+      poly: [[0,6],[8,6],[5,10],[0,10]], area: 26,
+      dims: "lika stor som botten", sol: "5 · 4 + 3 · 4 / 2 = 20 + 6 = 26 m²",
+      center: [2.5, 8], dash: [[5,6],[5,10]],
+      edge: [[[2.5,9.65],"5"],[[0.45,8],"4"],[[6.55,6.4],"3"],[[6.15,7.7],"5"]] },
+    { id: "fram", name: "Framsida", color: "--f-fram", parent: "botten", hinge: [[0,0],[5,0]],
+      poly: [[0,0],[5,0],[5,-2],[0,-2]], area: 10, dims: "5 × 2", sol: "5 · 2 = 10 m²", center: [2.5,-1] },
+    { id: "vanster", name: "Vänster", color: "--f-vanster", parent: "botten", hinge: [[0,0],[0,4]],
+      poly: [[0,0],[0,4],[-2,4],[-2,0]], area: 8, dims: "4 × 2", sol: "4 · 2 = 8 m²", center: [-1,2] },
+    { id: "bak", name: "Baksida", color: "--f-bak", parent: "botten", hinge: [[0,4],[8,4]],
+      poly: [[0,4],[8,4],[8,6],[0,6]], area: 16, dims: "8 × 2", sol: "8 · 2 = 16 m²", center: [4,5] },
+    { id: "sned", name: "Sned sida", color: "--f-sned", parent: "botten", hinge: [[5,0],[8,4]],
+      poly: [[5,0],[8,4],[9.6,2.8],[6.6,-1.2]], area: 10, dims: "5 × 2", sol: "5 · 2 = 10 m²", center: [7.3,1.4] },
+  ];
+  const TOTAL = 96;
+  const byId = Object.fromEntries(FACES.map(f => [f.id, f]));
+
+  // Förbered gångjärn: enhetsriktning och vilket håll sidan ska vikas (uppåt, +z)
+  FACES.forEach(f => {
+    if (!f.hinge) return;
+    const [a, b] = f.hinge;
+    const dx = b[0]-a[0], dy = b[1]-a[1], L = Math.hypot(dx, dy);
+    f.d = [dx/L, dy/L, 0];
+    f.a = [a[0], a[1], 0];
+    const vx = f.center[0]-a[0], vy = f.center[1]-a[1];
+    f.sign = Math.sign(f.d[0]*vy - f.d[1]*vx); // (d × v)_z
+  });
+
+  function rotate(p, a, d, ang) {
+    // Rodrigues-rotation av punkt p runt axel genom a med riktning d
+    const v = [p[0]-a[0], p[1]-a[1], p[2]-a[2]];
+    const c = Math.cos(ang), s = Math.sin(ang);
+    const dot = d[0]*v[0] + d[1]*v[1] + d[2]*v[2];
+    const cr = [d[1]*v[2]-d[2]*v[1], d[2]*v[0]-d[0]*v[2], d[0]*v[1]-d[1]*v[0]];
+    return [
+      a[0] + v[0]*c + cr[0]*s + d[0]*dot*(1-c),
+      a[1] + v[1]*c + cr[1]*s + d[1]*dot*(1-c),
+      a[2] + v[2]*c + cr[2]*s + d[2]*dot*(1-c),
+    ];
+  }
+  function toWorld(f, p, t) {
+    let q = p;
+    let cur = f;
+    while (cur && cur.hinge) {
+      const ang = cur.sign * (1 - t) * Math.PI / 2;
+      q = rotate(q, cur.a, cur.d, ang);
+      cur = byId[cur.parent];
+    }
+    return q;
+  }
+
+  // ---------- Kamera ----------
+  const cam = { yaw: -0.55, pitch: 1.05, tYaw: -0.55, tPitch: 1.05 };
+  let fold = 1, foldTarget = 1;
+  let selected = null;
+
+  const cv = document.getElementById("cv");
+  const box = document.getElementById("box");
+  const ctx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+  function resize() {
+    const r = box.getBoundingClientRect();
+    DPR = window.devicePixelRatio || 1;
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  new ResizeObserver(resize).observe(box);
+  resize();
+
+  let colors = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    ["--ink","--muted","--accent","--face-ink","--panel"].concat(FACES.map(f => f.color))
+      .forEach(k => colors[k] = cs.getPropertyValue(k).trim());
+  }
+  readColors();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function shade(hex, k) {
+    const m = hex.replace("#", "");
+    const n = parseInt(m.length === 3 ? m.split("").map(c => c+c).join("") : m, 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const f = v => Math.max(0, Math.min(255, Math.round(v * k)));
+    return `rgb(${f(r)},${f(g)},${f(b)})`;
+  }
+
+  // Projektion: yaw runt z, pitch (90° = rakt ovanifrån)
+  function view(p) {
+    const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
+    const x1 = p[0]*cy - p[1]*sy;
+    const y1 = p[0]*sy + p[1]*cy;
+    const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+    return { x: x1, y: -(p[2]*cp + y1*sp), depth: y1*cp - p[2]*sp };
+  }
+
+  let projected = [];
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const scale = Math.min(W, H) / 12.5;
+
+    // Beräkna alla sidor i världen
+    const items = FACES.map(f => {
+      const w = f.poly.map(p => toWorld(f, [p[0], p[1], 0], fold));
+      const v = w.map(view);
+      const depth = v.reduce((s, q) => s + q.depth, 0) / v.length;
+      // normal för ljussättning
+      const u1 = [w[1][0]-w[0][0], w[1][1]-w[0][1], w[1][2]-w[0][2]];
+      const u2 = [w[2][0]-w[0][0], w[2][1]-w[0][1], w[2][2]-w[0][2]];
+      const n = [u1[1]*u2[2]-u1[2]*u2[1], u1[2]*u2[0]-u1[0]*u2[2], u1[0]*u2[1]-u1[1]*u2[0]];
+      const nl = Math.hypot(...n) || 1;
+      const light = Math.abs((n[0]*-0.3 + n[1]*-0.5 + n[2]*0.8) / nl);
+      return { f, v, depth, light };
+    });
+
+    // Centrera figuren
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    items.forEach(it => it.v.forEach(q => {
+      minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x);
+      minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y);
+    }));
+    const ox = W/2 - (minX + maxX)/2 * scale;
+    const oy = H/2 - (minY + maxY)/2 * scale;
+    const S = q => [ox + q.x*scale, oy + q.y*scale];
+
+    items.sort((a, b) => b.depth - a.depth);
+    projected = [];
+
+    items.forEach(({ f, v, light }) => {
+      const pts = v.map(S);
+      ctx.beginPath();
+      pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+      ctx.closePath();
+      const base = colors[f.color];
+      ctx.fillStyle = shade(base, 0.82 + 0.18 * light);
+      ctx.fill();
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = selected === f.id ? colors["--accent"] : shade(base, 0.55);
+      ctx.lineWidth = selected === f.id ? 3.5 : 1.6;
+      ctx.stroke();
+
+      // projicerad area i pixlar (för att avgöra om text får plats)
+      let A = 0;
+      for (let i = 0; i < pts.length; i++) {
+        const [x1, y1] = pts[i], [x2, y2] = pts[(i+1) % pts.length];
+        A += x1*y2 - x2*y1;
+      }
+      A = Math.abs(A) / 2;
+      projected.push({ id: f.id, pts });
+
+      const P = xy => S(view(toWorld(f, [xy[0], xy[1], 0], fold)));
+
+      if (f.dash) {
+        const [a, b] = f.dash.map(P);
+        ctx.save();
+        ctx.setLineDash([6, 5]);
+        ctx.strokeStyle = shade(base, 0.45);
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        ctx.restore();
+      }
+
+      if (A < 1400) return;
+      ctx.fillStyle = colors["--face-ink"];
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const fs = Math.max(11, Math.min(16, scale * 0.36));
+      const c = P(f.center);
+      const revealed = shownAreas.has(f.id);
+      ctx.font = `700 ${fs}px Atkinson Hyperlegible, system-ui, sans-serif`;
+      if (f.edge) {
+        ctx.fillText(f.name, c[0], c[1] - (revealed ? fs*0.6 : 0));
+        if (revealed) {
+          ctx.font = `400 ${fs}px Atkinson Hyperlegible, system-ui, sans-serif`;
+          ctx.fillText(`${f.area} m²`, c[0], c[1] + fs*0.7);
+        }
+        ctx.font = `400 ${fs*0.85}px Atkinson Hyperlegible, system-ui, sans-serif`;
+        f.edge.forEach(([xy, txt]) => { const p = P(xy); ctx.fillText(txt, p[0], p[1]); });
+      } else {
+        const lines = [f.name, f.dims + " m"];
+        if (revealed) lines.push(`${f.area} m²`);
+        lines.forEach((ln, i) => {
+          ctx.font = `${i === 0 ? 700 : 400} ${i === 0 ? fs : fs*0.88}px Atkinson Hyperlegible, system-ui, sans-serif`;
+          ctx.fillText(ln, c[0], c[1] + (i - (lines.length-1)/2) * fs * 1.15);
+        });
+      }
+    });
+  }
+
+  // ---------- Animation ----------
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function tick() {
+    const k = reduce ? 1 : 0.12;
+    fold += (foldTarget - fold) * k;
+    if (Math.abs(foldTarget - fold) < 0.001) fold = foldTarget;
+    cam.yaw += (cam.tYaw - cam.yaw) * (dragging ? 1 : k);
+    cam.pitch += (cam.tPitch - cam.pitch) * (dragging ? 1 : k);
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- Reglage ----------
+  const slider = document.getElementById("fold");
+  const pct = document.getElementById("pct");
+  const toggle = document.getElementById("toggle");
+  function setFold(v, fromSlider) {
+    foldTarget = v;
+    if (!fromSlider) slider.value = Math.round(v * 100);
+    pct.textContent = Math.round(v * 100) + " %";
+    toggle.textContent = v > 0.5 ? "Vik ihop" : "Vik ut";
+  }
+  slider.addEventListener("input", () => setFold(slider.value / 100, true));
+  toggle.addEventListener("click", () => setFold(foldTarget > 0.5 ? 0 : 1));
+  document.getElementById("viewTop").addEventListener("click", () => { cam.tPitch = Math.PI/2 - 0.001; cam.tYaw = 0; });
+  document.getElementById("view3d").addEventListener("click", () => { cam.tPitch = 1.05; cam.tYaw = -0.55; });
+
+  // ---------- Dra och klicka ----------
+  let dragging = false, moved = false, lx = 0, ly = 0;
+  box.addEventListener("pointerdown", e => {
+    dragging = true; moved = false; lx = e.clientX; ly = e.clientY;
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const dx = e.clientX - lx, dy = e.clientY - ly;
+    if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+    lx = e.clientX; ly = e.clientY;
+    cam.tYaw -= dx * 0.01;
+    cam.tPitch = Math.max(0.15, Math.min(Math.PI/2 - 0.001, cam.tPitch + dy * 0.01));
+  });
+  box.addEventListener("pointerup", e => {
+    dragging = false;
+    if (moved) return;
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    for (let i = projected.length - 1; i >= 0; i--) {
+      if (inside(x, y, projected[i].pts)) { select(projected[i].id, true); return; }
+    }
+    select(null);
+  });
+  function inside(x, y, pts) {
+    let c = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  }
+
+  // ---------- Tabellen ----------
+  const list = document.getElementById("faces");
+  const shownAreas = new Set();
+  FACES.forEach(f => {
+    const row = document.createElement("div");
+    row.className = "row"; row.id = "row-" + f.id;
+    row.innerHTML = `
+      <span class="swatch" style="background:var(${f.color})"></span>
+      <div><div class="name">${f.name}</div><div class="dims">${f.dims}${f.edge ? "" : " m"}</div></div>
+      <div class="ans"><input id="in-${f.id}" inputmode="decimal" aria-label="Arean för ${f.name} i kvadratmeter"><span class="unit">m²</span></div>
+      <div class="sol" id="sol-${f.id}" hidden>${f.sol}</div>`;
+    list.appendChild(row);
+    row.querySelector(".name").addEventListener("click", () => select(f.id, true));
+    row.querySelector("input").addEventListener("focus", () => select(f.id, false));
+  });
+
+  function select(id, focus) {
+    selected = id;
+    document.querySelectorAll(".row").forEach(r => r.classList.toggle("active", r.id === "row-" + id));
+    if (id && focus) document.getElementById("in-" + id).focus({ preventScroll: true });
+  }
+
+  const num = s => parseFloat(String(s).replace(",", ".").replace(/\s/g, ""));
+  const feedback = document.getElementById("feedback");
+
+  document.getElementById("check").addEventListener("click", () => {
+    let right = 0, filled = 0;
+    FACES.forEach(f => {
+      const el = document.getElementById("in-" + f.id);
+      el.classList.remove("ok", "no");
+      if (el.value.trim() === "") return;
+      filled++;
+      if (num(el.value) === f.area) { el.classList.add("ok"); right++; shownAreas.add(f.id); }
+      else el.classList.add("no");
+    });
+    const tEl = document.getElementById("in-total");
+    tEl.classList.remove("ok", "no");
+    let totalOk = false;
+    if (tEl.value.trim() !== "") {
+      totalOk = num(tEl.value) === TOTAL;
+      tEl.classList.add(totalOk ? "ok" : "no");
+    }
+    feedback.className = "feedback";
+    if (filled === 0 && tEl.value.trim() === "") {
+      feedback.textContent = "Skriv in en area först, till exempel för framsidan.";
+    } else if (right === FACES.length && totalOk) {
+      feedback.textContent = "Allt rätt! Begränsningsytan är 96 m².";
+      feedback.classList.add("ok");
+    } else {
+      feedback.textContent = `${right} av ${FACES.length} sidor rätt${tEl.value.trim() ? (totalOk ? ", summan stämmer." : ", summan stämmer inte än.") : "."}`;
+      if (right < filled || (tEl.value.trim() && !totalOk)) feedback.classList.add("no");
+    }
+  });
+
+  document.getElementById("reveal").addEventListener("click", () => {
+    FACES.forEach(f => { document.getElementById("sol-" + f.id).hidden = false; shownAreas.add(f.id); });
+    document.getElementById("sol-total").hidden = false;
+    feedback.className = "feedback";
+    feedback.textContent = "Lösningen visas i blått under varje sida.";
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    FACES.forEach(f => {
+      const el = document.getElementById("in-" + f.id);
+      el.value = ""; el.classList.remove("ok", "no");
+      document.getElementById("sol-" + f.id).hidden = true;
+    });
+    const tEl = document.getElementById("in-total");
+    tEl.value = ""; tEl.classList.remove("ok", "no");
+    document.getElementById("sol-total").hidden = true;
+    shownAreas.clear();
+    feedback.textContent = ""; feedback.className = "feedback";
+    select(null);
+  });
+
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body></html>

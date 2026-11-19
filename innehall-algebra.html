@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Algebrakapitlet åk 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
+<style>
+/* Samma formspråk som Geometrikapitlet: prickpapper, stationer i två spalter, tio frågor per station. */
+:root{
+  color-scheme:light;
+  --paper:#f7f5fb; --dot:#d4cbe5; --card:#ffffff; --ink:#221a35; --muted:#625a78;
+  --pen:#6b3fc4; --pen-soft:#eee7fc; --fill:#f3eefc; --arc:#d9620f; --marker:#ffe24d; --on-marker:#221a35;
+  --good:#17824a; --good-soft:#e2f4e8; --bad:#c2352b; --bad-soft:#fbe7e4; --line:#dad2e9;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#15111e; --dot:#2b2339; --card:#1d1729; --ink:#ece7f6; --muted:#a9a0be;
+  --pen:#b79cff; --pen-soft:#2c2245; --fill:#251d38; --arc:#ff9a52; --marker:#e6c62e; --on-marker:#15111e;
+  --good:#52c486; --good-soft:#143020; --bad:#ff7b6f; --bad-soft:#3a1a18; --line:#352c47; color-scheme:dark}}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background-color:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  background-image:radial-gradient(circle,var(--dot) 1.3px,transparent 1.6px);background-size:22px 22px;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:780px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,7vw,52px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+.total{font-family:var(--display);font-weight:700;font-size:15px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.total b{color:var(--pen)}
+.head-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ver{font:700 15px var(--display);background:var(--card);color:var(--pen);border:1.5px solid var(--pen);border-radius:999px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.ver:hover{background:var(--pen-soft)}
+.ver[aria-pressed="true"]{background:var(--pen);color:var(--card)}
+.label{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.stations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.stations{grid-template-columns:1fr}}
+.st{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);color:var(--ink);
+  border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font:inherit;transition:transform .12s,border-color .12s}
+.st:hover{border-color:var(--pen);transform:translateY(-2px)}
+.st:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.glyph{flex:0 0 70px;height:64px;display:grid;place-items:center;border-radius:10px;background:var(--pen-soft);color:var(--pen);
+  font-family:var(--display);font-weight:800;font-size:19px;white-space:nowrap;letter-spacing:-.02em}
+.glyph.sm{font-size:15px}
+.st.mix .glyph{background:var(--marker);color:var(--on-marker)}
+.st-body{min-width:0;display:flex;flex-direction:column;gap:2px}
+.st-name{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.2}
+.st-ex{color:var(--muted);font-size:14px}
+.stars{letter-spacing:2px;font-size:16px;color:var(--line)}
+.stars .on{color:var(--marker);-webkit-text-stroke:.5px var(--ink)}
+.how{color:var(--muted);font-size:15px;margin:0}
+
+.sheet{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:22px clamp(16px,4vw,32px) 26px;display:flex;flex-direction:column;gap:16px;
+  box-shadow:0 10px 30px -18px rgba(34,26,53,.35)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar .topic{font-family:var(--display);font-weight:700;font-size:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:14px;font-weight:700;border-radius:999px;padding:3px 11px;background:var(--pen-soft);color:var(--pen);font-variant-numeric:tabular-nums}
+.chip.streak{background:var(--marker);color:var(--on-marker)}
+.progress{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.progress i{height:7px;border-radius:4px;background:var(--line)}
+.progress i.ok{background:var(--good)} .progress i.no{background:var(--bad)} .progress i.now{background:var(--pen)}
+.ask{font-family:var(--display);font-weight:700;font-size:clamp(21px,4.4vw,28px);line-height:1.25;text-wrap:balance}
+.prompt{color:var(--muted);font-size:16px;margin-top:4px}
+.prompt:empty{display:none}
+.figbox{display:flex;justify-content:center;background-image:radial-gradient(circle,var(--dot) 1.2px,transparent 1.5px);background-size:16px 16px;border-radius:12px;border:1.5px dashed var(--line);padding:6px}
+.figbox:empty{display:none}
+
+/* algebra */
+.v{font-style:italic}
+sup{font-size:.62em;line-height:0;font-style:normal}
+.expr{font:800 clamp(28px,7vw,46px)/1.2 var(--display);padding:18px 10px;text-align:center;font-variant-numeric:tabular-nums;overflow-x:auto;max-width:100%;white-space:nowrap}
+.expr .v{color:var(--pen)}
+.story{font-size:19px;line-height:1.6;padding:12px 14px;max-width:620px;background:var(--card);border-radius:10px;margin:6px}
+.story b{color:var(--pen)}
+table.grid{border-collapse:separate;border-spacing:4px;margin:6px 0;font:700 18px var(--display)}
+table.grid th,table.grid td{padding:5px 12px;border-radius:8px;text-align:center;white-space:nowrap}
+table.grid th{background:var(--pen-soft);color:var(--pen)}
+table.grid td{background:var(--card);border:1.5px solid var(--line)}
+.fb .m{font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted);font-weight:400;font-family:var(--body)}
+
+.answer-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ans{flex:1 1 160px;min-width:0;font:700 26px var(--display);padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink)}
+#ans:focus{border-color:var(--pen)}
+.unit{font:700 22px var(--display);color:var(--muted)}
+.unit:empty{display:none}
+.keys{display:flex;gap:6px;flex-wrap:wrap;margin-top:-6px}
+.key{font:700 18px var(--display);min-width:46px;padding:5px 12px;border-radius:10px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.key:hover{border-color:var(--pen)}
+.btn{font:700 17px var(--display);border:none;border-radius:12px;padding:12px 22px;cursor:pointer;background:var(--pen);color:var(--card)}
+.btn.ghost{background:transparent;color:var(--pen);border:2px solid var(--pen)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{font:700 20px var(--display);text-align:left;padding:13px 16px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:12px;align-items:center;font-variant-numeric:tabular-nums}
+.opt .k{flex:0 0 26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;background:var(--line);color:var(--ink);font-style:normal}
+.opt:hover:not(:disabled){border-color:var(--pen)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--good-soft)} .fb.no{background:var(--bad-soft)}
+.fb h3{margin:0;font-family:var(--display);font-size:20px}
+.fb.ok h3{color:var(--good)} .fb.no h3{color:var(--bad)}
+.fb p{margin:0}
+.fb .exp{line-height:1.7}
+.next-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big-stars{font-size:54px;letter-spacing:6px;line-height:1;color:var(--line)}
+.big-stars .on{color:var(--marker);-webkit-text-stroke:1px var(--ink)}
+.res-h{font-family:var(--display);font-size:clamp(26px,5vw,36px);margin:0}
+.facts{display:flex;gap:26px;flex-wrap:wrap}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-family:var(--display);font-size:30px;font-variant-numeric:tabular-nums}
+.missed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.missed li{border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.missed .q{font-weight:700}
+.missed .a{color:var(--good);font-weight:700;font-family:var(--display)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Algebra<mark>kapitlet</mark></h1>
+      <p class="sub"><span id="klass">Matte 7B</span> · Välj en station och klara tio frågor.</p>
+    </div>
+    <div class="head-right">
+      <button class="ver" id="ver" type="button" aria-pressed="false">Jag går i 8A</button>
+      <div class="total" id="total">★ <b>0</b> / 21 stjärnor</div>
+    </div>
+  </header>
+
+  <section id="home" style="display:flex;flex-direction:column;gap:14px">
+    <div class="stations" id="stations"></div>
+    <p class="how">Rätt svar ger 10 poäng, och flera rätt i rad ger bonus. 9–10 rätt ger tre stjärnor, 7–8 ger två och 5–6 ger en. Termerna får stå i vilken ordning som helst, men svaret ska vara förenklat.<span id="how-extra"></span></p>
+  </section>
+
+  <section id="game" class="sheet" hidden>
+    <div class="bar">
+      <span class="topic" id="g-topic"></span>
+      <div class="chips"><span class="chip" id="g-score">0 p</span><span class="chip streak" id="g-streak" hidden></span></div>
+    </div>
+    <div class="progress" id="g-progress"></div>
+    <div>
+      <div class="ask" id="g-ask"></div>
+      <div class="prompt" id="g-prompt"></div>
+    </div>
+    <div class="figbox" id="g-fig"></div>
+    <div id="g-input" hidden style="display:flex;flex-direction:column;gap:10px">
+      <div class="answer-row">
+        <input id="ans" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ditt svar" placeholder="Ditt svar">
+        <span class="unit" id="g-unit"></span>
+        <button class="btn" id="check">Rätta</button>
+      </div>
+      <div class="keys" id="g-keys"></div>
+      <div class="prompt" id="g-preview" aria-live="polite"></div>
+    </div>
+    <div id="g-opts" class="opts" hidden></div>
+    <div id="g-fb" class="fb" hidden></div>
+    <div class="next-row">
+      <button class="btn ghost" id="quit">Avsluta</button>
+      <button class="btn" id="next" hidden>Nästa fråga</button>
+    </div>
+  </section>
+
+  <section id="result" class="sheet" hidden>
+    <div class="big-stars" id="r-stars"></div>
+    <h2 class="res-h" id="r-head"></h2>
+    <div class="facts">
+      <div><span class="label">Rätt</span><b id="r-correct"></b></div>
+      <div><span class="label">Poäng</span><b id="r-score"></b></div>
+      <div><span class="label">Bästa svit</span><b id="r-streak"></b></div>
+    </div>
+    <div id="r-missed-wrap">
+      <div class="label" style="margin-bottom:6px">Öva på de här</div>
+      <ul class="missed" id="r-missed"></ul>
+    </div>
+    <div class="next-row">
+      <button class="btn ghost" id="to-home">Till stationerna</button>
+      <button class="btn" id="again">Spela igen</button>
+    </div>
+  </section>
+</div>
+
+<script>
+// LOGIC-START
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const NZ=(a,b)=>{let v;do{v=R(a,b)}while(v===0);return v};
+const pick=a=>a[R(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const clean=n=>Math.round(n*1e8)/1e8;
+const fmt=n=>clean(n).toLocaleString('sv-SE',{maximumFractionDigits:8}).replace('-','−');
+const M='−';
+
+/* ---------- Termer och uttryck ----------
+   En term är {c: koefficient, k: variabeldel}. k är t.ex. '' (tal), 'x', 'x2' (x²), 'y', 'a', 'ab'. */
+const T=(c,k='')=>({c,k});
+const ORD=['x2','x','y','a','b','ab',''];
+const ord=k=>{const i=ORD.indexOf(k);return i<0?50:i};
+const vH=k=>k.replace(/([a-z])(\d)?/g,(m,l,p)=>`<span class="v">${l}</span>${p?`<sup>${p}</sup>`:''}`);
+function tH(t,first){
+  const a=Math.abs(t.c),n=(t.k&&a===1)?'':fmt(a);
+  return first?(t.c<0?M:'')+n+vH(t.k):(t.c<0?' '+M+' ':' + ')+n+vH(t.k);
+}
+const sq=ts=>ts.length?ts.map((t,i)=>tH(t,i===0)).join(''):'0';
+const comb=ts=>{const m={};ts.forEach(t=>m[t.k]=(m[t.k]||0)+t.c);return m};
+const mTerms=m=>Object.keys(m).filter(k=>m[k]).sort((a,b)=>ord(a)-ord(b)).map(k=>T(m[k],k));
+const mH=m=>sq(mTerms(m));
+const mKey=m=>mTerms(m).map(t=>t.k+':'+clean(t.c)).join('|')||'0';
+const kmul=(a,b)=>{const p={};[a,b].forEach(k=>(k.match(/[a-z]\d?/g)||[]).forEach(s=>p[s[0]]=(p[s[0]]||0)+(+s[1]||1)));
+  return Object.keys(p).sort().map(l=>l+(p[l]>1?p[l]:'')).join('')};
+const tmul=(a,b)=>T(a.c*b.c,kmul(a.k,b.k));
+const facH=t=>t.c<0?`(${tH(t,true)})`:tH(t,true);
+const label=k=>k===''?'tal':`${vH(k)}-termer`;
+const ex=s=>s.replace(/-/g,M).replace(/(?<![a-zåäö])([xyab])(?![a-zåäö])(²)?/g,(m,l,p)=>`<span class="v">${l}</span>${p?'<sup>2</sup>':''}`);
+
+/* Uttrycksdelar: K = faktor · (A), PL = ±(A), PP = (A)(B), L = lös term */
+const K=(f,A)=>({f,A}), PL=(s,A)=>({f:T(s),A,plain:true}), PP=(A,B,sqr)=>({A,B,sqr}), L=t=>({loose:t});
+function products(it){
+  if(it.loose)return [it.loose];
+  if(it.B){const o=[];it.A.forEach(a=>it.B.forEach(b=>o.push(tmul(a,b))));return o}
+  return it.A.map(a=>tmul(it.f,a));
+}
+function itemH(it,first){
+  if(it.loose)return tH(it.loose,first);
+  if(it.B)return (first?'':' + ')+(it.sqr?`(${sq(it.A)})<sup>2</sup>`:`(${sq(it.A)})(${sq(it.B)})`);
+  const f=it.f,a=Math.abs(f.c);
+  const pre=first?(f.c<0?M:''):(f.c<0?' '+M+' ':' + ');
+  const core=(it.plain||(!f.k&&a===1))?'':((f.k&&a===1)?'':fmt(a))+vH(f.k);
+  return pre+core+`(${sq(it.A)})`;
+}
+const exprH=items=>items.map((it,i)=>itemH(it,i===0)).join('');
+const flat=items=>items.flatMap(products);
+function gridH(A,B){
+  return `<table class="grid"><tr><th>·</th>${B.map((b,j)=>`<th>${j&&b.c>0?'+':''}${tH(b,true)}</th>`).join('')}</tr>`+
+    A.map((a,i)=>`<tr><th>${i&&a.c>0?'+':''}${tH(a,true)}</th>${B.map(b=>`<td>${tH(tmul(a,b),true)}</td>`).join('')}</tr>`).join('')+'</table>';
+}
+function groupLines(ts,showSingles){
+  const out=[];
+  [...new Set(ts.map(t=>t.k))].sort((a,b)=>ord(a)-ord(b)).forEach(k=>{
+    const g=ts.filter(t=>t.k===k),s=g.reduce((a,t)=>a+t.c,0);
+    if(g.length>1)out.push(`${label(k)}: ${sq(g)} = ${s===0?'0':tH(T(s,k),true)}${s===0?' <span class="muted">(tar ut varandra)</span>':''}`);
+    else if(showSingles)out.push(`${label(k)}: ${tH(g[0],true)} <span class="muted">(inget att slå ihop med)</span>`);
+  });
+  return out;
+}
+function explainItems(items,ans){
+  const lines=[];
+  items.filter(i=>!i.loose).forEach(it=>{
+    const pr=products(it);
+    if(it.plain&&it.f.c>0)lines.push(`${itemH(it,true)} = ${sq(it.A)} <span class="muted">(inget minus framför – inget ändras)</span>`);
+    else if(it.plain)lines.push(`${itemH(it,true)} = ${sq(pr)} <span class="muted">(minus framför – alla tecken byts)</span>`);
+    else if(it.B){
+      if(it.sqr)lines.push(`(${sq(it.A)})<sup>2</sup> = (${sq(it.A)})(${sq(it.A)})`);
+      lines.push(`Varje term gånger varje term:${gridH(it.A,it.B)}`);
+      lines.push(`${itemH(it,true)} = ${sq(pr)}`);
+    }
+    else if(it.f.c>0)lines.push(`${itemH(it,true)} = ${it.A.map((a,i)=>(i?(a.c<0?' '+M+' ':' + '):(a.c<0?M:''))+tH(it.f,true)+' · '+tH(T(Math.abs(a.c),a.k),true)).join('')} = ${sq(pr)}`);
+    else lines.push(`${itemH(it,true)} = ${it.A.map(a=>facH(it.f)+' · '+facH(a)).join(' + ')} = ${sq(pr)}`);
+  });
+  const all=flat(items);
+  if(items.length>1||items.some(i=>i.B))lines.push(`Nu står det: ${sq(all)}`);
+  const g=groupLines(all,false);
+  if(g.length)lines.push('Samla lika termer:<br>'+g.join('<br>'));
+  lines.push(`<b>Svar: ${mH(ans)}</b>`);
+  return lines.join('<br>');
+}
+const box=html=>`<div class="expr">${html}</div>`;
+const bin=(a,b,k='x')=>[T(a,k),T(b)];
+function algQ(items,ask,prompt){
+  const ans=comb(flat(items));
+  return {ask,prompt,fig:box(exprH(items)),short:exprH(items),type:'input',kind:'alg',answer:ans,answerText:mH(ans),explain:explainItems(items,ans)};
+}
+function mcAlg(ans,wrongs){
+  const seen=new Set([mKey(ans)]),w=[];
+  const fine=m=>VER==='8'||Object.keys(m).every(k=>m[k]>=0||m[k]===ans[k]);
+  for(const x of wrongs){const k=mKey(x);if(k!=='0'&&!seen.has(k)&&fine(x)){seen.add(k);w.push(x)}if(w.length===3)break}
+  let g=0;const ks=mTerms(ans).map(t=>t.k);
+  while(w.length<3&&g++<300){const c={...ans},k=pick(ks);c[k]=(c[k]||0)+pick([-2,-1,1,2,3]);const kk=mKey(c);if(kk!=='0'&&!seen.has(kk)&&fine(c)){seen.add(kk);w.push(c)}}
+  return shuffle([{html:mH(ans),ok:true},...w.map(m=>({html:mH(m),ok:false}))]);
+}
+
+/* ---------- Version: 7B (inga räkneoperationer med negativa tal) eller 8A ----------
+   ok7: i varje grupp av lika termer (i skriven ordning) ska delsummorna alltid vara positiva.
+   Då slipper eleven räkna t.ex. 5x − 9x eller −12 + 5. En ensam term som subtraheras (… − 12) är okej. */
+let VER='7';
+function ok7(ts){
+  const groups={};ts.forEach(t=>(groups[t.k]=groups[t.k]||[]).push(t.c));
+  return Object.values(groups).every(g=>{if(g.length<2)return true;let s=0;for(const c of g){s+=c;if(s<=0)return false}return true});
+}
+function retry(make,extra){
+  let it;for(let g=0;g<300;g++){it=make();const ts=flat(it),ans=comb(ts);
+    if(mKey(ans)!=='0'&&(VER==='8'||ok7(ts))&&(!extra||extra(ts,ans)))return it}
+  return it;
+}
+
+/* ---------- Förenkla uttryck ---------- */
+function genForenkla(lv){
+  const seven=VER==='7';
+  const c=(lo,hi)=>NZ(seven?-Math.min(hi,6):lo,hi);
+  const items=retry(()=>{
+    let ts;
+    if(lv===1){const v=pick(['x','a','y','b']);ts=[T(R(2,9),v)];for(let i=0;i<pick([1,2]);i++)ts.push(T(c(-9,9),v))}
+    else if(lv===2){const v=pick(['x','a']);ts=[];for(let i=0;i<pick([2,2,3]);i++)ts.push(T(c(-8,9),v));ts.push(T(c(-9,9)),T(c(-9,9)));ts=shuffle(ts)}
+    else if(seven||Math.random()<.55){const [p,q]=pick([['x','y'],['a','b']]);ts=[T(c(-6,7),p),T(c(-6,7),p),T(c(-6,7),q),T(c(-6,7),q)];if(Math.random()<.4)ts.push(T(c(-5,6),pick([p,q,''])));ts=shuffle(ts)}
+    else{ts=shuffle([T(NZ(-4,5),'x2'),T(NZ(-4,5),'x2'),T(NZ(-7,7),'x'),T(NZ(-7,7),'x'),T(NZ(-9,9))])}
+    if(ts[0].c<0)ts[0].c=-ts[0].c;
+    return ts.map(L);
+  },(ts,ans)=>[...new Set(ts.map(t=>t.k))].every(k=>ans[k])&&Math.max(...Object.values(ans).map(Math.abs))<=30);
+  const ts=flat(items),ans=comb(ts);
+  const prompt=lv===1?'Slå ihop lika termer.':lv===2?'Variabeltermer och tal är olika sorter.':(seven?'Olika variabler är olika sorter.':'Olika variabler – och x² och x – är olika sorter.');
+  const explain=groupLines(ts,true).join('<br>')+`<br><b>Svar: ${mH(ans)}</b>`;
+  const base={ask:'Förenkla uttrycket.',prompt,fig:box(sq(ts)),short:sq(ts),answer:ans,answerText:mH(ans),explain};
+  if(Math.random()<(lv===3?.15:.3)){
+    const ks=Object.keys(ans).filter(k=>ans[k]);
+    const merged=ks.length>1?{[ks.slice().sort((a,b)=>ord(a)-ord(b))[0]]:ts.reduce((s,t)=>s+t.c,0)}:{};
+    const plus=comb(ts.map(t=>T(Math.abs(t.c),t.k)));
+    const flip={...ans};const fk=pick(ks);flip[fk]=-flip[fk];
+    return {...base,ask:'Vilket uttryck är rätt förenklat?',type:'mc',options:mcAlg(ans,shuffle([merged,plus,flip]))};
+  }
+  return {...base,type:'input',kind:'alg'};
+}
+
+/* ---------- Tal gånger parentes ---------- */
+function genTal(lv){
+  if(lv===1)return algQ([K(T(R(2,6)),bin(pick([1,1,2]),R(1,9)))],'Multiplicera in i parentesen.','Talet framför multipliceras med varje term inuti.');
+  if(VER==='7'){
+    if(lv===2)return algQ([K(T(R(2,6)),bin(R(1,4),-R(1,9)))],'Multiplicera in i parentesen.','Både x-termen och talet ska multipliceras.');
+    const it=retry(()=>pick([
+      ()=>[K(T(R(2,5)),bin(R(1,3),NZ(-6,6))),L(T(R(1,7),'x'))],
+      ()=>[L(T(R(2,9),'x')),K(T(R(2,4)),bin(R(1,3),NZ(-7,7)))],
+      ()=>[K(T(R(2,5)),bin(R(1,3),R(1,6))),L(T(NZ(-9,9)))],
+      ()=>[K(T(R(2,4)),bin(1,R(1,5))),K(T(R(2,4)),bin(R(1,2),NZ(-5,5)))]
+    ])());
+    return algQ(it,'Multiplicera in och förenkla.','Multiplicera in först, samla sedan lika termer.');
+  }
+  if(lv===2){
+    const neg=Math.random()<.6,k=neg?-R(2,6):R(2,6),b=neg?NZ(-9,9):-R(1,9);
+    return algQ([K(T(k),Math.random()<.2?[T(b),T(R(1,4),'x')]:bin(R(1,4),b))],'Multiplicera in i parentesen.',k<0?'Tänk på tecknen: minus gånger minus blir plus.':'');
+  }
+  const r=R(0,2);
+  if(r===0)return algQ([K(T(pick([1,1,2,3,-1,-2]),'x'),bin(R(1,3),NZ(-8,8)))],'Multiplicera in i parentesen.','x · x = x²');
+  if(r===1)return algQ([K(T(R(2,5)),bin(R(1,3),NZ(-6,6))),L(T(NZ(-6,7),'x'))],'Multiplicera in och förenkla.','');
+  return algQ([L(T(R(4,12),'x')),K(T(-R(2,4)),bin(R(1,3),NZ(-7,7)))],'Multiplicera in och förenkla.','Tecknet framför talet hör till talet.');
+}
+
+/* ---------- Plus och minus framför parentes ---------- */
+function genPM(lv){
+  const seven=VER==='7';
+  if(lv===1)return algQ(retry(()=>[PL(1,bin(R(1,7),seven?R(1,9):NZ(-9,9))),PL(1,bin(seven?R(1,6):NZ(-5,6),seven?NZ(-6,9):NZ(-9,9)))]),'Ta bort parenteserna och förenkla.','Plus framför en parentes: ingenting ändras.');
+  if(lv===2)return algQ(retry(()=>[PL(1,bin(R(2,9),seven?R(3,12):NZ(-9,9))),PL(-1,bin(seven?R(1,5):NZ(-5,6),seven?NZ(-9,9):NZ(-9,9)))]),
+    'Ta bort parenteserna och förenkla.','Minus framför en parentes byter tecken på alla termer inuti.');
+  if(seven){
+    const it=retry(()=>pick([
+      ()=>[L(T(R(5,12),'x')),L(T(R(8,15))),PL(-1,bin(R(1,4),NZ(-7,7)))],
+      ()=>[K(T(R(2,4)),bin(R(1,2),R(3,8))),PL(-1,bin(1,NZ(-6,6)))],
+      ()=>[PL(1,bin(R(5,9),R(8,14))),PL(-1,bin(R(1,3),NZ(-6,6))),L(T(R(1,5),'x'))]
+    ])());
+    return algQ(it,'Förenkla uttrycket.','Minus framför parentesen byter tecken på alla termer inuti.');
+  }
+  const r=R(0,2);
+  if(r===0)return algQ([L(T(R(3,9),'x')),L(T(NZ(-9,9))),PL(-1,bin(R(1,5),NZ(-9,9)))],'Förenkla uttrycket.','');
+  if(r===1)return algQ([K(T(R(2,4)),bin(1,NZ(-6,6))),PL(-1,bin(R(1,4),NZ(-8,8)))],'Förenkla uttrycket.','');
+  return algQ([PL(-1,bin(R(1,5),NZ(-8,8))),PL(-1,bin(R(1,5),NZ(-8,8)))],'Förenkla uttrycket.','Det är minus framför båda parenteserna.');
+}
+
+/* ---------- Parentes gånger parentes (8A) ---------- */
+function genDubbel(lv){
+  const ask='Multiplicera ihop parenteserna och förenkla.';
+  if(lv===1)return algQ([PP(bin(1,R(1,7)),bin(1,R(1,7)))],ask,'Varje term i första parentesen gånger varje term i den andra – fyra produkter.');
+  if(lv===2)return algQ([PP(bin(1,NZ(-8,8)),bin(1,NZ(-8,8)))],ask,'Tänk på tecknen i varje produkt.');
+  const r=R(0,3);
+  if(r===0){const A=bin(1,NZ(-7,7));return algQ([PP(A,A,true)],'Utveckla kvadraten.','(a + b)² betyder (a + b)(a + b).');}
+  if(r===1){const a=R(2,9);return algQ([PP(bin(1,a),bin(1,-a))],ask,'Titta noga på x-termerna i svaret.');}
+  if(r===2)return algQ([PP(bin(pick([2,3]),NZ(-5,5)),bin(1,NZ(-6,6)))],ask,'');
+  return algQ([PP(bin(1,NZ(-6,6)),bin(1,NZ(-6,6))),K(T(-1,'x'),bin(1,NZ(-6,6)))],'Förenkla uttrycket.','Multiplicera in i båda delarna först.');
+}
+
+/* ---------- Uttryckets värde (7B) ---------- */
+function genVarde(lv){
+  let e,val,why,ask;
+  if(lv===1){const a=R(2,9),b=R(1,12),x=R(2,9);e=`${a}x + ${b}`;val=a*x+b;ask=`Beräkna värdet av uttrycket när x = ${x}.`;
+    why=`Byt ut x mot ${x}:<br>${a} · ${x} + ${b} = ${a*x} + ${b} = <b>${val}</b>`}
+  else if(lv===2){
+    if(Math.random()<.5){let a,b,x;do{a=R(3,9);x=R(2,9);b=R(1,15)}while(a*x-b<=0);e=`${a}x - ${b}`;val=a*x-b;ask=`Beräkna värdet av uttrycket när x = ${x}.`;
+      why=`Byt ut x mot ${x}:<br>${a} · ${x} − ${b} = ${a*x} − ${b} = <b>${val}</b>`}
+    else{const k=R(2,6),b=R(1,9),x=R(2,9);e=`${k}(x + ${b})`;val=k*(x+b);ask=`Beräkna värdet av uttrycket när x = ${x}.`;
+      why=`Byt ut x mot ${x}. Räkna parentesen först:<br>${k} · (${x} + ${b}) = ${k} · ${x+b} = <b>${val}</b>`}
+  } else {
+    if(Math.random()<.6){const p=R(2,6),q=R(2,6),a=R(2,9),b=R(2,9);e=`${p}a + ${q}b`;val=p*a+q*b;ask=`Beräkna värdet av uttrycket när a = ${a} och b = ${b}.`;
+      why=`Byt ut a mot ${a} och b mot ${b}:<br>${p} · ${a} + ${q} · ${b} = ${p*a} + ${q*b} = <b>${val}</b>`}
+    else{let a,b,x,y;do{a=R(4,9);b=R(2,6);x=R(2,8);y=R(1,9)}while(a*x-b*y<=0||a*x-b*y>80);e=`${a}x - ${b}y`;val=a*x-b*y;ask=`Beräkna värdet av uttrycket när x = ${x} och y = ${y}.`;
+      why=`Byt ut x mot ${x} och y mot ${y}:<br>${a} · ${x} − ${b} · ${y} = ${a*x} − ${b*y} = <b>${val}</b>`}
+  }
+  return {ask,prompt:lv===1?'Byt ut variabeln mot talet. 3x betyder 3 · x.':'',fig:box(ex(e)),short:ex(e)+' '+ask.replace('Beräkna värdet av uttrycket ',''),type:'input',kind:'num',answer:val,answerText:fmt(val),explain:why};
+}
+
+/* ---------- Från text till uttryck ---------- */
+function opt(correct,wrongs){return mcHtml(ex(correct),wrongs.map(ex))}
+function mcHtml(correct,wrongs){const seen=new Set([correct]);const w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  return shuffle([{html:correct,ok:true},...w.map(h=>({html:h,ok:false}))])}
+function genOversatt(lv){
+  const T1=[
+    ()=>{const d=R(2,9);return {ask:'Vilket uttryck visar systerns ålder?',story:`Omar är <b>x</b> år. Hans syster är ${d} år äldre än han.`,c:`x + ${d}`,w:[`x - ${d}`,`${d}x`,`${d}`],why:`”${d} år äldre” betyder ${d} år mer, alltså plus ${d}.`}},
+    ()=>{const n=R(3,9);return {ask:`Vad kostar ${n} pennor?`,story:`En penna kostar <b>x</b> kr.`,c:`${n}x`,w:[`x + ${n}`,`x / ${n}`,`${n}`],why:`${n} pennor som kostar x kr styck: ${n} · x = ${n}x.`}},
+    ()=>{const p=pick([15,20,25,30,35]);return {ask:'Hur mycket pengar har du kvar?',story:`Du har <b>x</b> kr och köper en glass för ${p} kr.`,c:`x - ${p}`,w:[`${p} - x`,`x + ${p}`,`${p}x`],why:`Du börjar med x kr och drar bort ${p} kr: x − ${p}. Ordningen spelar roll vid subtraktion.`}},
+    ()=>{const n=R(3,8);return {ask:'Hur många kakor får var och en?',story:`<b>x</b> kakor delas lika mellan ${n} kompisar.`,c:`x / ${n}`,w:[`${n} / x`,`x - ${n}`,`${n}x`],why:`Att dela lika är division: x / ${n}.`}},
+    ()=>{const d=R(2,15);return {ask:`Hur gammal var Lina för ${d} år sedan?`,story:`Lina är <b>x</b> år idag.`,c:`x - ${d}`,w:[`x + ${d}`,`${d} - x`,`${d}x`],why:`För ${d} år sedan var hon ${d} år yngre: x − ${d}.`}},
+  ];
+  const T2=[
+    ()=>{const n=R(3,6),p=pick([40,45,50,60]);return {ask:'Vilket uttryck visar vad det kostar totalt?',story:`En biobiljett kostar <b>x</b> kr. ${n} kompisar köper var sin biljett och delar på en stor popcorn för ${p} kr.`,c:`${n}x + ${p}`,w:[`${n}(x + ${p})`,`x + ${n*p}`,`${n}x - ${p}`],why:`${n} biljetter kostar ${n}x och popcornen ${p} kr: ${n}x + ${p}. Popcornen köps bara en gång.`}},
+    ()=>{const d=R(2,9);return {ask:'Vilket uttryck stämmer?',story:`Tänk på ett tal <b>x</b>. Dubbla talet och dra sedan bort ${d}.`,c:`2x - ${d}`,w:[`2(x - ${d})`,`x² - ${d}`,`${d} - 2x`],why:`Dubbla talet: 2x. Dra sedan bort ${d}: 2x − ${d}. I 2(x − ${d}) drar man bort först och dubblar sedan.`}},
+    ()=>{const s=pick([50,80,100,150]),r=pick([20,25,30,40]);return {ask:'Hur mycket pengar har Ella efter x veckor?',story:`Ella har ${s} kr. Hon sparar ${r} kr varje vecka i <b>x</b> veckor.`,c:`${s} + ${r}x`,w:[`${s}x + ${r}`,`(${s} + ${r})x`,`${r}x`],why:`Varje vecka tillkommer ${r} kr, så på x veckor blir det ${r}x. Plus de ${s} kr hon redan har.`}},
+    ()=>{const a=R(2,6),b=R(2,9),v=R(2,9);return {num:true,ask:`Beräkna värdet av uttrycket när x = ${v}.`,story:`<span class="expr" style="padding:0;font-size:inherit">${ex(`${a}x + ${b}`)}</span>`,answer:a*v+b,
+      why:`Byt ut x mot ${v}:<br>${a} · ${v} + ${b} = ${a*v} + ${b} = <b>${a*v+b}</b>`}},
+  ];
+  const T3=[
+    ()=>{const d=R(2,6);return {ask:'Vilket uttryck visar rektangelns omkrets?',story:`En rektangel är <b>x</b> cm bred. Den är ${d} cm längre än den är bred.`,c:`4x + ${2*d}`,w:[`2x + ${d}`,`4x + ${d}`,`x(x + ${d})`],why:`Längden är x + ${d}. Omkretsen är alla fyra sidor: x + x + (x + ${d}) + (x + ${d}) = 4x + ${2*d}. x(x + ${d}) är arean.`}},
+    ()=>{const d=R(2,5);return {ask:'Vilket uttryck visar deras sammanlagda ålder?',story:`Ali är <b>x</b> år. Bo är dubbelt så gammal som Ali och Cia är ${d} år yngre än Ali.`,c:`4x - ${d}`,w:[`3x - ${d}`,`4x + ${d}`,`2x - ${d}`],why:`Ali: x, Bo: 2x, Cia: x − ${d}. Tillsammans: x + 2x + x − ${d} = 4x − ${d}.`}},
+    ()=>{const d=R(2,9),k=R(2,5);return {ask:'Vilket uttryck stämmer?',story:`Ett tal <b>x</b> ökas med ${d}. Summan multipliceras sedan med ${k}.`,c:`${k}(x + ${d})`,w:[`${k}x + ${d}`,`x + ${k*d}`,`${k} + x + ${d}`],why:`Först summan x + ${d}, sedan hela summan gånger ${k}: ${k}(x + ${d}). Parentesen visar att additionen görs först.`}},
+    ()=>{const a=R(2,5),b=R(2,9),v=VER==='8'?-R(1,5):R(3,9);return {num:true,ask:`Beräkna värdet av uttrycket när x = ${fmt(v)}.`,story:`<span class="expr" style="padding:0;font-size:inherit">${ex(`${a}x + ${b}`)}</span>`,answer:a*v+b,
+      why:v<0?`Byt ut x mot (${fmt(v)}):<br>${a} · (${fmt(v)}) + ${b} = ${fmt(a*v)} + ${b} = <b>${fmt(a*v+b)}</b>`:`Byt ut x mot ${v}:<br>${a} · ${v} + ${b} = ${a*v} + ${b} = <b>${a*v+b}</b>`}},
+    ()=>{const b=R(1,6),v=R(2,6);return {num:true,ask:`Beräkna värdet av uttrycket när x = ${v}.`,story:`<span class="expr" style="padding:0;font-size:inherit">${ex(`x² + ${b}x`)}</span>`,answer:v*v+b*v,
+      why:`x² betyder x · x.<br>${v} · ${v} + ${b} · ${v} = ${v*v} + ${b*v} = <b>${v*v+b*v}</b>`}},
+  ];
+  const t=pick(lv===1?T1:lv===2?T2:T3)();
+  const fig=`<div class="story">${t.story}</div>`;
+  if(t.num)return {ask:t.ask,prompt:'',fig,short:t.story,type:'input',kind:'num',answer:t.answer,answerText:fmt(t.answer),explain:t.why};
+  return {ask:t.ask,prompt:lv===1?'x står för ett tal vi inte vet.':'',fig,short:t.story.replace(/<[^>]+>/g,''),type:'mc',options:opt(t.c,t.w),answerText:ex(t.c),explain:t.why};
+}
+
+/* ---------- Problemlösning ---------- */
+function solve(A,B,C){ // Ax + B = C  -> rader
+  const r=[];
+  if(B!==0)r.push(`${ex(`${A===1?'':A}x`)} = ${fmt(C)} ${B>0?M:'+'} ${fmt(Math.abs(B))} = ${fmt(C-B)}`);
+  if(A!==1)r.push(`${ex('x')} = ${fmt(C-B)} / ${A} = ${fmt((C-B)/A)}`);
+  return r;
+}
+function genProblem(lv){
+  const P1=[
+    ()=>{const x=R(4,15),m=R(3,6),s=R(2,15),Rr=m*x+s;return {story:`Jag tänker på ett tal. Om jag multiplicerar talet med ${m} och sedan adderar ${s} får jag ${Rr}.`,ask:'Vilket tal tänker jag på?',unit:'',x,ans:x,
+      xdef:'det tänkta talet',eq:`${m}x + ${s} = ${Rr}`,lines:solve(m,s,Rr),svar:`Talet är ${x}.`,ctrl:`${m} · ${x} + ${s} = ${Rr} ✓`}},
+    ()=>{const x=R(5,15),m=R(3,6),s=R(2,12),Rr=m*x-s;return {story:`Jag tänker på ett tal. Om jag multiplicerar talet med ${m} och sedan subtraherar ${s} får jag ${Rr}.`,ask:'Vilket tal tänker jag på?',unit:'',x,ans:x,
+      xdef:'det tänkta talet',eq:`${m}x - ${s} = ${Rr}`,lines:solve(m,-s,Rr),svar:`Talet är ${x}.`,ctrl:`${m} · ${x} − ${s} = ${Rr} ✓`}},
+    ()=>{const n=pick([2,3,4]),p=pick([85,90,95,100,110,120]),q=pick([35,45,55,60]),Tt=n*p+q;return {story:`Mia köper ${n} biobiljetter som kostar lika mycket och en stor popcorn för ${q} kr. Totalt betalar hon ${Tt} kr.`,ask:'Vad kostar en biobiljett?',unit:'kr',x:p,ans:p,
+      xdef:'priset för en biljett',eq:`${n}x + ${q} = ${Tt}`,lines:solve(n,q,Tt),svar:`En biljett kostar ${p} kr.`,ctrl:`${n} · ${p} + ${q} = ${Tt} ✓`}},
+  ];
+  const P2=[
+    ()=>{const o=R(9,14),d=R(3,6),S=2*o+d;return {story:`Lisa är ${d} år äldre än sin bror Omar. Tillsammans är de ${S} år.`,ask:'Hur gammal är Lisa?',unit:'år',x:o,ans:o+d,
+      xdef:'Omars ålder',eq:`x + (x + ${d}) = ${S}`,lines:[ex(`2x + ${d} = ${S}`),...solve(2,d,S)],svar:`Lisa är x + ${d} = ${o+d} år.`,ctrl:`${o} + ${o+d} = ${S} ✓`,trap:o}},
+    ()=>{const s0=pick([80,100,120,150,200]),r=pick([25,30,35,40,50]),w=R(4,12),g=s0+r*w;return {story:`Ella har ${s0} kr i spargrisen och sparar ${r} kr varje vecka. Hon vill köpa hörlurar för ${g} kr.`,ask:'Efter hur många veckor har hon råd?',unit:'veckor',x:w,ans:w,
+      xdef:'antal veckor',eq:`${s0} + ${r}x = ${g}`,lines:solve(r,s0,g),svar:`Efter ${w} veckor.`,ctrl:`${s0} + ${r} · ${w} = ${g} ✓`}},
+    ()=>{const w=R(4,12),d=R(2,6),Pp=4*w+2*d;return {story:`En rektangel är ${d} cm längre än den är bred. Omkretsen är ${Pp} cm.`,ask:'Hur lång är rektangeln?',unit:'cm',x:w,ans:w+d,
+      xdef:'bredden',eq:`x + x + (x + ${d}) + (x + ${d}) = ${Pp}`,lines:[ex(`4x + ${2*d} = ${Pp}`),...solve(4,2*d,Pp)],svar:`Längden är x + ${d} = ${w+d} cm.`,ctrl:`${w} + ${w} + ${w+d} + ${w+d} = ${Pp} ✓`,trap:w}},
+  ];
+  const P3=[
+    ()=>{const b=pick([40,50,60,70,80,90]),d=pick([20,30,40]),Tt=4*b+d;return {story:`Ali, Bo och Cia har tjänat ${Tt} kr tillsammans. Ali får dubbelt så mycket som Bo, och Cia får ${d} kr mer än Bo.`,ask:'Hur mycket får Ali?',unit:'kr',x:b,ans:2*b,
+      xdef:'Bos pengar',eq:`x + 2x + (x + ${d}) = ${Tt}`,lines:[ex(`4x + ${d} = ${Tt}`),...solve(4,d,Tt)],svar:`Ali får 2x = ${2*b} kr.`,ctrl:`${b} + ${2*b} + ${b+d} = ${Tt} ✓`,trap:b}},
+    ()=>{const d=pick([20,40,60]),x=(180-d)/4,v2=2*x,v3=x+d,big=Math.max(v2,v3);return {story:`I en triangel är den andra vinkeln dubbelt så stor som den första. Den tredje vinkeln är ${d}° större än den första.`,ask:'Hur stor är den största vinkeln?',unit:'°',x,ans:big,
+      xdef:'den första vinkeln',eq:`x + 2x + (x + ${d}) = 180`,lines:[ex(`4x + ${d} = 180`),...solve(4,d,180)],svar:`Vinklarna är ${x}°, ${v2}° och ${v3}°. Den största är ${big}°.`,ctrl:`${x} + ${v2} + ${v3} = 180 ✓`,trap:x,tip:'Vinkelsumman i en triangel är 180°.'}},
+    ()=>{let a0,ar,br,w,b0;do{a0=pick([200,240,300]);ar=pick([15,20,25]);br=ar+pick([15,20,30]);w=R(4,8);b0=a0-(br-ar)*w}while(b0<20||b0===br);const V=a0+ar*w;
+      return {story:`Adam har ${a0} kr och sparar ${ar} kr i veckan. Bea har ${b0} kr och sparar ${br} kr i veckan.`,ask:'Efter hur många veckor har de lika mycket pengar?',unit:'veckor',x:w,ans:w,
+      xdef:'antal veckor',eq:`${b0} + ${br}x = ${a0} + ${ar}x`,lines:[`${ex(`${b0} + ${br-ar}x`)} = ${a0} <span class="muted">(subtrahera ${ar}x på båda sidor)</span>`,...solve(br-ar,b0,a0)],svar:`Efter ${w} veckor. Då har båda ${V} kr.`,ctrl:`${a0} + ${ar} · ${w} = ${V} och ${b0} + ${br} · ${w} = ${V} ✓`}},
+  ];
+  const p=pick(lv===1?P1:lv===2?P2:P3)();
+  const prompt=lv===1?`Tips: låt x vara ${p.xdef} och ställ upp en ekvation.`:lv===2?'Ställ upp en ekvation. Tänk på vad x ska stå för – och vad frågan gäller.':(p.tip||'');
+  const explain=`Låt <span class="v">x</span> = ${p.xdef}.<br>Ekvation: <span class="m">${ex(p.eq)}</span><br>`+p.lines.map(l=>`<span class="m">${l}</span>`).join('<br>')+
+    `<br><b>${p.svar}</b><br><span class="muted">Kontroll: ${p.ctrl}</span>`+(p.trap!==undefined?`<br><span class="muted">Obs! x = ${p.trap} är inte svaret – läs frågan igen.</span>`:'');
+  return {ask:p.ask,prompt,fig:`<div class="story">${p.story}</div>`,short:p.story,type:'input',kind:'num',answer:p.ans,answerText:fmt(p.ans)+(p.unit?(p.unit==='°'?'°':' '+p.unit):''),unit:p.unit,explain};
+}
+
+/* ---------- Tolka elevens svar ---------- */
+function parseAlg(raw){
+  let s=String(raw).toLowerCase().replace(/[−–—]/g,'-').replace(/²/g,'^2').replace(/,/g,'.').replace(/[\s*·⋅]/g,'');
+  if(!s)return null;
+  const re=/([+-])?(\d+(?:\.\d+)?)?((?:[a-z](?:\^?2)?)*)/y;
+  const m={};let pos=0,first=true,dup=false;
+  while(pos<s.length){
+    re.lastIndex=pos;const r=re.exec(s);
+    if(!r||r[0]===''||(!r[2]&&!r[3]))return null;
+    if(!first&&!r[1])return null;
+    const c=(r[1]==='-'?-1:1)*(r[2]?parseFloat(r[2]):1);
+    const k=kmul(r[3].replace(/\^/g,''),'');
+    if(k in m)dup=true;
+    m[k]=(m[k]||0)+c;pos=re.lastIndex;first=false;
+  }
+  return {m,dup};
+}
+function parseNum(raw){
+  let s=raw.trim().toLowerCase().replace(/[\s ]/g,'').replace(/(kr|år|veckor|vecka|cm|st|°|grader)$/i,'');
+  s=s.replace(/,/g,'.').replace(/[·×]/g,'*').replace(/[÷:]/g,'/').replace(/[−–]/g,'-');
+  if(!s||!/^[\d.+\-*/()]+$/.test(s))return null;
+  let i=0;const peek=()=>s[i];
+  const num=()=>{const m=s.slice(i).match(/^\d*\.?\d+/);if(!m)throw 0;i+=m[0].length;return parseFloat(m[0])};
+  const primary=()=>{if(peek()==='('){i++;const v=expr();if(peek()!==')')throw 0;i++;return v}return num()};
+  const unary=()=>{if(peek()==='-'){i++;return -unary()}if(peek()==='+'){i++;return unary()}return primary()};
+  const term=()=>{let v=unary();for(;;){const c=peek();if(c==='*'){i++;v*=unary()}else if(c==='/'){i++;const d=unary();if(d===0)throw 0;v/=d}else break}return v};
+  function expr(){let v=term();while(peek()==='+'||peek()==='-'){const op=s[i++];const t=term();v=op==='+'?v+t:v-t}return v}
+  try{const v=expr();if(i!==s.length||!isFinite(v))return null;return v}catch(e){return null}
+}
+// LOGIC-END
+
+const TOPICS_BY={
+  '7':[
+    {id:'forenkla',name:'Förenkla uttryck',glyph:'x+x',ex:'3x + 5x + 2 = 8x + 2',gen:genForenkla},
+    {id:'tal',name:'Tal gånger parentes',glyph:'3(x+1)',sm:true,ex:'3(x + 4) = 3x + 12',gen:genTal},
+    {id:'pm',name:'Plus och minus framför parentes',glyph:'−( )',ex:'(5x + 4) − (2x + 1) = 3x + 3',gen:genPM},
+    {id:'varde',name:'Uttryckets värde',glyph:'x = 5',sm:true,ex:'3x + 4 när x = 5 blir 19',gen:genVarde},
+    {id:'oversatt',name:'Från text till uttryck',glyph:'Aa→x',sm:true,ex:'”4 år äldre än x” blir x + 4',gen:genOversatt},
+    {id:'problem',name:'Problemlösning',glyph:'x = ?',sm:true,ex:'Ställ upp och lös en ekvation',gen:genProblem},
+    {id:'mix',name:'Blandat',glyph:'Mix',ex:'Frågor från alla sex delar',gen:null},
+  ],
+  '8':[
+    {id:'forenkla',name:'Förenkla uttryck',glyph:'x+x',ex:'5x − 9x + 2 = −4x + 2',gen:genForenkla},
+    {id:'tal',name:'Tal gånger parentes',glyph:'3(x+1)',sm:true,ex:'−2(x − 5) = −2x + 10',gen:genTal},
+    {id:'pm',name:'Plus och minus framför parentes',glyph:'−( )',ex:'−(2x − 3) = −2x + 3',gen:genPM},
+    {id:'dubbel',name:'Parentes gånger parentes',glyph:'( )( )',sm:true,ex:'(x + 2)(x + 3) = x² + 5x + 6',gen:genDubbel},
+    {id:'oversatt',name:'Från text till uttryck',glyph:'Aa→x',sm:true,ex:'”4 år äldre än x” blir x + 4',gen:genOversatt},
+    {id:'problem',name:'Problemlösning',glyph:'x = ?',sm:true,ex:'Ställ upp och lös en ekvation',gen:genProblem},
+    {id:'mix',name:'Blandat',glyph:'Mix',ex:'Frågor från alla sex delar',gen:null},
+  ]
+};
+let TOPICS=TOPICS_BY['7'];
+
+/* ---------- Spelmotor ---------- */
+const KEYS={'7':'algebrakapitlet-7b-best','8':'algebrakapitlet-8a-best'};
+let best={};
+const loadBest=()=>{try{best=JSON.parse(localStorage.getItem(KEYS[VER])||'{}')||{}}catch(e){best={}}};
+const saveBest=()=>{try{localStorage.setItem(KEYS[VER],JSON.stringify(best))}catch(e){}};
+function setVersion(v){
+  VER=v;TOPICS=TOPICS_BY[v];loadBest();
+  try{localStorage.setItem('algebrakapitlet-version',v)}catch(e){}
+  const b=document.getElementById('ver');b.setAttribute('aria-pressed',v==='8');b.textContent=v==='8'?'✓ Jag går i 8A':'Jag går i 8A';
+  document.getElementById('klass').textContent=v==='8'?'Matte 8A':'Matte 7B';
+  document.title=v==='8'?'Algebrakapitlet åk 8':'Algebrakapitlet åk 7';
+  document.getElementById('how-extra').textContent=v==='8'?' Här räknar du även med negativa tal och multiplicerar parentes med parentes. Skriv x² som x^2 eller med knappen.':' I den här versionen behöver du inte räkna med negativa tal.';
+}
+const starHTML=n=>[0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join('');
+const $=id=>document.getElementById(id);
+function renderHome(){
+  $('stations').innerHTML=TOPICS.map(t=>`<button class="st ${t.id==='mix'?'mix':''}" data-id="${t.id}" id="st-${t.id}">
+    <span class="glyph ${t.sm?'sm':''}">${t.glyph}</span>
+    <span class="st-body"><span class="st-name">${t.name}</span><span class="st-ex">${t.ex}</span>
+    <span class="stars" aria-label="${(best[t.id]?.stars)||0} av 3 stjärnor">${starHTML((best[t.id]?.stars)||0)}</span></span></button>`).join('');
+  const tot=TOPICS.reduce((s,t)=>s+((best[t.id]?.stars)||0),0);
+  $('total').innerHTML=`★ <b>${tot}</b> / 21 stjärnor`;
+  document.querySelectorAll('.st').forEach(b=>b.onclick=()=>start(b.dataset.id));
+}
+function show(id){['home','game','result'].forEach(s=>$(s).hidden=s!==id);window.scrollTo({top:0})}
+let S=null;
+function start(id){
+  const topic=TOPICS.find(t=>t.id===id);
+  S={topic,i:0,score:0,streak:0,bestStreak:0,correct:0,marks:[],missed:[],used:new Set(),cur:null,answered:false};
+  $('g-topic').textContent=topic.name;show('game');ask();
+}
+function makeQ(){
+  const lv=S.i<3?1:S.i<7?2:3;let q,t=0;
+  do{const g=S.topic.gen||pick(TOPICS.slice(0,6)).gen;q=g(lv);t++}while(S.used.has(q.ask+q.short)&&t<30);
+  S.used.add(q.ask+q.short);return q;
+}
+function ask(){
+  const q=S.cur=makeQ();S.answered=false;
+  $('g-progress').innerHTML=Array.from({length:10},(_,k)=>`<i class="${k<S.i?(S.marks[k]?'ok':'no'):k===S.i?'now':''}"></i>`).join('');
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('g-ask').textContent=q.ask;$('g-prompt').textContent=q.prompt||'';$('g-fig').innerHTML=q.fig||'';
+  $('g-fb').hidden=true;$('next').hidden=true;
+  if(q.type==='input'){
+    $('g-opts').hidden=true;$('g-input').hidden=false;$('g-unit').textContent=q.unit||'';
+    const inp=$('ans');inp.value='';inp.disabled=false;inp.style.borderColor='';$('check').disabled=false;$('g-preview').innerHTML='';
+    const alg=q.kind==='alg';
+    inp.inputMode=alg?'text':'decimal';inp.placeholder=alg?'t.ex. 5x + 3':'Ditt svar';
+    const vars=alg?[...new Set(Object.keys(q.answer).join('').replace(/\d/g,'').split('').filter(Boolean))]:[];
+    const keys=alg?[...(vars.length?vars:['x']).flatMap(v=>v==='x'&&(q.answer.x2!==undefined||q.fig.includes('<sup>'))?['x','x²']:[v]),'+',M]:[];
+    $('g-keys').innerHTML=keys.map(k=>`<button class="key" type="button" data-v="${k}">${k.replace(/^([a-z])/,'<span class="v">$1</span>')}</button>`).join('');
+    $('g-keys').hidden=!alg;
+    document.querySelectorAll('.key').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>insert(b.dataset.v)});
+    setTimeout(()=>inp.focus({preventScroll:true}),30);
+  }else{
+    $('g-input').hidden=true;$('g-opts').hidden=false;
+    $('g-opts').innerHTML=q.options.map((o,k)=>`<button class="opt" data-k="${k}" id="opt-${k}"><span class="k">${k+1}</span><span>${o.html}</span></button>`).join('');
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.k));
+  }
+}
+function insert(v){
+  const i=$('ans');if(i.disabled)return;
+  const a=i.selectionStart??i.value.length,b=i.selectionEnd??i.value.length;
+  i.value=i.value.slice(0,a)+v+i.value.slice(b);i.focus();i.setSelectionRange(a+v.length,a+v.length);preview();
+}
+function preview(){
+  if(!S||!S.cur||S.cur.kind!=='alg'||S.answered)return;
+  const v=$('ans').value.trim(),p=v?parseAlg(v):null;
+  $('g-preview').innerHTML=!v?'':p?`Du skrev: <b style="font-family:var(--display)">${mH(p.m)}</b>`:'Jag kan inte läsa uttrycket ännu…';
+}
+function nope(msg){const r=$('g-input');r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake');$('g-preview').innerHTML=msg}
+function checkInput(){
+  if(S.answered)return;const q=S.cur,typed=$('ans').value.trim();
+  let ok;
+  if(q.kind==='alg'){
+    const p=parseAlg(typed);
+    if(!typed)return nope('Skriv ditt svar först.');
+    if(!p)return nope(/[()]/.test(typed)?'Skriv svaret utan parenteser – multiplicera in först.':'Jag kan inte läsa svaret. Skriv till exempel 5x + 3 eller x^2 − 4.');
+    if(p.dup)return nope('Nästan klart – slå ihop lika termer så att svaret blir förenklat.');
+    ok=mKey(p.m)===mKey(q.answer);
+    $('ans').disabled=true;$('check').disabled=true;$('ans').style.borderColor=ok?'var(--good)':'var(--bad)';finish(ok);
+    if(!ok)$('g-fb').insertAdjacentHTML('afterbegin',`<p>Du skrev: <span class="m">${mH(p.m)}</span></p>`);
+  }else{
+    const v=parseNum(typed);
+    if(v===null){$('ans').value='';return nope('Skriv ett tal, till exempel 12.')}
+    ok=Math.abs(v-q.answer)<1e-7;
+    $('ans').disabled=true;$('check').disabled=true;$('ans').style.borderColor=ok?'var(--good)':'var(--bad)';finish(ok);
+  }
+}
+function choose(k){
+  if(S.answered)return;const ok=S.cur.options[k].ok;
+  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(S.cur.options[j].ok)b.classList.add('right');else if(j===k)b.classList.add('wrong')});finish(ok);
+}
+function finish(ok){
+  S.answered=true;S.marks.push(ok);$('g-preview').innerHTML='';
+  if(ok){S.streak++;S.correct++;S.score+=10+Math.min(S.streak-1,5)*2;S.bestStreak=Math.max(S.bestStreak,S.streak)}
+  else{S.streak=0;S.missed.push({q:S.cur.short||S.cur.ask,a:S.cur.answerText})}
+  const fb=$('g-fb');fb.hidden=false;fb.className='fb '+(ok?'ok':'no');
+  fb.innerHTML=`<h3>${ok?pick(['Rätt!','Snyggt!','Helt rätt!','Bra jobbat!']):'Inte riktigt. Rätt svar: '+S.cur.answerText}</h3><div class="exp">${S.cur.explain}</div>`;
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('next').hidden=false;$('next').textContent=S.i===9?'Se resultat':'Nästa fråga';
+  setTimeout(()=>$('next').focus({preventScroll:true}),30);
+}
+function next(){S.i++;if(S.i>=10)result();else ask()}
+function result(){
+  const c=S.correct,stars=c>=9?3:c>=7?2:c>=5?1:0,prev=best[S.topic.id]||{stars:0,score:0},rec=S.score>prev.score;
+  best[S.topic.id]={stars:Math.max(prev.stars,stars),score:Math.max(prev.score,S.score)};saveBest();
+  $('r-stars').innerHTML=starHTML(stars);
+  $('r-head').textContent=(stars===3?'Mästerligt!':stars===2?'Riktigt bra!':stars===1?'Bra kämpat!':'Öva lite till, du klarar det!')+(rec?' Nytt rekord.':'');
+  $('r-correct').textContent=`${c}/10`;$('r-score').textContent=S.score;$('r-streak').textContent=S.bestStreak;
+  $('r-missed-wrap').hidden=!S.missed.length;
+  $('r-missed').innerHTML=S.missed.map(m=>`<li><span class="q">${m.q}</span><span class="a">${m.a}</span></li>`).join('');
+  show('result');renderHome();
+}
+$('check').onclick=checkInput;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkInput()}});
+$('ans').addEventListener('input',preview);
+$('next').onclick=next;$('quit').onclick=()=>{show('home');renderHome()};
+$('again').onclick=()=>start(S.topic.id);$('to-home').onclick=()=>show('home');
+$('ver').onclick=()=>{setVersion(VER==='8'?'7':'8');show('home');renderHome()};
+try{if(localStorage.getItem('algebrakapitlet-version')==='8')VER='8'}catch(e){}
+setVersion(VER);
+document.addEventListener('keydown',e=>{
+  if($('game').hidden||!S)return;
+  if(!S.answered&&S.cur.type==='mc'&&/^[1-4]$/.test(e.key)){const k=+e.key-1;if(k<S.cur.options.length)choose(k)}
+  else if(S.answered&&e.key==='Enter'&&document.activeElement!==$('next')){e.preventDefault();next()}
+});
+renderHome();
+</script>
+</body>
+</html>

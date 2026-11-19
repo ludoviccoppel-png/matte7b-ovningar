@@ -1,0 +1,468 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Talkapitlet åk 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: ett rutat mattehäfte. Stationer som kort i två spalter, spelet som ett blad mitt på sidan. */
+:root{
+  --paper:#f5f7fb; --grid:#dfe6f2; --card:#ffffff; --ink:#18223d; --muted:#56627f;
+  --pen:#1f4fd1; --pen-soft:#e4ebff; --marker:#ffe24d; --on-marker:#18223d;
+  --good:#17824a; --good-soft:#e2f4e8; --bad:#c2352b; --bad-soft:#fbe7e4; --line:#cdd6e8;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#10151f; --grid:#1a2232; --card:#171e2c; --ink:#e6ebf5; --muted:#9ba7c1;
+  --pen:#86a7ff; --pen-soft:#1f2b4a; --marker:#e6c62e; --on-marker:#10151f;
+  --good:#52c486; --good-soft:#143020; --bad:#ff7b6f; --bad-soft:#3a1a18; --line:#2b3549; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#10151f; --grid:#1a2232; --card:#171e2c; --ink:#e6ebf5; --muted:#9ba7c1;
+  --pen:#86a7ff; --pen-soft:#1f2b4a; --marker:#e6c62e; --on-marker:#10151f;
+  --good:#52c486; --good-soft:#143020; --bad:#ff7b6f; --bad-soft:#3a1a18; --line:#2b3549; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background-color:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+.wrap{max-width:780px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,7vw,52px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 mark,.hl{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+.total{font-family:var(--display);font-weight:700;font-size:15px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.total b{color:var(--pen)}
+.label{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.stations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.stations{grid-template-columns:1fr}}
+.st{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);color:var(--ink);
+  border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font:inherit;transition:transform .12s,border-color .12s}
+.st:hover{border-color:var(--pen);transform:translateY(-2px)}
+.st:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.glyph{flex:0 0 74px;height:64px;display:grid;place-items:center;border-radius:10px;background:var(--pen-soft);color:var(--pen);
+  font-family:var(--display);font-weight:800;font-size:22px;white-space:nowrap}
+.st.mix .glyph{background:var(--marker);color:var(--on-marker)}
+.st-body{min-width:0;display:flex;flex-direction:column;gap:2px}
+.st-name{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.2}
+.st-ex{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.stars{letter-spacing:2px;font-size:16px;color:var(--line)}
+.stars .on{color:var(--marker);-webkit-text-stroke:.5px var(--ink)}
+.how{color:var(--muted);font-size:15px;margin:0}
+
+/* Spelbladet */
+.sheet{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:22px clamp(16px,4vw,32px) 26px;display:flex;flex-direction:column;gap:18px;
+  box-shadow:0 10px 30px -18px rgba(24,34,61,.35)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar .topic{font-family:var(--display);font-weight:700;font-size:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:14px;font-weight:700;border-radius:999px;padding:3px 11px;background:var(--pen-soft);color:var(--pen);font-variant-numeric:tabular-nums}
+.chip.streak{background:var(--marker);color:var(--on-marker)}
+.progress{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.progress i{height:7px;border-radius:4px;background:var(--line)}
+.progress i.ok{background:var(--good)} .progress i.no{background:var(--bad)} .progress i.now{background:var(--pen)}
+.ask{font-size:15px;color:var(--muted);font-weight:700}
+.prompt{font-family:var(--display);font-weight:700;font-size:clamp(28px,6.4vw,46px);line-height:1.15;font-variant-numeric:tabular-nums;text-wrap:balance;overflow-wrap:anywhere}
+.prompt sup,.opt sup{font-size:.6em}
+.answer-row{display:flex;gap:10px;flex-wrap:wrap}
+#ans{flex:1 1 180px;min-width:0;font:700 26px var(--display);padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink)}
+#ans:focus{border-color:var(--pen)}
+.btn{font:700 17px var(--display);border:none;border-radius:12px;padding:12px 22px;cursor:pointer;background:var(--pen);color:var(--card)}
+.btn.ghost{background:transparent;color:var(--pen);border:2px solid var(--pen)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{font:700 22px var(--display);text-align:left;padding:14px 16px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:12px;align-items:center;font-variant-numeric:tabular-nums}
+.opt .k{flex:0 0 26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;background:var(--line);color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--pen)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--good-soft)} .fb.no{background:var(--bad-soft)}
+.fb h3{margin:0;font-family:var(--display);font-size:20px}
+.fb.ok h3{color:var(--good)} .fb.no h3{color:var(--bad)}
+.fb p{margin:0}
+.next-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* Resultat */
+.big-stars{font-size:54px;letter-spacing:6px;line-height:1;color:var(--line)}
+.big-stars .on{color:var(--marker);-webkit-text-stroke:1px var(--ink)}
+.res-h{font-family:var(--display);font-size:clamp(26px,5vw,36px);margin:0}
+.facts{display:flex;gap:26px;flex-wrap:wrap}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-family:var(--display);font-size:30px;font-variant-numeric:tabular-nums}
+.missed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.missed li{border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.missed .q{font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums}
+.missed .a{color:var(--good);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Tal<mark>kapitlet</mark></h1>
+      <p class="sub">Matte 7B · Välj en station och klara tio frågor.</p>
+    </div>
+    <div class="total" id="total">★ <b>0</b> / 24 stjärnor</div>
+  </header>
+
+  <section id="home" style="display:flex;flex-direction:column;gap:14px">
+    <div class="stations" id="stations"></div>
+    <p class="how">Rätt svar ger 10 poäng, och flera rätt i rad ger bonus. 9–10 rätt ger tre stjärnor, 7–8 ger två och 5–6 ger en. Skriv decimaltal med komma, till exempel 3,5. Frågorna blir lite svårare mot slutet av varje runda.</p>
+  </section>
+
+  <section id="game" class="sheet" hidden>
+    <div class="bar">
+      <span class="topic" id="g-topic"></span>
+      <div class="chips"><span class="chip" id="g-score">0 p</span><span class="chip streak" id="g-streak" hidden></span></div>
+    </div>
+    <div class="progress" id="g-progress"></div>
+    <div>
+      <div class="ask" id="g-ask"></div>
+      <div class="prompt" id="g-prompt"></div>
+    </div>
+    <div id="g-input" class="answer-row" hidden>
+      <input id="ans" type="text" inputmode="decimal" autocomplete="off" aria-label="Ditt svar" placeholder="Ditt svar">
+      <button class="btn" id="check">Rätta</button>
+    </div>
+    <div id="g-opts" class="opts" hidden></div>
+    <div id="g-fb" class="fb" hidden></div>
+    <div class="next-row">
+      <button class="btn ghost" id="quit">Avsluta</button>
+      <button class="btn" id="next" hidden>Nästa fråga</button>
+    </div>
+  </section>
+
+  <section id="result" class="sheet" hidden>
+    <div class="big-stars" id="r-stars"></div>
+    <h2 class="res-h" id="r-head"></h2>
+    <div class="facts">
+      <div><span class="label">Rätt</span><b id="r-correct"></b></div>
+      <div><span class="label">Poäng</span><b id="r-score"></b></div>
+      <div><span class="label">Bästa svit</span><b id="r-streak"></b></div>
+    </div>
+    <div id="r-missed-wrap">
+      <div class="label" style="margin-bottom:6px">Öva på de här</div>
+      <ul class="missed" id="r-missed"></ul>
+    </div>
+    <div class="next-row">
+      <button class="btn ghost" id="to-home">Till stationerna</button>
+      <button class="btn" id="again">Spela igen</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[R(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const clean=n=>Math.round(n*1e8)/1e8;
+const fmt=n=>clean(n).toLocaleString('sv-SE',{maximumFractionDigits:8});
+const sup=(b,e)=>`${b}<sup>${e}</sup>`;
+const mc=(correct,wrongs)=>{const seen=new Set([correct]);const w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  return shuffle([{html:correct,ok:true},...w.map(h=>({html:h,ok:false}))])};
+
+/* 1. Gånger och delat med 10, 100, 1000 */
+function genTio(lv){
+  const f=pick([10,100,1000]), steg={10:1,100:2,1000:3}[f];
+  const v=R(2,999)/pick([1,10,100]);
+  const mul=Math.random()<.5, op=mul?'·':'/';
+  const res=clean(mul?v*f:v/f);
+  const dir=mul?'höger':'vänster', size=mul?'större':'mindre';
+  if(lv===3&&Math.random()<.5){
+    return {ask:'Vilket tal fattas?',prompt:`${fmt(v)} ${op} ? = ${fmt(res)}`,type:'input',answer:f,answerText:fmt(f),
+      explain:`Decimaltecknet har flyttats ${steg} steg åt ${dir}. Det betyder ${mul?'gånger':'delat med'} ${fmt(f)}.`};
+  }
+  return {ask:'Räkna ut.',prompt:`${fmt(v)} ${op} ${fmt(f)} = ?`,type:'input',answer:res,answerText:fmt(res),
+    explain:`${mul?'Gånger':'Delat med'} ${fmt(f)}: flytta decimaltecknet ${steg} steg åt ${dir}, så talet blir ${size}. <b>${fmt(v)} ${op} ${fmt(f)} = ${fmt(res)}</b>`};
+}
+
+/* 2. Primtalsfaktorisering */
+const PRIMES=[11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+const FAKE=[21,27,33,39,49,51,57,63,69,77,81,87,91,93,99,111,119,121,133];
+const factors=n=>{const f=[];let m=n,p=2;while(m>1){while(m%p===0){f.push(p);m/=p}p++}return f};
+const chain=n=>{const s=[];let m=n,p=2;while(m>1){while(m%p===0){s.push(`${m} / ${p} = ${m/p}`);m/=p}p++}return s.join('<br>')};
+const fstr=f=>f.join(' · ');
+function genPrim(lv){
+  const v=pick(lv===1?['fakt','prim']:['fakt','fakt','prim','stor']);
+  if(v==='prim'){
+    const p=pick(PRIMES), fakes=shuffle(FAKE).slice(0,3);
+    return {ask:'Vilket av talen är ett primtal?',prompt:'Ett primtal har bara två delare: 1 och sig självt.',type:'mc',
+      options:mc(String(p),fakes.map(String)),answerText:String(p),
+      explain:`<b>${p}</b> är ett primtal. De andra går att dela upp: ${fakes.map(x=>{const f=factors(x);return `${x} = ${f[0]} · ${x/f[0]}`}).join(', ')}.`,small:true};
+  }
+  let n,f,tries=0;
+  do{const cnt=lv===1?3:R(3,4);f=[];for(let i=0;i<cnt;i++)f.push(pick(lv===1?[2,2,3,3,5]:[2,2,2,3,3,5,7,11]));f.sort((a,b)=>a-b);n=f.reduce((a,b)=>a*b,1);tries++}
+  while((n>(lv===1?120:420)||n<12)&&tries<200);
+  if(v==='stor'){
+    const big=Math.max(...f);
+    return {ask:'Vilken är den största primtalsfaktorn?',prompt:`${n}`,type:'input',answer:big,answerText:String(big),
+      explain:`Dela med primtal hela tiden:<br>${chain(n)}<br>Alltså ${n} = ${fstr(f)}. Den största faktorn är <b>${big}</b>.`};
+  }
+  const wr=[];
+  const i2=f.indexOf(2),i3=f.indexOf(3);
+  if(f.filter(x=>x===2).length>=2){const g=f.slice();g.splice(i2,2,4);wr.push(fstr(g.sort((a,b)=>a-b)))}
+  else if(f.filter(x=>x===3).length>=2){const g=f.slice();g.splice(i3,2,9);wr.push(fstr(g.sort((a,b)=>a-b)))}
+  else{const g=f.slice();g.splice(0,2,f[0]*f[1]);wr.push(fstr(g.sort((a,b)=>a-b)))}
+  {const g=f.slice();const l=g.length-1;g[l]=g[l]===5?7:g[l]===7?5:g[l]===3?5:g[l]===11?7:3;wr.push(fstr(g.sort((a,b)=>a-b)))}
+  {const g=f.slice(1);wr.push(fstr(g))}
+  {wr.push(fstr([2,...f]))}
+  return {ask:'Vilken är primtalsfaktoriseringen?',prompt:`${n} = ?`,type:'mc',options:mc(fstr(f),wr),answerText:fstr(f),
+    explain:`Dela med minsta möjliga primtal tills du får 1:<br>${chain(n)}<br><b>${n} = ${fstr(f)}</b>. Alla faktorer måste vara primtal, så 4, 6 och 9 får inte vara med.`};
+}
+
+/* 3. Potenser */
+function genPot(lv){
+  const v=pick(lv===1?['calc','calc','skriv','tio']:lv===2?['calc','skriv','tio','tiogg']:['calc','tiogg','summa','tio','skriv']);
+  if(v==='calc'){
+    let b,e;do{b=R(2,lv===1?4:6);e=R(2,lv===1?4:5)}while(b**e>(lv===3?1300:260));
+    return {ask:'Räkna ut.',prompt:`${sup(b,e)} = ?`,type:'input',answer:b**e,answerText:fmt(b**e),
+      explain:`${sup(b,e)} betyder ${b} gånger sig själv ${e} gånger, inte ${b} · ${e}.<br><b>${Array(e).fill(b).join(' · ')} = ${fmt(b**e)}</b>`};
+  }
+  if(v==='skriv'){
+    let b,e;do{b=R(2,6);e=R(3,5)}while(b===e);
+    return {ask:'Skriv som en potens.',prompt:Array(e).fill(b).join(' · '),type:'mc',
+      options:mc(sup(b,e),[sup(e,b),String(b*e),sup(b,e+1)]),answerText:sup(b,e),
+      explain:`Basen är talet som multipliceras (${b}). Exponenten är hur många gånger det står (${e}). <b>${sup(b,e)}</b>`};
+  }
+  if(v==='tio'){
+    const e=R(2,7),N=10**e;
+    return {ask:'Vilken exponent fattas?',prompt:`${sup(10,'?')} = ${fmt(N)}`,type:'input',answer:e,answerText:String(e),
+      explain:`Räkna nollorna: ${fmt(N)} har ${e} nollor, så <b>${sup(10,e)} = ${fmt(N)}</b>.`};
+  }
+  if(v==='tiogg'){
+    const a=R(11,99)/10,e=R(2,4),ans=clean(a*10**e);
+    return {ask:'Skriv talet utan potens.',prompt:`${fmt(a)} · ${sup(10,e)} = ?`,type:'input',answer:ans,answerText:fmt(ans),
+      explain:`${sup(10,e)} = ${fmt(10**e)}. Gånger ${fmt(10**e)} flyttar decimaltecknet ${e} steg åt höger.<br><b>${fmt(a)} · ${fmt(10**e)} = ${fmt(ans)}</b>`};
+  }
+  const b1=R(2,5),e1=R(2,3),b2=R(2,4),e2=R(2,4),ans=b1**e1+b2**e2;
+  return {ask:'Räkna ut.',prompt:`${sup(b1,e1)} + ${sup(b2,e2)} = ?`,type:'input',answer:ans,answerText:String(ans),
+    explain:`Räkna ut potenserna först: ${sup(b1,e1)} = ${b1**e1} och ${sup(b2,e2)} = ${b2**e2}.<br><b>${b1**e1} + ${b2**e2} = ${ans}</b>`};
+}
+
+/* 4. Delbarhetsregler */
+function rule(n,d){
+  const ds=String(n).split('').map(Number),sum=ds.reduce((a,b)=>a+b,0),last=n%10,ok=n%d===0;
+  const s3=`Siffersumman är ${ds.join(' + ')} = ${sum}, och ${sum} ${sum%3===0?'är':'är inte'} delbart med 3.`;
+  let t;
+  if(d===2)t=`Sista siffran är ${last}, en ${last%2===0?'jämn':'udda'} siffra.`;
+  else if(d===5)t=`Talet måste sluta på 0 eller 5. Det slutar på ${last}.`;
+  else if(d===10)t=`Talet måste sluta på 0. Det slutar på ${last}.`;
+  else if(d===3)t=s3;
+  else if(d===9)t=`Siffersumman är ${ds.join(' + ')} = ${sum}, och ${sum} ${sum%9===0?'är':'är inte'} delbart med 9.`;
+  else if(d===4){const l2=n%100;t=`De två sista siffrorna bildar talet ${l2}, och ${l2} ${l2%4===0?'är':'är inte'} delbart med 4.`}
+  else t=`Delbart med 6 kräver delbart med både 2 och 3. Sista siffran är ${last} (${last%2===0?'jämn':'udda'}). ${s3}`;
+  return `${t} Alltså är ${n} <b>${ok?'':'inte '}delbart med ${d}</b>.`;
+}
+function genDelb(lv){
+  const d=pick(lv===1?[2,5,10,3]:[2,3,4,5,6,9,10,3,9,4,6]);
+  const mk=want=>{let n;do{n=R(lv===1?100:1000,lv===1?999:9999)}while((n%d===0)!==want);return n};
+  if(Math.random()<.5){
+    const want=Math.random()<.5,n=mk(want);
+    return {ask:`Är talet delbart med ${d}?`,prompt:`${n}`,type:'mc',options:[{html:'Ja',ok:want},{html:'Nej',ok:!want}],answerText:want?'Ja':'Nej',explain:rule(n,d)};
+  }
+  const n=mk(true),wr=[mk(false),mk(false),mk(false),mk(false),mk(false)].map(String);
+  return {ask:`Vilket tal är delbart med ${d}?`,prompt:`Bara ett av talen går jämnt upp med ${d}.`,type:'mc',options:mc(String(n),wr),answerText:String(n),explain:rule(n,d),small:true};
+}
+
+/* 5. Avrundning */
+function genAvr(lv){
+  if(Math.random()<(lv===1?.4:.6)){
+    const xi=R(1001,lv===1?9999:99999);
+    const p=lv===1?pick([0,1]):pick([0,1,2]);
+    const unit=10**(3-p),ai=Math.round(xi/unit)*unit,dig=Math.floor((xi%unit)/(unit/10));
+    const x=xi/1000,ans=ai/1000,at=ans.toFixed(p).replace('.',',');
+    const name=['heltal','tiondelar','hundradelar'][p],after=['tiondelssiffran','hundradelssiffran','tusendelssiffran'][p];
+    return {ask:`Avrunda till ${name}.`,prompt:`${fmt(x)} ≈ ?`,type:'input',answer:ans,answerText:at,
+      explain:`Titta på ${after}: den är <span class="hl">${dig}</span>. ${dig>=5?'5 eller mer, så avrunda uppåt.':'Mindre än 5, så avrunda nedåt.'}<br><b>${fmt(x)} ≈ ${at}</b>`};
+  }
+  const n=R(1000,lv===3?999999:99999),k=pick([1,2,3]),unit=10**k;
+  const ans=Math.round(n/unit)*unit,dig=Math.floor((n%unit)/(unit/10));
+  const name=['tiotal','hundratal','tusental'][k-1],after=['entalssiffran','tiotalssiffran','hundratalssiffran'][k-1];
+  return {ask:`Avrunda till ${name}.`,prompt:`${fmt(n)} ≈ ?`,type:'input',answer:ans,answerText:fmt(ans),
+    explain:`Titta på ${after}: den är <span class="hl">${dig}</span>. ${dig>=5?'5 eller mer, så avrunda uppåt.':'Mindre än 5, så avrunda nedåt.'}<br><b>${fmt(n)} ≈ ${fmt(ans)}</b>`};
+}
+
+/* 6. Överslagsräkning */
+const off=()=>pick([-4,-3,-2,-1,1,2,3,4]);
+function genOvers(lv){
+  const v=pick(lv===1?['mul','pris']:lv===2?['mul','dec','div','pris']:['mul3','dec','div','pris']);
+  if(v==='mul'||v==='mul3'){
+    let a,b,ra,rb;
+    if(v==='mul'){ra=R(2,9)*10;rb=R(2,9)*10;a=ra+off();b=rb+off()}
+    else{ra=R(2,9)*100;rb=R(3,9);a=ra+off()*R(1,9);b=rb}
+    const ans=ra*rb;
+    return {ask:'Gör ett överslag. Vilket svar ligger närmast?',prompt:`${fmt(a)} · ${fmt(b)} ≈ ?`,type:'mc',
+      options:mc(fmt(ans),[fmt(ans*10),fmt(ans/10),fmt((ra+(v==='mul'?10:100))*rb)]),answerText:fmt(ans),
+      explain:`Avrunda till jämna tal: ${fmt(a)} ≈ ${fmt(ra)}${b!==rb?` och ${fmt(b)} ≈ ${fmt(rb)}`:''}.<br><b>${fmt(ra)} · ${fmt(rb)} = ${fmt(ans)}</b><br>Exakt svar: ${fmt(a*b)}.`};
+  }
+  if(v==='dec'){
+    const ri=R(2,9),rj=R(2,9),a=clean(ri+pick([-3,-2,-1,1,2,3])/10),b=clean(rj+pick([-2,-1,1,2])/10),ans=ri*rj;
+    return {ask:'Gör ett överslag. Vilket svar ligger närmast?',prompt:`${fmt(a)} · ${fmt(b)} ≈ ?`,type:'mc',
+      options:mc(fmt(ans),[fmt(ans*10),fmt(ans/10),fmt((ri+1)*(rj+1))]),answerText:fmt(ans),
+      explain:`Avrunda till heltal: ${fmt(a)} ≈ ${ri} och ${fmt(b)} ≈ ${rj}.<br><b>${ri} · ${rj} = ${ans}</b><br>Exakt svar: ${fmt(clean(a*b))}.`};
+  }
+  if(v==='div'){
+    const d=R(2,9),k=R(2,9),ra=d*k*10,a=ra+off(),ans=k*10;
+    return {ask:'Gör ett överslag. Vilket svar ligger närmast?',prompt:`${fmt(a)} / ${d} ≈ ?`,type:'mc',
+      options:mc(fmt(ans),[fmt(ans*10),fmt(ans/10),fmt(ans+10)]),answerText:fmt(ans),
+      explain:`Välj ett tal nära ${fmt(a)} som går jämnt upp med ${d}: ${fmt(ra)}.<br><b>${fmt(ra)} / ${d} = ${ans}</b><br>Exakt svar: ${fmt(Math.round(a/d*100)/100)} (avrundat).`};
+  }
+  const n=lv===1?2:3,rs=[],ps=[];
+  for(let i=0;i<n;i++){const r=R(2,9)*10;let c;do{c=r*100+R(-450,450)}while(c%10!==0);rs.push(r);ps.push(c/100)}
+  const ans=rs.reduce((a,b)=>a+b,0),pt=ps.map(p=>p.toFixed(2).replace('.',',')+' kr');
+  return {ask:'Avrunda varje pris till närmaste tiotal kronor och gör ett överslag.',prompt:pt.join(' + '),type:'mc',
+    options:mc(fmt(ans)+' kr',[fmt(ans+10)+' kr',fmt(ans-10)+' kr',fmt(ans+20)+' kr',fmt(ans-20)+' kr']),answerText:fmt(ans)+' kr',
+    explain:`${pt.map((p,i)=>`${p} ≈ ${rs[i]} kr`).join(', ')}.<br><b>${rs.join(' + ')} = ${ans} kr</b><br>Exakt summa: ${(ps.reduce((a,b)=>a+b,0)).toFixed(2).replace('.',',')} kr.`};
+}
+
+/* 7. Räkna med decimaltal */
+function genDec(lv){
+  const v=pick(lv===1?['add','sub','mul']:lv===2?['add','sub','mul','div']:['mul2','div','sub','add','mul2']);
+  const num=()=>{const d=lv===1?10:pick([10,100]);return R(lv===1?11:101,lv===1?99:999)/d};
+  if(v==='add'||v==='sub'){
+    let a=num(),b=num();if(v==='sub'&&b>a)[a,b]=[b,a];if(v==='sub'&&a===b)a=clean(a+1.5);
+    const ans=clean(v==='add'?Math.round(a*100+b*100)/100:Math.round(a*100-b*100)/100),op=v==='add'?'+':'−';
+    return {ask:'Räkna ut.',prompt:`${fmt(a)} ${op} ${fmt(b)} = ?`,type:'input',answer:ans,answerText:fmt(ans),
+      explain:`Ställ upp talen så att decimaltecknen hamnar rakt under varandra. Fyll gärna ut med nollor så att talen har lika många decimaler.<br><b>${fmt(a)} ${op} ${fmt(b)} = ${fmt(ans)}</b>`};
+  }
+  if(v==='mul'){
+    const ai=R(11,99),k=R(2,9),a=ai/10,ans=ai*k/10;
+    return {ask:'Räkna ut.',prompt:`${fmt(a)} · ${k} = ?`,type:'input',answer:ans,answerText:fmt(ans),
+      explain:`Räkna utan decimaltecken: ${ai} · ${k} = ${ai*k}. Faktorerna har en decimal tillsammans, så svaret får en decimal.<br><b>${fmt(a)} · ${k} = ${fmt(ans)}</b>`};
+  }
+  if(v==='mul2'){
+    const ai=R(2,9),bi=R(2,lv===3?19:9),ans=ai*bi/100;
+    return {ask:'Räkna ut.',prompt:`${fmt(ai/10)} · ${fmt(bi/10)} = ?`,type:'input',answer:clean(ans),answerText:fmt(ans),
+      explain:`Räkna utan decimaltecken: ${ai} · ${bi} = ${ai*bi}. Faktorerna har två decimaler tillsammans, så svaret får två decimaler.<br><b>${fmt(ai/10)} · ${fmt(bi/10)} = ${fmt(ans)}</b>`};
+  }
+  const qi=R(11,99),d=R(2,9),a=qi*d/10,q=qi/10;
+  return {ask:'Räkna ut.',prompt:`${fmt(a)} / ${d} = ?`,type:'input',answer:q,answerText:fmt(q),
+    explain:`Dela som vanligt och sätt decimaltecknet på samma plats i svaret. Kontrollera med multiplikation: ${fmt(q)} · ${d} = ${fmt(a)}.<br><b>${fmt(a)} / ${d} = ${fmt(q)}</b>`};
+}
+
+const TOPICS=[
+  {id:'tio',name:'Gånger och delat med 10, 100, 1000',glyph:'·100',ex:'3,45 · 100 = 345',gen:genTio},
+  {id:'prim',name:'Primtalsfaktorisering',glyph:'2·3·5',ex:'60 = 2 · 2 · 3 · 5',gen:genPrim},
+  {id:'pot',name:'Potenser',glyph:'2<sup>3</sup>',ex:'2³ = 2 · 2 · 2 = 8',gen:genPot},
+  {id:'delb',name:'Delbarhetsregler',glyph:'/ 3 ?',ex:'Siffersumman avgör för 3 och 9',gen:genDelb},
+  {id:'avr',name:'Avrundning',glyph:'3,47',ex:'3,47 ≈ 3,5 (tiondelar)',gen:genAvr},
+  {id:'overs',name:'Överslagsräkning',glyph:'≈',ex:'48 · 21 ≈ 50 · 20 = 1000',gen:genOvers},
+  {id:'dec',name:'Räkna med decimaltal',glyph:'0,5',ex:'2,4 · 3 = 7,2',gen:genDec},
+  {id:'mix',name:'Blandat',glyph:'Mix',ex:'Frågor från alla sju delar',gen:null},
+];
+
+/* Lagring av bästa resultat */
+const KEY='talkapitlet-7b-best';
+let best={};try{best=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){best={}}
+const saveBest=()=>{try{localStorage.setItem(KEY,JSON.stringify(best))}catch(e){}};
+const starHTML=(n,cls='')=>[0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join('');
+
+const $=id=>document.getElementById(id);
+function renderHome(){
+  $('stations').innerHTML=TOPICS.map(t=>`<button class="st ${t.id==='mix'?'mix':''}" data-id="${t.id}" id="st-${t.id}">
+    <span class="glyph">${t.glyph}</span>
+    <span class="st-body"><span class="st-name">${t.name}</span><span class="st-ex">${t.ex}</span>
+    <span class="stars" aria-label="${(best[t.id]?.stars)||0} av 3 stjärnor">${starHTML((best[t.id]?.stars)||0)}</span></span></button>`).join('');
+  const tot=TOPICS.reduce((s,t)=>s+((best[t.id]?.stars)||0),0);
+  $('total').innerHTML=`★ <b>${tot}</b> / 24 stjärnor`;
+  document.querySelectorAll('.st').forEach(b=>b.onclick=()=>start(b.dataset.id));
+}
+function show(id){['home','game','result'].forEach(s=>$(s).hidden=s!==id);window.scrollTo({top:0})}
+
+let S=null;
+function start(id){
+  const topic=TOPICS.find(t=>t.id===id);
+  S={topic,i:0,score:0,streak:0,bestStreak:0,correct:0,marks:[],missed:[],used:new Set(),cur:null,answered:false};
+  $('g-topic').textContent=topic.name;
+  show('game');ask();
+}
+function makeQ(){
+  const lv=S.i<3?1:S.i<7?2:3;
+  let q,t=0;
+  do{const g=S.topic.gen||pick(TOPICS.slice(0,7)).gen;q=g(lv);t++}while(S.used.has(q.prompt+q.ask)&&t<30);
+  S.used.add(q.prompt+q.ask);return q;
+}
+function ask(){
+  const q=S.cur=makeQ();S.answered=false;
+  $('g-progress').innerHTML=Array.from({length:10},(_,k)=>`<i class="${k<S.i?(S.marks[k]?'ok':'no'):k===S.i?'now':''}"></i>`).join('');
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('g-ask').textContent=q.ask;
+  $('g-prompt').innerHTML=q.prompt;
+  $('g-prompt').style.fontSize=q.small?'clamp(22px,4.6vw,30px)':'';
+  $('g-fb').hidden=true;$('next').hidden=true;
+  if(q.type==='input'){
+    $('g-opts').hidden=true;$('g-input').hidden=false;
+    const inp=$('ans');inp.value='';inp.disabled=false;inp.style.borderColor='';$('check').disabled=false;
+    setTimeout(()=>inp.focus({preventScroll:true}),30);
+  }else{
+    $('g-input').hidden=true;$('g-opts').hidden=false;
+    $('g-opts').innerHTML=q.options.map((o,k)=>`<button class="opt" data-k="${k}" id="opt-${k}"><span class="k">${k+1}</span><span>${o.html}</span></button>`).join('');
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.k));
+  }
+}
+const parse=s=>{s=s.trim().replace(/[\s ]/g,'').replace(/kr$/i,'').replace(',', '.').replace('−','-');if(s===''||!/^-?\d*\.?\d+$/.test(s))return null;return Number(s)};
+function checkInput(){
+  if(S.answered)return;
+  const v=parse($('ans').value);
+  if(v===null){const r=$('g-input');r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake');
+    $('ans').placeholder='Skriv ett tal, t.ex. 3,5';return}
+  const ok=Math.abs(v-S.cur.answer)<1e-7;
+  $('ans').disabled=true;$('check').disabled=true;$('ans').style.borderColor=ok?'var(--good)':'var(--bad)';
+  finish(ok);
+}
+function choose(k){
+  if(S.answered)return;
+  const ok=S.cur.options[k].ok;
+  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(S.cur.options[j].ok)b.classList.add('right');else if(j===k)b.classList.add('wrong')});
+  finish(ok);
+}
+function finish(ok){
+  S.answered=true;S.marks.push(ok);
+  if(ok){S.streak++;S.correct++;const pts=10+Math.min(S.streak-1,5)*2;S.score+=pts;S.bestStreak=Math.max(S.bestStreak,S.streak)}
+  else{S.streak=0;S.missed.push({q:S.cur.prompt,ask:S.cur.ask,a:S.cur.answerText})}
+  const fb=$('g-fb');fb.hidden=false;fb.className='fb '+(ok?'ok':'no');
+  const praise=pick(['Rätt!','Snyggt!','Helt rätt!','Bra jobbat!']);
+  fb.innerHTML=`<h3>${ok?praise:'Inte riktigt. Rätt svar: '+S.cur.answerText}</h3><p>${S.cur.explain}</p>`;
+  $('g-score').textContent=`${S.score} p · fråga ${S.i+1}/10`;
+  $('g-streak').hidden=S.streak<2;$('g-streak').textContent=`${S.streak} rätt i rad`;
+  $('next').hidden=false;$('next').textContent=S.i===9?'Se resultat':'Nästa fråga';
+  setTimeout(()=>$('next').focus({preventScroll:true}),30);
+}
+function next(){S.i++;if(S.i>=10)result();else ask()}
+function result(){
+  const c=S.correct,stars=c>=9?3:c>=7?2:c>=5?1:0;
+  const prev=best[S.topic.id]||{stars:0,score:0};
+  const rec=S.score>prev.score;
+  best[S.topic.id]={stars:Math.max(prev.stars,stars),score:Math.max(prev.score,S.score)};saveBest();
+  $('r-stars').innerHTML=starHTML(stars);
+  $('r-head').textContent=(stars===3?'Mästerligt!':stars===2?'Riktigt bra!':stars===1?'Bra kämpat!':'Öva lite till, du klarar det!')+(rec?' Nytt rekord.':'');
+  $('r-correct').textContent=`${c}/10`;$('r-score').textContent=S.score;$('r-streak').textContent=S.bestStreak;
+  $('r-missed-wrap').hidden=!S.missed.length;
+  $('r-missed').innerHTML=S.missed.map(m=>`<li><span><span class="label">${m.ask}</span><br><span class="q">${m.q}</span></span><span class="a">${m.a}</span></li>`).join('');
+  show('result');renderHome();
+}
+$('check').onclick=checkInput;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkInput()}});
+$('next').onclick=next;
+$('quit').onclick=()=>{show('home');renderHome()};
+$('again').onclick=()=>start(S.topic.id);
+$('to-home').onclick=()=>show('home');
+document.addEventListener('keydown',e=>{
+  if($('game').hidden||!S)return;
+  if(!S.answered&&S.cur.type==='mc'&&/^[1-4]$/.test(e.key)){const k=+e.key-1;if(k<S.cur.options.length)choose(k)}
+  else if(S.answered&&e.key==='Enter'&&document.activeElement!==$('next')){e.preventDefault();next()}
+});
+renderHome();
+</script>
+
+</body></html>

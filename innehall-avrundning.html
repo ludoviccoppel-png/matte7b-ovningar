@@ -1,0 +1,362 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Avrundningsbacken</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600;700&display=swap">
+<style>
+/* Layout: ett ljust dagslandskap med en backe som spelplan. Talet överst, backen i mitten, två stora svarsknappar under. En enda look för båda teman. */
+:root{
+  --sky:#bfe6ff; --sky2:#eaf7ff; --hill:#5cc46b; --hill-dark:#3a9a4c; --ink:#173047; --muted:#4b6378;
+  --ball:#ff8a2b; --ball-dark:#d9631a; --card:#ffffff; --line:#cfe1ee; --gold:#ffc83d; --bad:#e2483d; --good:#1f9a52;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:linear-gradient(180deg,var(--sky) 0%,var(--sky2) 70%);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:640px;margin:0 auto;padding-block:16px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,6vw,34px);margin:0;line-height:1}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:var(--card);border-radius:999px;padding:4px 12px;font-weight:700;font-variant-numeric:tabular-nums;box-shadow:0 2px 0 var(--line);white-space:nowrap}
+.pill b{color:var(--ball-dark)}
+.hearts{color:var(--bad);letter-spacing:2px}
+.hearts .off{color:var(--line)}
+.board{background:var(--card);border-radius:22px;padding:16px clamp(12px,3vw,22px) 18px;box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.task{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.task .to{font-family:var(--display);font-weight:600;font-size:clamp(17px,4vw,21px);color:var(--muted)}
+.task .to b{color:var(--ink);background:linear-gradient(transparent 55%,var(--gold) 55%,var(--gold) 92%,transparent 92%);padding:0 .1em}
+.combo{font-family:var(--display);font-weight:700;color:var(--ball-dark);font-size:18px}
+.num{font-family:var(--display);font-weight:700;font-size:clamp(46px,13vw,76px);line-height:1;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.num .dd{color:var(--ball-dark);text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:8px}
+.timer{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--good);border-radius:6px;transform-origin:left;transition:background .3s}
+svg#hill{width:100%;height:auto;display:block}
+#hill text{font-family:var(--display);font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ch{font:700 clamp(24px,7vw,34px) var(--display);padding:14px 10px;border-radius:16px;border:none;cursor:pointer;background:var(--sky2);color:var(--ink);box-shadow:0 5px 0 var(--line);font-variant-numeric:tabular-nums;transition:transform .08s}
+.ch:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+.ch .arrow{display:block;font-size:13px;font-family:var(--body);color:var(--muted);font-weight:700}
+.ch.right{background:#d8f5e2;box-shadow:0 5px 0 #9fdcb5}
+.ch.wrong{background:#fde0dc;box-shadow:0 5px 0 #f3b0a8}
+.ch:disabled{cursor:default}
+.ch:focus-visible,.go:focus-visible{outline:3px solid var(--ball-dark);outline-offset:3px}
+.fb{min-height:48px;font-size:16px;text-align:center}
+.fb b.ok{color:var(--good)} .fb b.no{color:var(--bad)}
+.levelup{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.levelup span{font-family:var(--display);font-weight:700;font-size:clamp(30px,8vw,44px);color:var(--card);background:var(--ball);padding:8px 22px;border-radius:18px;box-shadow:0 6px 0 var(--ball-dark);animation:pop 1.6s ease forwards}
+@keyframes pop{0%{transform:scale(.4);opacity:0}15%{transform:scale(1.1);opacity:1}25%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.96);display:flex;align-items:safe center;justify-content:center;padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow-y:auto;z-index:30}
+.card{max-width:440px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:center}
+.card h2{font-family:var(--display);font-weight:700;font-size:clamp(28px,7vw,38px);margin:0;line-height:1.05;text-wrap:balance}
+.card p{margin:0}
+.rules{text-align:left;background:var(--sky2);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.go{font:700 22px var(--display);background:var(--ball);color:#fff;border:none;border-radius:16px;padding:13px 30px;cursor:pointer;box-shadow:0 5px 0 var(--ball-dark);align-self:center}
+.keys{color:var(--muted);font-size:14px}
+.big{font-family:var(--display);font-weight:700;font-size:54px;color:var(--ball-dark);line-height:1}
+.missed{list-style:none;margin:0;padding:10px 14px;text-align:left;display:flex;flex-direction:column;gap:6px;background:var(--sky2);border-radius:14px;max-height:200px;overflow-y:auto}
+.missed li{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:5px;font-variant-numeric:tabular-nums}
+.missed li:last-child{border-bottom:none}
+.missed .a{color:var(--good);font-weight:700}
+.lvbtn{border:none;cursor:pointer;font:inherit;font-weight:700;color:var(--ink)}
+.lvbtn:focus-visible,.lv:focus-visible,.c4:focus-visible{outline:3px solid var(--ball-dark);outline-offset:2px}
+.levels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;text-align:left}
+@media (max-width:380px){.levels{grid-template-columns:1fr}}
+.lv{font:600 15px var(--body);background:var(--sky2);color:var(--ink);border:2px solid transparent;border-radius:12px;padding:8px 10px;cursor:pointer;display:flex;gap:8px;align-items:center;text-align:left}
+.lv b{flex:0 0 26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--ball);color:#fff;font-family:var(--display)}
+.lv:hover{border-color:var(--ball)}
+.lv.cur{border-color:var(--ball-dark);background:#fff3e8}
+.stay{display:flex;gap:8px;align-items:center;justify-content:center;font-size:15px;color:var(--muted)}
+.stay input{width:18px;height:18px;accent-color:var(--ball-dark)}
+.choices4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.c4{font:700 clamp(20px,6vw,28px) var(--display);padding:14px 8px;border-radius:16px;border:none;cursor:pointer;background:var(--sky2);color:var(--ink);box-shadow:0 5px 0 var(--line);font-variant-numeric:tabular-nums;display:flex;gap:8px;align-items:center;justify-content:center}
+.c4 .k{font:700 12px var(--body);color:var(--muted);background:#fff;border-radius:6px;padding:1px 6px}
+.c4.right{background:#d8f5e2;box-shadow:0 5px 0 #9fdcb5}
+.c4.wrong{background:#fde0dc;box-shadow:0 5px 0 #f3b0a8}
+.c4:disabled{cursor:default}
+.pickhelp{text-align:center;color:var(--muted);font-size:15px;margin-top:-4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="hud">
+    <h1>Avrundningsbacken</h1>
+    <div class="stats">
+      <span class="pill">Poäng <b id="score">0</b></span>
+      <button class="pill lvbtn" id="lvbtn" aria-label="Byt nivå">Nivå <b id="level">1</b> ▾</button>
+      <span class="pill hearts" id="hearts">♥♥♥</span>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <div class="task"><span class="to" id="to">Avrunda till <b>heltal</b></span><span class="combo" id="combo"></span></div>
+    <div class="num" id="num">7,3</div>
+    <div class="timer"><i id="tbar"></i></div>
+    <svg id="hill" viewBox="0 0 320 222" aria-hidden="true">
+      <defs>
+        <radialGradient id="bg" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ffc58f"/><stop offset="1" stop-color="#ff8a2b"/></radialGradient>
+      </defs>
+      <path id="hillpath" fill="#5cc46b" stroke="#3a9a4c" stroke-width="3"/>
+      <g id="flags"></g>
+      <g id="axis"></g>
+      <g id="ball"><circle r="15" fill="url(#bg)" stroke="#d9631a" stroke-width="2.5"/><path id="ballmark" d="M-8,-4 A9,9 0 0 1 4,-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/></g>
+      <g id="fog" hidden><text x="160" y="80" text-anchor="middle" font-size="17">Var ligger bollen?</text><text x="160" y="102" text-anchor="middle" font-size="13" style="fill:#4b6378">Bollen syns först när du har svarat</text></g>
+    </svg>
+    <div class="choices">
+      <button class="ch" id="left"><span class="arrow">← nedåt</span><span id="lv">7</span></button>
+      <button class="ch" id="right"><span class="arrow">uppåt →</span><span id="rv">8</span></button>
+    </div>
+    <div class="pickhelp" id="pickhelp" hidden>Vilket svar är rätt avrundat?</div>
+    <div class="choices4" id="choices4" hidden></div>
+    <div class="fb" id="fb" aria-live="polite"></div>
+    <div class="levelup" id="lvlup" hidden><span id="lvltxt">Nivå 2</span></div>
+
+    <div class="overlay" id="start">
+      <div class="card">
+        <h2>Åt vilket håll rullar bollen?</h2>
+        <div class="rules">
+          <span>Talet ligger som en boll på en backe mellan två avrundade värden. Toppen av backen ligger exakt på 5.</span>
+          <span>Om siffran som avgör är <b>0–4</b> rullar bollen <b>nedåt</b> till vänster. Om den är <b>5–9</b> rullar bollen <b>uppåt</b> till höger.</span>
+          <span>Svara innan tiden tar slut. Flera rätt i rad ger mer poäng. Från nivå 3 ser du inte bollen förrän du har svarat.</span>
+          <span>På nivå 5 och uppåt kommer frågor med fyra svar: samma sorts tal ska avrundas till tiondelar, hundratal, tusental och så vidare.</span>
+        </div>
+        <button class="go" id="go">Kör från nivå 1!</button>
+        <p class="keys" style="margin-bottom:-4px">eller hoppa direkt till en nivå:</p>
+        <div class="levels" id="lvlist1"></div>
+        <label class="stay"><input type="checkbox" id="stay1"> Stanna på vald nivå</label>
+        <p class="keys">Backe: piltangenterna ← →. Fyra svar: tangenterna 1–4.</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="lvmenu" hidden>
+      <div class="card">
+        <h2>Välj nivå</h2>
+        <div class="levels" id="lvlist2"></div>
+        <label class="stay"><input type="checkbox" id="stay2"> Stanna på vald nivå</label>
+        <p class="keys">Poängen nollställs när du byter nivå.</p>
+        <button class="go" id="lvclose" style="background:var(--muted);box-shadow:0 5px 0 #2c4153">Fortsätt där jag var</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="over" hidden>
+      <div class="card">
+        <h2 id="o-head">Slut på liv!</h2>
+        <div class="big" id="o-score">0</div>
+        <p id="o-info"></p>
+        <div id="o-mw"><p class="keys" style="margin-bottom:6px">Öva på de här:</p><ul class="missed" id="o-missed"></ul></div>
+        <button class="go" id="again">Spela igen</button>
+        <button class="lv" id="overlv" style="align-self:center">Välj en annan nivå</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[R(0,a.length-1)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const S=1000; // allt räknas i tusendelar
+const KIND={
+  heltal:{u:1000,dec:0,name:'heltal',digit:'tiondelssiffran'},
+  tiondelar:{u:100,dec:1,name:'tiondelar',digit:'hundradelssiffran'},
+  hundradelar:{u:10,dec:2,name:'hundradelar',digit:'tusendelssiffran'},
+  tiotal:{u:10000,dec:0,name:'tiotal',digit:'entalssiffran'},
+  hundratal:{u:100000,dec:0,name:'hundratal',digit:'tiotalssiffran'},
+  tusental:{u:1000000,dec:0,name:'tusental',digit:'hundratalssiffran'},
+};
+const LEVELS=[
+  {kinds:['heltal'],time:9,hide:false,label:'Heltal',mode:'hill'},
+  {kinds:['tiondelar','heltal'],time:8,hide:false,label:'Tiondelar',mode:'hill'},
+  {kinds:['tiotal','hundratal'],time:7.5,hide:true,label:'Tiotal och hundratal',mode:'hill'},
+  {kinds:['hundradelar','tiondelar'],time:7,hide:true,label:'Hundradelar',mode:'hill'},
+  {kinds:Object.keys(KIND),time:12,hide:true,label:'Alla positioner (4 svar)',mode:'pick'},
+  {kinds:['tusental','hundratal','tiondelar','hundradelar'],time:7,hide:true,label:'Blandat',mode:'mix'},
+  {kinds:Object.keys(KIND),time:5.5,hide:true,label:'Blandat, snabbare',mode:'mix'},
+  {kinds:Object.keys(KIND),time:4.5,hide:true,label:'Blixtfart',mode:'mix'},
+];
+const PICK_EXTRA=5; // fyrvalsfrågor får mer tid
+const fmtI=(vi,dec)=>(vi/S).toLocaleString('sv-SE',{minimumFractionDigits:dec,maximumFractionDigits:3});
+const fmtV=vi=>(vi/S).toLocaleString('sv-SE',{maximumFractionDigits:3});
+
+function makeQ(level){
+  const L0=LEVELS[Math.min(level-1,LEVELS.length-1)];
+  if(L0.mode==='pick'||(L0.mode==='mix'&&Math.random()<.45))return makePick(L0);
+  const L=L0,kind=pick(L.kinds),K=KIND[kind],u=K.u,step=u/10;
+  let base;
+  if(u>=10000)base=R(1,u>=1000000?98:u>=100000?99:999)*u; else base=R(u===10?10:0,u===10?999:99)*u;
+  const g=u>=10000?1000:1; // heltal får inga decimaler
+  let d,extra=0;
+  do{d=R(0,9);extra=step/10>=g&&Math.random()<.6?R(1,9)*(step/10):0;if(step/100>=g&&extra&&Math.random()<.5)extra+=R(1,9)*(step/100)}
+  while(d===0&&extra===0);
+  if(Math.random()<.12){d=5;extra=0} // exakt på toppen
+  else if(Math.random()<.09&&step/10>=g){d=4;extra=step-step/10} // nära toppen men under
+  const vi=base+d*step+extra;
+  const lo=base,hi=base+u,up=d>=5;
+  return {mode:'hill',kind,K,vi,lo,hi,d,up,frac:(vi-lo)/u,hide:L.hide,time:L.time};
+}
+/* fyrval: avrunda samma sorts tal till olika positioner */
+const roundTo=(vi,u)=>Math.round(vi/u)*u;
+function makePick(L){
+  const kind=pick(Object.keys(KIND)),K=KIND[kind],u=K.u;
+  let vi;do{vi=R(1000,99999)*1000+R(1,99)*10+R(1,9)}while(Math.floor((vi%u)/(u/10))===0&&Math.random()<.6);
+  const lo=Math.floor(vi/u)*u,hi=lo+u,d=Math.floor((vi%u)/(u/10)),up=d>=5,ans=up?hi:lo;
+  const correct=fmtI(ans,K.dec),seen=new Set([correct]),opts=[{t:correct,ok:true}];
+  const add=t=>{if(!seen.has(t)&&opts.length<4){seen.add(t);opts.push({t,ok:false})}};
+  add(fmtI(up?lo:hi,K.dec)); // fel håll
+  for(const k2 of Object.keys(KIND).sort(()=>Math.random()-.5)){if(k2!==kind)add(fmtI(roundTo(vi,KIND[k2].u),KIND[k2].dec))}
+  for(let k=2;opts.length<4;k++)add(fmtI(ans+k*u,K.dec));
+  return {mode:'pick',kind,K,vi,lo,hi,d,up,opts:opts.sort(()=>Math.random()-.5),ansText:correct,time:L.time+PICK_EXTRA};
+}
+/* markera den avgörande siffran i talet */
+function numHTML(q){
+  const s=fmtV(q.vi);
+  // position: den avgörande siffran ligger efter avrundningspositionen
+  let idx;
+  const raw=s.replace(/ /g,' ');
+  const comma=raw.indexOf(',');
+  const intPart=comma<0?raw:raw.slice(0,comma);
+  if(q.K.dec>0||q.kind==='heltal'){idx=(comma<0?raw.length:comma)+1+q.K.dec}
+  else{const digitsFromRight={tiotal:0,hundratal:1,tusental:2}[q.kind];
+    let count=-1;for(let i=intPart.length-1;i>=0;i--){if(/\d/.test(intPart[i])){count++;if(count===digitsFromRight){idx=i;break}}}}
+  if(idx==null||idx>=raw.length||!/\d/.test(raw[idx]))return raw;
+  return raw.slice(0,idx)+`<span class="dd">${raw[idx]}</span>`+raw.slice(idx+1);
+}
+
+/* backe */
+const X0=36,X1=284,BASE=172,HH=96;
+const hx=f=>X0+(X1-X0)*f, hy=f=>BASE-HH*Math.sin(Math.PI*Math.min(1,Math.max(0,f)));
+(function drawHill(){
+  let d=`M0,${BASE} L${X0},${BASE}`;for(let i=0;i<=60;i++){const f=i/60;d+=` L${hx(f).toFixed(1)},${hy(f).toFixed(1)}`}
+  d+=` L320,${BASE} L320,190 L0,190 Z`;$('hillpath').setAttribute('d',d);
+})();
+function drawAxis(q){
+  let a=`<line x1="${X0}" y1="200" x2="${X1}" y2="200" stroke="#173047" stroke-width="2"/>`;
+  for(let k=0;k<=10;k++){const x=hx(k/10),big=k===0||k===10,mid=k===5;
+    a+=`<line x1="${x}" y1="${big||mid?192:195}" x2="${x}" y2="${big||mid?208:205}" stroke="${mid?'#d9631a':'#173047'}" stroke-width="${mid?2.5:1.5}"/>`;
+    if(!big&&!mid)a+=`<text x="${x}" y="186" text-anchor="middle" font-size="10" style="fill:#4b6378">${k}</text>`}
+  a+=`<text x="${hx(0)}" y="221" text-anchor="middle" font-size="13">${fmtI(q.lo,q.K.dec)}</text><text x="${hx(1)}" y="221" text-anchor="middle" font-size="13">${fmtI(q.hi,q.K.dec)}</text>`;
+  a+=`<text x="${hx(.5)}" y="221" text-anchor="middle" font-size="11" style="fill:#d9631a">${fmtV(q.lo+q.K.u/2)}</text>`;
+  $('axis').innerHTML=a;
+  $('flags').innerHTML=`<g transform="translate(${hx(0)-4},${BASE-48})"><line x1="0" y1="0" x2="0" y2="48" stroke="#173047" stroke-width="2"/><path d="M0,0 L22,7 L0,14Z" fill="#ffc83d"/></g>
+    <g transform="translate(${hx(1)+4},${BASE-48})"><line x1="0" y1="0" x2="0" y2="48" stroke="#173047" stroke-width="2"/><path d="M0,0 L-22,7 L0,14Z" fill="#ffc83d"/></g>`;
+}
+let ballF=0.5,ballRot=0;
+function placeBall(f){ballF=f;const x=hx(f),y=hy(f)-15;$('ball').setAttribute('transform',`translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ballRot.toFixed(0)})`)}
+function roll(to,ms,done){
+  const from=ballF,t0=performance.now(),dur=reduce?1:ms;
+  (function st(t){const k=Math.min(1,(t-t0)/dur),e=k*k*(3-2*k);const nf=from+(to-from)*e;
+    ballRot+=(hx(nf)-hx(ballF))/15*57.3;placeBall(nf);if(k<1)requestAnimationFrame(st);else done&&done()})(t0);
+}
+
+/* spel */
+let G=null,timerRAF=0,best=0;try{best=+localStorage.getItem('avrundningsbacken-best')||0}catch(e){}
+function hud(){$('score').textContent=G.score;$('level').textContent=G.level;
+  $('hearts').innerHTML=[0,1,2].map(i=>`<span class="${i<G.lives?'':'off'}">♥</span>`).join('');
+  $('combo').textContent=G.streak>=2?`×${Math.min(G.streak,5)} i rad!`:''}
+function newGame(level=1,stay=false){G={score:0,level,lives:3,streak:0,correct:0,inLevel:0,missed:[],q:null,locked:false,best:0,stay,menu:false};hud();next()}
+function next(){
+  const q=G.q=makeQ(G.level);G.locked=false;
+  $('to').innerHTML=`Avrunda till <b>${q.K.name}</b>`;
+  const pickM=q.mode==='pick';
+  $('hill').style.display=pickM?'none':'';document.querySelector('.choices').hidden=pickM;
+  $('choices4').hidden=!pickM;$('pickhelp').hidden=!pickM;
+  if(pickM){
+    $('num').textContent=fmtV(q.vi);
+    $('choices4').innerHTML=q.opts.map((o,i)=>`<button class="c4" data-i="${i}"><span class="k">${i+1}</span>${o.t}</button>`).join('');
+    $('fb').innerHTML='';
+  }else{
+    $('num').innerHTML=numHTML(q);
+    $('lv').textContent=fmtI(q.lo,q.K.dec);$('rv').textContent=fmtI(q.hi,q.K.dec);
+    ['left','right'].forEach(id=>{const b=$(id);b.disabled=false;b.classList.remove('right','wrong')});
+    drawAxis(q);
+    $('fog').hidden=!q.hide;$('ball').style.opacity=q.hide?0:1;
+    ballRot=0;placeBall(q.frac);
+    $('fb').innerHTML=q.hide?'':'Titta var bollen ligger. Är den före eller efter toppen?';
+  }
+  startTimer(q.time);
+}
+function startTimer(sec){
+  cancelAnimationFrame(timerRAF);const t0=performance.now(),bar=$('tbar');
+  (function tick(t){const left=1-(t-t0)/(sec*1000);bar.style.transform=`scaleX(${Math.max(0,left)})`;
+    bar.style.background=left<.3?'var(--bad)':left<.6?'var(--gold)':'var(--good)';
+    if(G.locked)return;if(left<=0){G.q.mode==='pick'?answerPick(-1):answer(null);return}timerRAF=requestAnimationFrame(tick)})(t0);
+}
+function answer(up){
+  if(G.locked||!G.q||G.q.mode!=='hill')return;G.locked=true;cancelAnimationFrame(timerRAF);
+  const q=G.q,ok=up===q.up,ans=fmtI(q.up?q.hi:q.lo,q.K.dec);
+  $('left').disabled=$('right').disabled=true;
+  $(q.up?'right':'left').classList.add('right');if(up!==null&&!ok)$(up?'right':'left').classList.add('wrong');
+  $('fog').hidden=true;$('ball').style.opacity=1;
+  const why=`Den avgörande siffran (${q.K.digit}) är <b>${q.d}</b>, så ${q.up?'avrunda uppåt':'avrunda nedåt'}: ${fmtV(q.vi)} ≈ <b>${ans}</b>`;
+  if(ok){G.streak++;G.correct++;G.inLevel++;const m=Math.min(G.streak,5),pts=10*m*G.level;G.score+=pts;
+    $('fb').innerHTML=`<b class="ok">Rätt! +${pts}</b><br>${why}`}
+  else{G.streak=0;G.lives--;G.missed.push({n:fmtV(q.vi),k:q.K.name,a:ans});
+    $('fb').innerHTML=`<b class="no">${up===null?'Tiden tog slut!':'Oj, fel håll!'}</b><br>${why}`}
+  hud();
+  const exactTop=q.d===5&&Math.abs(q.frac-.5)<1e-9;
+  const go=()=>roll(q.up?1:0,700,()=>setTimeout(after,ok?650:1700));
+  if(exactTop){$('fb').innerHTML+=`<br>Exakt på toppen! En femma avrundas alltid uppåt.`;roll(.47,180,()=>roll(.53,220,go))}else go();
+}
+function after(){
+  if(!G||G.menu)return;
+  if(G.lives<=0)return gameOver();
+  if(G.inLevel>=6&&G.level<LEVELS.length&&!G.stay){G.level++;G.inLevel=0;hud();
+    $('lvltxt').textContent=`Nivå ${G.level}: ${LEVELS[G.level-1].label}`;$('lvlup').hidden=false;
+    setTimeout(()=>{$('lvlup').hidden=true;next()},1500)}
+  else next();
+}
+function answerPick(i){
+  if(G.locked||!G.q||G.q.mode!=='pick')return;G.locked=true;cancelAnimationFrame(timerRAF);
+  const q=G.q,ok=i>=0&&q.opts[i].ok;
+  [...$('choices4').children].forEach((b,j)=>{b.disabled=true;if(q.opts[j].ok)b.classList.add('right');else if(j===i)b.classList.add('wrong')});
+  $('num').innerHTML=numHTML(q);
+  const why=`Avrunda till ${q.K.name}: titta på ${q.K.digit}. Den är <b>${q.d}</b>, så ${q.up?'avrunda uppåt':'avrunda nedåt'}: ${fmtV(q.vi)} ≈ <b>${q.ansText}</b>`;
+  if(ok){G.streak++;G.correct++;G.inLevel++;const m=Math.min(G.streak,5),pts=10*m*G.level;G.score+=pts;$('fb').innerHTML=`<b class="ok">Rätt! +${pts}</b><br>${why}`}
+  else{G.streak=0;G.lives--;G.missed.push({n:fmtV(q.vi),k:q.K.name,a:q.ansText});$('fb').innerHTML=`<b class="no">${i<0?'Tiden tog slut!':'Inte riktigt!'}</b><br>${why}`}
+  hud();setTimeout(after,ok?1300:2600);
+}
+function gameOver(){
+  const rec=G.score>best;if(rec){best=G.score;try{localStorage.setItem('avrundningsbacken-best',best)}catch(e){}}
+  $('o-head').textContent=rec&&G.score>0?'Nytt rekord!':'Slut på liv!';
+  $('o-score').textContent=G.score;
+  $('o-info').textContent=`${G.correct} rätt, nivå ${G.level}. Ditt rekord är ${best} poäng.`;
+  $('o-mw').hidden=!G.missed.length;
+  $('o-missed').innerHTML=G.missed.map(m=>`<li><span>${m.n} till ${m.k}</span><span class="a">≈ ${m.a}</span></li>`).join('');
+  $('over').hidden=false;setTimeout(()=>$('again').focus(),50);
+}
+function start(level=1,stay=false){['start','over','lvmenu'].forEach(id=>$(id).hidden=true);newGame(level,stay);G.startLevel=level}
+$('go').onclick=()=>start(1,$('stay1').checked);
+$('again').onclick=()=>start(G&&G.startLevel||1,G&&G.stay);
+function levelList(el,stayBox){
+  el.innerHTML=LEVELS.map((L,i)=>`<button class="lv ${G&&G.level===i+1&&el.id==='lvlist2'?'cur':''}" data-l="${i+1}"><b>${i+1}</b>${L.label}</button>`).join('');
+  el.querySelectorAll('.lv').forEach(b=>b.onclick=()=>{const l=+b.dataset.l,st=$(stayBox).checked;start(l,st)});
+}
+levelList($('lvlist1'),'stay1');
+function openMenu(){
+  if(!G||!$('start').hidden)return;
+  G.menu=true;G.locked=true;cancelAnimationFrame(timerRAF);$('stay2').checked=!!G.stay;levelList($('lvlist2'),'stay2');
+  $('lvclose').hidden=!$('over').hidden;$('over').hidden=true;$('lvmenu').hidden=false;
+}
+$('lvbtn').onclick=openMenu;$('overlv').onclick=openMenu;
+$('lvclose').onclick=()=>{$('lvmenu').hidden=true;G.menu=false;G.stay=$('stay2').checked;next()};
+$('choices4').addEventListener('click',e=>{const b=e.target.closest('.c4');if(b)answerPick(+b.dataset.i)});
+$('left').onclick=()=>answer(false);$('right').onclick=()=>answer(true);
+window.addEventListener('keydown',e=>{
+  if(!$('lvmenu').hidden)return;
+  if(!$('start').hidden||!$('over').hidden){if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();($('start').hidden?$('again'):$('go')).click()}return}
+  if(!G||!G.q)return;
+  if(G.q.mode==='pick'){if(/^[1-4]$/.test(e.key)){e.preventDefault();answerPick(+e.key-1)}return}
+  if(e.key==='ArrowLeft'){e.preventDefault();answer(false)}
+  else if(e.key==='ArrowRight'){e.preventDefault();answer(true)}
+});
+/* visa ett exempel bakom startrutan */
+(function demo(){const q=makeQ(2);G={q:null,locked:true};drawAxis(q);$('to').innerHTML=`Avrunda till <b>${q.K.name}</b>`;$('num').innerHTML=numHTML(q);
+  $('lv').textContent=fmtI(q.lo,q.K.dec);$('rv').textContent=fmtI(q.hi,q.K.dec);placeBall(q.frac);
+  $('hearts').innerHTML='♥♥♥'})();
+</script>
+
+</body></html>
