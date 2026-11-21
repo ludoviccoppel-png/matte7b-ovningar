@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kommahoppet – gånger och delat med 10, 100 och 1 000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f7fb;--grid:#dfe6f2;--card:#fff;--ink:#18223d;--muted:#56627f;--marker:#ffe24d;--good:#17824a;--good-soft:#e2f4e8;--bad:#c2352b;--bad-soft:#fbe7e4;--line:#cdd6e8;--tal:#1f4fd1;--tal-soft:#e6edfd;
+--display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 var(--body);color:var(--ink);background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.wrap{max-width:860px;margin:0 auto;padding:22px 14px 40px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1;margin:0;letter-spacing:-.02em}
+h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
+.lv{font:700 14px var(--display);border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink)}
+.lv .st{font:400 12px var(--body);color:#b08a00;margin-left:6px;letter-spacing:1px}
+.lv[aria-pressed="true"]{background:var(--tal);border-color:var(--tal);color:#fff}
+.lv[aria-pressed="true"] .st{color:var(--marker)}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pill{background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-family:var(--display);font-weight:700;font-size:14px}
+.pill b{color:var(--tal)}
+.bar{flex:1;min-width:120px;height:10px;border-radius:99px;background:#e3e8f3;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--tal);transition:width .3s}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:16px;overflow:hidden}
+.task{background:var(--ink);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.task .lbl{font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#c9cfee}
+.task .qn{font:700 13px var(--display);color:#c9cfee}
+.body{padding:16px 18px 18px}
+.q{font:700 clamp(16px,3vw,19px) var(--display);margin:0 0 8px;color:var(--muted)}
+.ex{font:800 clamp(30px,7vw,44px) var(--display);margin:2px 0 14px;letter-spacing:-.01em}
+.ex .gap{display:inline-block;min-width:1.6em;border-bottom:4px dashed var(--tal);color:var(--tal);text-align:center}
+.ans{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ans input{font:700 24px var(--display);width:170px;padding:8px 12px;border:2px solid var(--ink);border-radius:12px;color:var(--ink)}
+.ans input:focus{outline:3px solid var(--marker);outline-offset:1px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.ch{font:800 22px var(--display);text-align:center;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+.ch:hover:not(:disabled){border-color:var(--tal);background:var(--tal-soft)}
+.ch.ok{border-color:var(--good);background:var(--good-soft);color:#105c34}
+.ch.bad{border-color:var(--bad);background:var(--bad-soft);color:#8f2a17}
+.ch:disabled{cursor:default}
+.btn{font:700 16px var(--display);border-radius:12px;padding:10px 20px;cursor:pointer;border:2px solid var(--ink);background:var(--ink);color:#fff}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.tal{background:var(--tal);border-color:var(--tal)}
+.fb{margin-top:12px;border-radius:12px;padding:10px 14px;font-size:15px;background:#f7f8fc;border:1.5px solid var(--line);display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--good-soft);border-color:#b9e3c8;color:#105c34}
+.fb.bad{background:var(--bad-soft);border-color:#f1c2bb;color:#8f2a17}
+.fb b{font-family:var(--display)}
+.next{margin-top:12px;display:none}
+.next.show{display:inline-block}
+.done{text-align:center;padding:26px 18px}
+.done h2{font:800 28px var(--display);margin:0 0 6px}
+.done .big{font:800 46px var(--display);color:var(--tal);margin:4px 0}
+.done p{color:var(--muted);margin:6px 0 14px}
+.theory{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.theory div{background:#fff;border:1.5px solid var(--line);border-left:5px solid var(--tal);border-radius:12px;padding:10px 14px;font-size:14px}
+.theory h3{font:800 15px var(--display);margin:0 0 4px;color:var(--tal)}
+.theory p{margin:0}
+.pv{margin-top:8px;overflow-x:auto}
+.pv table{border-collapse:collapse;font-family:var(--display);background:#fff;color:var(--ink)}
+.pv th{font:700 11px var(--body);color:var(--muted);padding:4px 6px;border:1px solid var(--line);background:#f3f6fc;writing-mode:horizontal-tb;white-space:nowrap}
+.pv td{font-weight:800;font-size:18px;text-align:center;min-width:34px;padding:4px 6px;border:1px solid var(--line)}
+.pv td.k{font:700 12px var(--body);color:var(--muted);text-align:left;white-space:nowrap}
+.pv th.c,.pv td.c{border-left:3px solid var(--ink)}
+.pv tr.after td:not(.k){color:var(--tal)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Komma<mark>hoppet</mark></h1>
+  <p class="sub">Multiplicera och dividera med 10, 100 och 1 000. Se hur siffrorna flyttar i positionstabellen.</p>
+  <div class="levels" id="levels" role="group" aria-label="Välj övning"></div>
+  <div class="hud">
+    <span class="pill">Poäng <b id="score">0</b></span>
+    <span class="pill">I rad <b id="streak">0</b></span>
+    <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+  </div>
+  <div class="card">
+    <div class="task"><span class="lbl" id="lbl"></span><span class="qn" id="qn"></span></div>
+    <div class="body" id="body"></div>
+  </div>
+  <div class="theory">
+    <div><h3>Gånger 10, 100, 1 000</h3><p>Talet blir större. Siffrorna flyttar 1, 2 eller 3 steg åt vänster, och det ser ut som att kommat hoppar åt höger: 3,45 · 100 = 345.</p></div>
+    <div><h3>Delat med 10, 100, 1 000</h3><p>Talet blir mindre. Siffrorna flyttar åt höger, och det ser ut som att kommat hoppar åt vänster: 72 / 1 000 = 0,072.</p></div>
+    <div><h3>Räkna nollorna</h3><p>10 har en nolla och ger 1 steg, 100 ger 2 steg och 1 000 ger 3 steg. Fyll på med nollor när det behövs: 0,6 · 100 = 60.</p></div>
+    <div><h3>Kontrollera</h3><p>Är svaret rimligt? Gånger 100 ska ge ett större tal och delat med 100 ett mindre tal. Gör tvärtom för att kontrollera: 345 / 100 = 3,45.</p></div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+/* Exact decimals: a number is [m, d] meaning m / 10^d (m integer >= 0). */
+function norm(x){var m=x[0],d=x[1];while(d>0&&m%10===0){m/=10;d--;}while(d<0){m*=10;d++;}return [m,d];}
+function fmt(x){x=norm(x);var s=String(x[0]),d=x[1];if(d===0)return s;while(s.length<=d)s="0"+s;return s.slice(0,s.length-d)+","+s.slice(s.length-d);}
+function mul(a,b){return norm([a[0]*b[0],a[1]+b[1]]);}
+function decs(x){return norm(x)[1];}
+function canon(str){var s=String(str).replace(/\s+/g,"").replace(/\./g,",");if(!/^\d*(,\d*)?$/.test(s)||s===""||s===",")return null;var p=s.split(",");var i=p[0].replace(/^0+/,"")||"0",f=(p[1]||"").replace(/0+$/,"");return f?i+","+f:i;}
+function same(a,b){return canon(a)===canon(b);}
+var POS={4:"tiotusental",3:"tusental",2:"hundratal",1:"tiotal",0:"ental","-1":"tiondelar","-2":"hundradelar","-3":"tusendelar","-4":"tiotusen&shy;delar","-5":"hundratusen&shy;delar"};
+function digits(x){x=norm(x);var s=String(x[0]),o={};for(var i=0;i<s.length;i++){o[s.length-1-i-x[1]]=s[i];}if(x[1]>0){for(var e=-1;e>-x[1];e--)if(!(e in o))o[e]="0";}if(!(0 in o))o[0]="0";return o;}
+function pvTable(rows){var all=rows.map(function(r){return digits(r[1]);});var hi=0,lo=0;all.forEach(function(o){Object.keys(o).forEach(function(k){k=+k;if(k>hi)hi=k;if(k<lo)lo=k;});});
+ var h='<div class="pv"><table><tr><th></th>';for(var e=hi;e>=lo;e--)h+='<th'+(e===-1?' class="c"':'')+'>'+POS[e]+'</th>';h+='</tr>';
+ rows.forEach(function(r,i){h+='<tr'+(i>0?' class="after"':'')+'><td class="k">'+r[0]+'</td>';for(var e=hi;e>=lo;e--)h+='<td'+(e===-1?' class="c"':'')+'>'+(all[i][e]!==undefined?all[i][e]:"")+'</td>';h+='</tr>';});
+ return h+'</table></div>';}
+function grp(s){var p=s.split(",");if(p[0].length>=4)p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g," ");return p.join(",");}
+function F(x){return grp(fmt(x));}
+var KS=[["10",1],["100",2],["1 000",3]];
+function steps(k){return k===1?"1 steg":k+" steg";}
+function hiExp(x){x=norm(x);return String(x[0]).length-1-x[1];}
+function randX(){return norm(pick([[ri(11,99),1],[ri(101,999),2],[ri(1,9),1],[ri(1,9),2],[ri(11,99),3],[ri(2,99),0],[ri(11,99),2],[ri(101,999),1],[ri(2,9)*10+ri(1,9),0]]));}
+function pick2(dir){var x,k,r,t=0;do{x=randX();var K=pick(KS);k=K[1];r=dir>0?mul(x,[1,-k]):mul(x,[1,k]);t++;}while((hiExp(r)>4||decs(r)>5||(dir>0&&hiExp(x)>2))&&t<50);return {x:x,k:k,ks:KS[k-1][0],r:r};}
+function explainMul(o){return "Gånger "+o.ks+": varje siffra blir "+o.ks+" gånger större och flyttar "+steps(o.k)+" åt vänster i tabellen. Det ser ut som att kommat flyttas "+steps(o.k)+" åt höger: "+F(o.x)+" · "+o.ks+" = <b>"+F(o.r)+"</b>."+pvTable([["före",o.x],["efter",o.r]]);}
+function explainDiv(o){return "Delat med "+o.ks+": varje siffra blir "+o.ks+" gånger mindre och flyttar "+steps(o.k)+" åt höger i tabellen. Det ser ut som att kommat flyttas "+steps(o.k)+" åt vänster: "+F(o.x)+" / "+o.ks+" = <b>"+F(o.r)+"</b>."+pvTable([["före",o.x],["efter",o.r]]);}
+var GEN={
+ mul10:function(){var o=pick2(1);return {lbl:"Gånger 10, 100, 1 000",q:"Räkna ut.",ex:F(o.x)+" · "+o.ks+" = ?",kind:"input",answer:F(o.r),explain:explainMul(o)};},
+ div10:function(){var o=pick2(-1);return {lbl:"Delat med 10, 100, 1 000",q:"Räkna ut.",ex:F(o.x)+" / "+o.ks+" = ?",kind:"input",answer:F(o.r),explain:explainDiv(o)};},
+ missing:function(){var t=ri(1,4),gap='<span class="gap">?</span>';
+  if(t===1){var o=pick2(1);return {lbl:"Vilket tal saknas?",q:"Vilket tal ska stå i rutan?",ex:gap+" · "+o.ks+" = "+F(o.r),kind:"input",answer:F(o.x),explain:"Gör tvärtom: dela med "+o.ks+". "+F(o.r)+" / "+o.ks+" = <b>"+F(o.x)+"</b>. Kontroll: "+F(o.x)+" · "+o.ks+" = "+F(o.r)+"."};}
+  if(t===2){var o=pick2(1);return {lbl:"Vilket tal saknas?",q:"Vilket tal ska stå i rutan? Välj mellan 10, 100 och 1 000.",ex:F(o.x)+" · "+gap+" = "+F(o.r),kind:"input",answer:o.ks,explain:"Siffrorna har flyttat "+steps(o.k)+" åt vänster (kommat "+steps(o.k)+" åt höger). Ett steg för varje nolla, så det är gånger <b>"+o.ks+"</b>."+pvTable([["före",o.x],["efter",o.r]])};}
+  if(t===3){var o=pick2(-1);return {lbl:"Vilket tal saknas?",q:"Vilket tal ska stå i rutan?",ex:gap+" / "+o.ks+" = "+F(o.r),kind:"input",answer:F(o.x),explain:"Gör tvärtom: multiplicera med "+o.ks+". "+F(o.r)+" · "+o.ks+" = <b>"+F(o.x)+"</b>. Kontroll: "+F(o.x)+" / "+o.ks+" = "+F(o.r)+"."};}
+  var o=pick2(-1);return {lbl:"Vilket tal saknas?",q:"Vilket tal ska stå i rutan? Välj mellan 10, 100 och 1 000.",ex:F(o.x)+" / "+gap+" = "+F(o.r),kind:"input",answer:o.ks,explain:"Siffrorna har flyttat "+steps(o.k)+" åt höger (kommat "+steps(o.k)+" åt vänster). Ett steg för varje nolla, så det är delat med <b>"+o.ks+"</b>."+pvTable([["före",o.x],["efter",o.r]])};},
+ mc:function(){var dir=Math.random()<0.5?1:-1,o=pick2(dir);
+  var c=o.r,opts=[F(c),F(mul(c,[1,1])),F(mul(c,[1,-1]))];
+  var opp=dir>0?mul(o.x,[1,o.k]):mul(o.x,[1,-o.k]);opts.push(F(opp));
+  var seen={},ch=[];opts.forEach(function(t,i){if(seen[t])return;seen[t]=1;ch.push({t:t,ok:i===0});});
+  if(ch.length<4){var extra=F(dir>0?mul(c,[1,-2]):mul(c,[1,2]));if(!seen[extra])ch.push({t:extra,ok:false});}
+  return {lbl:"Välj rätt svar",q:"Vilket svar är rätt?",ex:F(o.x)+(dir>0?" · ":" / ")+o.ks,kind:"mc",choices:ch,explain:dir>0?explainMul(o):explainDiv(o)};}
+};
+var LEVELS=[
+ {id:"mul10",name:"Gånger 10, 100, 1 000",gen:["mul10"]},
+ {id:"div10",name:"Delat med 10, 100, 1 000",gen:["div10"]},
+ {id:"missing",name:"Vilket tal saknas?",gen:["missing"]},
+ {id:"mc",name:"Välj rätt svar",gen:["mc"]},
+ {id:"mix",name:"Blandat",gen:["mul10","div10","missing","mc"]}
+];
+
+var ROUND=10;
+var stars={};try{stars=JSON.parse(localStorage.getItem("m7-tio-stars")||"{}")||{};}catch(e){stars={};}
+function saveStars(){try{localStorage.setItem("m7-tio-stars",JSON.stringify(stars));}catch(e){}}
+var $=function(id){return document.getElementById(id);};
+var state={lv:LEVELS[0],i:0,score:0,streak:0,right:0,q:null,answered:false};
+function renderLevels(){
+ var h="";LEVELS.forEach(function(l){var s=stars[l.id]||0;h+='<button class="lv" type="button" data-id="'+l.id+'" aria-pressed="'+(l===state.lv)+'">'+l.name+'<span class="st" aria-label="'+s+' av 3 stjärnor">'+"★★★".slice(0,s)+"☆☆☆".slice(0,3-s)+'</span></button>';});
+ $("levels").innerHTML=h;
+}
+$("levels").addEventListener("click",function(e){var b=e.target.closest(".lv");if(!b)return;start(LEVELS.filter(function(x){return x.id===b.dataset.id;})[0]);});
+function start(lv){state.lv=lv;state.i=0;state.right=0;state.streak=0;renderLevels();nextQ();}
+function hud(){$("score").textContent=state.score;$("streak").textContent=state.streak;$("prog").style.width=(state.i/ROUND*100)+"%";}
+var last="";
+function nextQ(){
+ if(state.i>=ROUND)return finish();
+ var q,tries=0;do{q=GEN[pick(state.lv.gen)]();tries++;}while(q.ex===last&&tries<20);last=q.ex;
+ if(q.kind==="mc")q.choices=shuffle(q.choices.slice());
+ state.q=q;state.answered=false;
+ $("lbl").textContent=q.lbl;$("qn").textContent="Fråga "+(state.i+1)+" av "+ROUND;
+ var h='<p class="q">'+q.q+'</p><div class="ex">'+q.ex+'</div>';
+ if(q.kind==="input"){h+='<form class="ans" id="f" autocomplete="off"><input id="inp" inputmode="decimal" aria-label="Ditt svar" placeholder="Svar"><button class="btn tal" type="submit">Rätta</button></form>';}
+ else{h+='<div class="choices">';q.choices.forEach(function(c,i){h+='<button class="ch" type="button" data-i="'+i+'">'+esc(c.t)+'</button>';});h+='</div>';}
+ h+='<div class="fb" id="fb" role="status" aria-live="polite"></div><button class="btn next" id="nx" type="button">Nästa fråga →</button>';
+ $("body").innerHTML=h;hud();
+ if(q.kind==="input"){var inp=$("inp");$("f").addEventListener("submit",function(e){e.preventDefault();check(inp.value);});setTimeout(function(){try{inp.focus({preventScroll:true});}catch(e){}},30);}
+ else{$("body").querySelectorAll(".ch").forEach(function(b){b.addEventListener("click",function(){checkMC(+b.dataset.i);});});}
+ $("nx").addEventListener("click",function(){state.i++;nextQ();});
+}
+function verdict(ok,extra){
+ state.answered=true;
+ if(ok){state.right++;state.streak++;state.score+=10+Math.min(state.streak-1,5)*2;}else{state.streak=0;}
+ var fb=$("fb");fb.className="fb show "+(ok?"ok":"bad");
+ fb.innerHTML=(ok?"<b>Rätt!</b> ":"<b>Inte riktigt.</b> "+(extra||""))+state.q.explain;
+ var nx=$("nx");nx.classList.add("show");nx.textContent=state.i+1>=ROUND?"Se resultatet →":"Nästa fråga →";
+ try{nx.focus({preventScroll:true});}catch(e){}
+ hud();
+}
+function check(v){
+ if(state.answered)return;var fb=$("fb");
+ if(canon(v)===null){fb.className="fb show";fb.innerHTML="Skriv ett tal, till exempel 0,12 eller 345.";return;}
+ $("inp").disabled=true;$("f").querySelector("button").disabled=true;
+ var ok=same(v,state.q.answer);
+ verdict(ok,ok?"":"Rätt svar är <b>"+state.q.answer+"</b>. ");
+}
+function checkMC(i){
+ if(state.answered)return;var q=state.q,ok=q.choices[i].ok;
+ $("body").querySelectorAll(".ch").forEach(function(b,j){b.disabled=true;if(q.choices[j].ok)b.classList.add("ok");else if(j===i)b.classList.add("bad");});
+ verdict(ok,"");
+}
+function finish(){
+ var r=state.right,s=r>=9?3:r>=7?2:r>=5?1:0;
+ if(s>(stars[state.lv.id]||0)){stars[state.lv.id]=s;saveStars();}
+ $("lbl").textContent=state.lv.name;$("qn").textContent="Klart!";$("prog").style.width="100%";
+ var msg=s===3?"Snyggt jobbat!":s===2?"Bra jobbat! Lite till så sitter det.":s===1?"Bra början. Läs rutorna nedanför och försök igen.":"Läs rutorna nedanför och prova igen, det blir lättare.";
+ $("body").innerHTML='<div class="done"><h2>'+"★★★".slice(0,s)+"☆☆☆".slice(0,3-s)+'</h2><div class="big">'+r+' / '+ROUND+'</div><p>'+msg+'</p><button class="btn tal" type="button" id="again">Spela igen</button> <button class="btn ghost" type="button" id="nextlv">Nästa övning</button></div>';
+ renderLevels();
+ $("again").addEventListener("click",function(){start(state.lv);});
+ $("nextlv").addEventListener("click",function(){var i=LEVELS.indexOf(state.lv);start(LEVELS[(i+1)%LEVELS.length]);});
+}
+
+start(LEVELS[0]);
+})();
+</script>
+</body>
+</html>
