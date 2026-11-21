@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mönsterverkstaden – talföljder och mönster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f7fb;--grid:#dfe6f2;--card:#fff;--ink:#18223d;--muted:#56627f;--pen:#1f4fd1;--marker:#ffe24d;--good:#17824a;--good-soft:#e2f4e8;--bad:#c2352b;--bad-soft:#fbe7e4;--line:#cdd6e8;--alg:#6a3fc8;--alg-soft:#eee8fb;
+--display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 var(--body);color:var(--ink);background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.wrap{max-width:860px;margin:0 auto;padding:22px 14px 40px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1;margin:0;letter-spacing:-.02em}
+h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:6px 0 0}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
+.lv{font:700 14px var(--display);border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink)}
+.lv .st{font:400 12px var(--body);color:#b08a00;margin-left:6px;letter-spacing:1px}
+.lv[aria-pressed="true"]{background:var(--alg);border-color:var(--alg);color:#fff}
+.lv[aria-pressed="true"] .st{color:var(--marker)}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pill{background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-family:var(--display);font-weight:700;font-size:14px}
+.pill b{color:var(--alg)}
+.bar{flex:1;min-width:120px;height:10px;border-radius:99px;background:#e3e8f3;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--alg);transition:width .3s}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:16px;overflow:hidden}
+.task{background:var(--ink);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.task .lbl{font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#c9cfee}
+.task .qn{font:700 13px var(--display);color:#c9cfee}
+.body{padding:16px 18px 18px}
+.q{font:700 clamp(18px,3.4vw,22px) var(--display);margin:0 0 12px}
+.seq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+.seq .t{min-width:54px;text-align:center;padding:9px 12px;border-radius:12px;background:var(--alg-soft);border:2px solid var(--alg);font:800 clamp(20px,4vw,26px) var(--display)}
+.seq .t.gap{background:#fff;border-style:dashed;color:var(--alg)}
+.seq .dots{font:800 22px var(--display);color:var(--muted)}
+.figs{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:4px 0 14px}
+.fig{background:#fbfcff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px 6px;text-align:center}
+.fig svg{display:block;margin:0 auto}
+.fig span{display:block;font:700 13px var(--display);color:var(--muted);margin-top:4px}
+.fig.more{border-style:dashed;align-self:stretch;display:flex;align-items:center;justify-content:center;min-width:70px;font:800 22px var(--display);color:var(--muted)}
+.ans{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ans input{font:700 22px var(--display);width:150px;padding:8px 12px;border:2px solid var(--ink);border-radius:12px;color:var(--ink)}
+.ans input:focus{outline:3px solid var(--marker);outline-offset:1px}
+.ans .unit{font:700 16px var(--display);color:var(--muted)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.ch{font:700 17px var(--display);text-align:left;padding:11px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+.ch:hover:not(:disabled){border-color:var(--alg);background:var(--alg-soft)}
+.ch.ok{border-color:var(--good);background:var(--good-soft);color:#105c34}
+.ch.bad{border-color:var(--bad);background:var(--bad-soft);color:#8f2a17}
+.ch:disabled{cursor:default}
+.btn{font:700 16px var(--display);border-radius:12px;padding:10px 20px;cursor:pointer;border:2px solid var(--ink);background:var(--ink);color:#fff}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.alg{background:var(--alg);border-color:var(--alg)}
+.fb{margin-top:12px;border-radius:12px;padding:10px 14px;font-size:15px;background:#f7f8fc;border:1.5px solid var(--line);display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--good-soft);border-color:#b9e3c8;color:#105c34}
+.fb.bad{background:var(--bad-soft);border-color:#f1c2bb;color:#8f2a17}
+.fb b{font-family:var(--display)}
+.next{margin-top:12px;display:none}
+.next.show{display:inline-block}
+.done{text-align:center;padding:26px 18px}
+.done h2{font:800 28px var(--display);margin:0 0 6px}
+.done .big{font:800 46px var(--display);color:var(--alg);margin:4px 0}
+.done p{color:var(--muted);margin:6px 0 14px}
+.theory{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.theory div{background:#fff;border:1.5px solid var(--line);border-left:5px solid var(--alg);border-radius:12px;padding:10px 14px;font-size:14px}
+.theory h3{font:800 15px var(--display);margin:0 0 4px;color:var(--alg)}
+.theory p{margin:0}
+.tip{color:var(--muted);font-size:14px;margin:10px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mönster<mark>verkstaden</mark></h1>
+  <p class="sub">Talföljder och mönster: hitta regeln, fortsätt mönstret och skriv en formel för figur n.</p>
+  <div class="levels" id="levels" role="group" aria-label="Välj övning"></div>
+  <div class="hud">
+    <span class="pill">Poäng <b id="score">0</b></span>
+    <span class="pill">I rad <b id="streak">0</b></span>
+    <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+  </div>
+  <div class="card">
+    <div class="task"><span class="lbl" id="lbl"></span><span class="qn" id="qn"></span></div>
+    <div class="body" id="body"></div>
+  </div>
+  <div class="theory">
+    <div><h3>Differens</h3><p>Skillnaden mellan två tal som följer på varandra. I 5, 8, 11, 14 är differensen +3.</p></div>
+    <div><h3>Regel i ord</h3><p>"Börja på 5 och öka med 3 varje gång." Regeln säger var följden börjar och hur den ändras.</p></div>
+    <div><h3>Formel för figur n</h3><p>Ökar mönstret med 3 per figur står 3 framför n: 3n + något. Kontrollera med figur 1: 3 · 1 + 2 = 5 ger 3n + 2.</p></div>
+    <div><h3>Baklänges</h3><p>Vilken figur har 38 stickor om formeln är 3n + 2? Lös 3n + 2 = 38 → 3n = 36 → n = 12.</p></div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+var MINUS="−";
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function num(n){return n<0?MINUS+(-n):String(n);}
+function signed(n){return n<0?MINUS+" "+(-n):"+ "+n;}
+function dstr(d){return d<0?MINUS+(-d):"+"+d;}
+// k·n + m as text
+function expr(k,m){var s=(k===1?"":String(k))+"n";if(m>0)s+=" + "+m;else if(m<0)s+=" "+MINUS+" "+(-m);return s;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+/* ---------- Figure patterns (count = k·n + m) ---------- */
+var U=20, SW=3.2, STICK="#c2410c", DOT="#6a3fc8", TABLE="#8a6100";
+function line(x1,y1,x2,y2){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+STICK+'" stroke-width="'+SW+'" stroke-linecap="round"/>';}
+function dot(x,y,c){return '<circle cx="'+x+'" cy="'+y+'" r="5.2" fill="'+(c||DOT)+'"/>';}
+function svg(w,h,inner){var p=6;return '<svg width="'+(w+2*p)+'" height="'+(h+2*p)+'" viewBox="'+(-p)+' '+(-p)+' '+(w+2*p)+' '+(h+2*p)+'" role="img">'+inner+'</svg>';}
+var PATTERNS=[
+ {id:"rad",name:"kvadrater i en rad",unit:"stickor",k:3,m:1,draw:function(n){var s="";for(var i=0;i<n;i++){s+=line(i*U,0,(i+1)*U,0)+line(i*U,U,(i+1)*U,U);}for(var i=0;i<=n;i++)s+=line(i*U,0,i*U,U);return svg(n*U,U,s);},
+  count:function(n){return 4+(n-1)*3;}},
+ {id:"tva",name:"kvadrater i två rader",unit:"stickor",k:5,m:2,draw:function(n){var s="";for(var r=0;r<=2;r++)for(var i=0;i<n;i++)s+=line(i*U,r*U,(i+1)*U,r*U);for(var r=0;r<2;r++)for(var i=0;i<=n;i++)s+=line(i*U,r*U,i*U,(r+1)*U);return svg(n*U,2*U,s);},
+  count:function(n){return 3*n+2*(n+1);}},
+ {id:"tri",name:"trianglar i en rad",unit:"stickor",k:2,m:1,draw:function(n){var V=U*1.5,h=U*1.5*0.87,s="",P=[];for(var i=0;i<=n+1;i++){P.push(i%2===0?[(i/2)*V,h]:[((i-1)/2+0.5)*V,0]);}
+   for(var i=0;i<=n;i++)s+=line(P[i][0],P[i][1],P[i+1][0],P[i+1][1]);
+   for(var t=0;t<n;t++){if(t%2===0){var k=t/2;s+=line(k*V,h,(k+1)*V,h);}else{var k=(t-1)/2;s+=line((k+0.5)*V,0,(k+1.5)*V,0);}}
+   return svg((n+1)/2*V,h,s);},
+  count:function(n){return 2*n+1;}},
+ {id:"L",name:"prickar i L-form",unit:"prickar",k:2,m:3,draw:function(n){var s="",G=U*0.9,H=n+2;for(var r=0;r<H;r++)s+=dot(0,r*G);for(var c=1;c<=n+1;c++)s+=dot(c*G,(H-1)*G);return svg((n+1)*G,(H-1)*G,s);},
+  count:function(n){return (n+2)+(n+1);}},
+ {id:"plus",name:"prickar i ett kors",unit:"prickar",k:4,m:1,draw:function(n){var s="",G=U*0.9,c=n*G;s+=dot(c,c);for(var i=1;i<=n;i++){s+=dot(c+i*G,c)+dot(c-i*G,c)+dot(c,c+i*G)+dot(c,c-i*G);}return svg(2*c,2*c,s);},
+  count:function(n){return 4*n+1;}},
+ {id:"bord",name:"bord med stolar",unit:"stolar",k:2,m:2,draw:function(n){var T=U*1.3,y=14,s='<rect x="14" y="'+y+'" width="'+(n*T)+'" height="'+T+'" rx="3" fill="#fff3c4" stroke="'+TABLE+'" stroke-width="2.4"/>';
+   for(var i=1;i<n;i++)s+='<line x1="'+(14+i*T)+'" y1="'+y+'" x2="'+(14+i*T)+'" y2="'+(y+T)+'" stroke="'+TABLE+'" stroke-width="1.4"/>';
+   for(var i=0;i<n;i++){var cx=14+(i+0.5)*T;s+=dot(cx,y-8,"#17824a")+dot(cx,y+T+8,"#17824a");}
+   s+=dot(5,y+T/2,"#17824a")+dot(14+n*T+9,y+T/2,"#17824a");return svg(n*T+28,T+28,s);},
+  count:function(n){return 2*n+2;}}
+];
+function figRow(p,ns,more){var h="";ns.forEach(function(n){h+='<div class="fig">'+p.draw(n)+'<span>Figur '+n+'</span></div>';});if(more)h+='<div class="fig more" aria-hidden="true">…</div>';return '<div class="figs">'+h+'</div>';}
+
+/* ---------- Sequences ---------- */
+function arith(){var d=pick([2,3,4,5,6,7,8,9,10,11,12,-2,-3,-4,-5,-6,-7]);var a=d>0?ri(1,25):ri(30,70);return {type:"a",a:a,d:d,term:function(i){return a+(i-1)*d;}};}
+function geom(){var r=pick([2,2,3]);var a=r===2?pick([1,2,3,5]):pick([1,2]);return {type:"g",a:a,r:r,term:function(i){return a*Math.pow(r,i-1);}};}
+function seqHtml(vals,gapIdx,more){var h="";vals.forEach(function(v,i){h+=(i===gapIdx?'<span class="t gap">?</span>':'<span class="t">'+num(v)+'</span>');});if(more)h+='<span class="dots">…</span>';return '<div class="seq">'+h+'</div>';}
+
+/* ---------- Question generators ---------- */
+// Each returns {lbl, html, kind:"input"|"mc", answer (number) or choices[{t,ok}], unit, explain}
+var GEN={
+ next:function(){
+  var r=Math.random();
+  if(r<0.22){var g=geom();var v=[1,2,3,4].map(g.term);var ans=g.term(5);
+   return {lbl:"Nästa tal",html:'<p class="q">Vilket tal kommer härnäst?</p>'+seqHtml(v.concat(["?"]),4),kind:"input",answer:ans,
+    explain:"Här ökar det inte med samma tal varje gång. Varje tal <b>multipliceras med "+g.r+"</b>: "+num(v[3])+" · "+g.r+" = "+num(ans)+"."};}
+  var s=arith();
+  if(r<0.45){var v=[1,2,3,4,5].map(s.term);var gi=ri(1,3);var ans=v[gi];
+   return {lbl:"Fyll i luckan",html:'<p class="q">Vilket tal saknas?</p>'+seqHtml(v,gi),kind:"input",answer:ans,
+    explain:"Differensen är <b>"+dstr(s.d)+"</b>: "+num(v[gi-1])+" "+signed(s.d)+" = "+num(ans)+"."};}
+  var v=[1,2,3,4].map(s.term);var ans=s.term(5);
+  return {lbl:"Nästa tal",html:'<p class="q">Vilket tal kommer härnäst?</p>'+seqHtml(v.concat(["?"]),4),kind:"input",answer:ans,
+   explain:"Skillnaden mellan talen är <b>"+dstr(s.d)+"</b> varje gång: "+num(v[3])+" "+signed(s.d)+" = "+num(ans)+"."};
+ },
+ rule:function(){
+  if(Math.random()<0.2){var g=geom();var v=[1,2,3,4].map(g.term);
+   var c=[{t:"Börja på "+g.a+" och multiplicera med "+g.r+" varje gång",ok:true},
+          {t:"Börja på "+g.a+" och öka med "+(v[1]-v[0])+" varje gång",ok:false},
+          {t:"Börja på "+g.a+" och öka med "+g.r+" varje gång",ok:false},
+          {t:"Börja på "+v[1]+" och multiplicera med "+g.r+" varje gång",ok:false}];
+   return {lbl:"Hitta regeln",html:'<p class="q">Vilken regel beskriver talföljden?</p>'+seqHtml(v,-1,true),kind:"mc",choices:dedupe(c),
+    explain:"Talen multipliceras med "+g.r+": "+v.map(num).join(" → ")+". Skillnaden ökar hela tiden, så det är ingen vanlig ökning."};}
+  var s=arith();var v=[1,2,3,4].map(s.term);var ad=Math.abs(s.d),verb=s.d>0?"öka":"minska",other=s.d>0?"minska":"öka";
+  var c=[{t:"Börja på "+s.a+" och "+verb+" med "+ad+" varje gång",ok:true},
+         {t:"Börja på "+s.a+" och "+other+" med "+ad+" varje gång",ok:false},
+         {t:"Börja på "+(s.a+s.d)+" och "+verb+" med "+ad+" varje gång",ok:false},
+         {t:"Börja på "+s.a+" och "+verb+" med "+(ad+1)+" varje gång",ok:false}];
+  return {lbl:"Hitta regeln",html:'<p class="q">Vilken regel beskriver talföljden?</p>'+seqHtml(v,-1,true),kind:"mc",choices:dedupe(c),
+   explain:"Första talet är "+num(s.a)+" och differensen är "+dstr(s.d)+", alltså: börja på "+num(s.a)+" och "+verb+" med "+ad+"."};
+ },
+ figure:function(){
+  var p=pick(PATTERNS);var ask=pick([4,4,5,6,10,10,20]);var c1=p.count(1),ans=p.count(ask);
+  var steps=ask-1;
+  return {lbl:"Figurmönster",html:'<p class="q">Mönstret består av '+p.name+'. Hur många '+p.unit+' behövs till figur '+ask+'?</p>'+figRow(p,[1,2,3],true),
+   kind:"input",answer:ans,unit:p.unit,
+   explain:"Figur 1 har "+c1+" "+p.unit+" och varje ny figur får <b>"+p.k+" till</b>. Figur "+ask+": "+c1+" + "+steps+" · "+p.k+" = "+ans+". Med formeln "+expr(p.k,p.m)+": "+p.k+" · "+ask+(p.m>=0?" + ":" − ")+Math.abs(p.m)+" = "+ans+"."};
+ },
+ formula:function(){
+  var k,m,html,unit="";
+  if(Math.random()<0.55){var p=pick(PATTERNS);k=p.k;m=p.m;unit=p.unit;
+   html='<p class="q">Vilken formel ger antalet '+p.unit+' i figur n?</p>'+figRow(p,[1,2,3],true);}
+  else{k=pick([2,3,4,5,6,7]);m=pick([-3,-2,-1,1,2,3,4,5,6]);var v=[1,2,3,4].map(function(n){return k*n+m;});
+   html='<p class="q">Talföljden fortsätter på samma sätt. Vilken formel ger tal nummer n?</p>'+seqHtml(v,-1,true);}
+  var first=k+m;
+  var cand=[[k,m],[k,0],[1,k],[first,0],[k,m+k],[k+1,m-1],[k,-m]];
+  var seen={},ch=[];
+  cand.forEach(function(km,i){var key=km[0]+"|"+km[1];if(seen[key])return;seen[key]=1;
+    if(i>0){var same=[1,2,3].every(function(n){return km[0]*n+km[1]===k*n+m;});if(same)return;}
+    ch.push({t:expr(km[0],km[1]),ok:i===0});});
+  var correct=ch[0];var wrong=shuffle(ch.slice(1)).slice(0,3);
+  return {lbl:"Formeln",html:html,kind:"mc",choices:[correct].concat(wrong),
+   explain:"Ökningen är <b>"+k+"</b> per steg, så det står "+k+" framför n. Figur/tal 1 är "+first+": "+k+" · 1 "+signed(m)+" = "+first+". Formeln blir <b>"+expr(k,m)+"</b>."};
+ },
+ back:function(){
+  if(Math.random()<0.5){var p=pick(PATTERNS);var n=ri(6,30);var T=p.count(n);
+   return {lbl:"Baklänges",html:'<p class="q">Mönstret består av '+p.name+' och formeln är <b>'+expr(p.k,p.m)+'</b>. Vilken figur har '+T+' '+p.unit+'?</p>'+figRow(p,[1,2,3],true),
+    kind:"input",answer:n,unit:"",prefix:"Figur",
+    explain:"Lös ekvationen "+expr(p.k,p.m)+" = "+T+": "+p.k+"n = "+(T-p.m)+" → n = "+n+". Det är figur "+n+"."};}
+  var s=arith();if(s.d<0){s=arith();}
+  var d=Math.abs(s.d),a=s.a,n=ri(8,30),T=a+(n-1)*d;var v=[1,2,3,4].map(function(i){return a+(i-1)*d;});
+  return {lbl:"Baklänges",html:'<p class="q">Talföljden fortsätter på samma sätt. Vilken plats i följden har talet '+T+'?</p>'+seqHtml(v,-1,true),
+   kind:"input",answer:n,prefix:"Plats",
+   explain:"Från "+a+" till "+T+" är det "+(T-a)+". Det är "+(T-a)+" / "+d+" = "+(n-1)+" steg på "+d+". Talet har plats 1 + "+(n-1)+" = <b>"+n+"</b>."};
+ }
+};
+function dedupe(c){var seen={},o=[];c.forEach(function(x){if(!seen[x.t]){seen[x.t]=1;o.push(x);}});return o;}
+
+var LEVELS=[
+ {id:"next",name:"Nästa tal",gen:["next"]},
+ {id:"rule",name:"Hitta regeln",gen:["rule"]},
+ {id:"figure",name:"Figurmönster",gen:["figure"]},
+ {id:"formula",name:"Formeln",gen:["formula"]},
+ {id:"back",name:"Baklänges",gen:["back"]},
+ {id:"mix",name:"Blandat",gen:["next","rule","figure","formula","back"]}
+];
+var ROUND=10;
+var stars={};try{stars=JSON.parse(localStorage.getItem("m7-monster-stars")||"{}")||{};}catch(e){stars={};}
+function saveStars(){try{localStorage.setItem("m7-monster-stars",JSON.stringify(stars));}catch(e){}}
+
+var $=function(id){return document.getElementById(id);};
+var state={lv:LEVELS[0],i:0,score:0,streak:0,right:0,q:null,answered:false};
+
+function renderLevels(){
+ var h="";LEVELS.forEach(function(l){var s=stars[l.id]||0;h+='<button class="lv" type="button" data-id="'+l.id+'" aria-pressed="'+(l===state.lv)+'">'+l.name+'<span class="st" aria-label="'+s+' av 3 stjärnor">'+"★★★".slice(0,s)+"☆☆☆".slice(0,3-s)+'</span></button>';});
+ $("levels").innerHTML=h;
+}
+$("levels").addEventListener("click",function(e){var b=e.target.closest(".lv");if(!b)return;var l=LEVELS.filter(function(x){return x.id===b.dataset.id;})[0];start(l);});
+
+function start(lv){state.lv=lv;state.i=0;state.right=0;state.streak=0;renderLevels();nextQ();}
+function hud(){ $("score").textContent=state.score;$("streak").textContent=state.streak;$("prog").style.width=(state.i/ROUND*100)+"%"; }
+
+function nextQ(){
+ if(state.i>=ROUND)return finish();
+ var g=GEN[pick(state.lv.gen)];var q=g();
+ if(q.kind==="mc"){q.choices=shuffle(q.choices.slice());}
+ state.q=q;state.answered=false;
+ $("lbl").textContent=q.lbl;$("qn").textContent="Fråga "+(state.i+1)+" av "+ROUND;
+ var h=q.html;
+ if(q.kind==="input"){
+  h+='<form class="ans" id="f" autocomplete="off">'+(q.prefix?'<span class="unit">'+q.prefix+'</span>':'')+'<input id="inp" inputmode="numeric" aria-label="Ditt svar" placeholder="Svar">'+(q.unit?'<span class="unit">'+esc(q.unit)+'</span>':'')+'<button class="btn alg" type="submit">Rätta</button></form>';
+ }else{
+  h+='<div class="choices">';q.choices.forEach(function(c,i){h+='<button class="ch" type="button" data-i="'+i+'">'+esc(c.t)+'</button>';});h+='</div>';
+ }
+ h+='<div class="fb" id="fb" role="status" aria-live="polite"></div><button class="btn next" id="nx" type="button">Nästa fråga →</button>';
+ $("body").innerHTML=h;hud();
+ if(q.kind==="input"){var inp=$("inp");$("f").addEventListener("submit",function(e){e.preventDefault();check(inp.value);});setTimeout(function(){try{inp.focus({preventScroll:true});}catch(e){}},30);}
+ else{$("body").querySelectorAll(".ch").forEach(function(b){b.addEventListener("click",function(){checkMC(+b.dataset.i);});});}
+ $("nx").addEventListener("click",function(){state.i++;nextQ();});
+}
+function parse(s){s=String(s).replace(/[−–]/g,"-").replace(/\s+/g,"").replace(/^(figur|plats)/i,"");if(!/^-?\d+$/.test(s))return null;return parseInt(s,10);}
+function verdict(ok,extra){
+ state.answered=true;
+ if(ok){state.right++;state.streak++;state.score+=10+Math.min(state.streak-1,5)*2;}else{state.streak=0;}
+ var fb=$("fb");fb.className="fb show "+(ok?"ok":"bad");
+ fb.innerHTML=(ok?"<b>Rätt!</b> ":"<b>Inte riktigt.</b> "+(extra||""))+state.q.explain;
+ var nx=$("nx");nx.classList.add("show");nx.textContent=state.i+1>=ROUND?"Se resultatet →":"Nästa fråga →";
+ try{nx.focus({preventScroll:true});}catch(e){}
+ hud();
+}
+function check(v){
+ if(state.answered)return;var n=parse(v);var fb=$("fb");
+ if(n===null){fb.className="fb show";fb.innerHTML="Skriv ett heltal, till exempel 17.";return;}
+ $("inp").disabled=true;$("f").querySelector("button").disabled=true;
+ var ok=n===state.q.answer;
+ verdict(ok,ok?"":"Rätt svar är <b>"+num(state.q.answer)+"</b>. ");
+}
+function checkMC(i){
+ if(state.answered)return;var q=state.q,ok=q.choices[i].ok;
+ $("body").querySelectorAll(".ch").forEach(function(b,j){b.disabled=true;if(q.choices[j].ok)b.classList.add("ok");else if(j===i)b.classList.add("bad");});
+ verdict(ok,"");
+}
+function finish(){
+ var r=state.right,s=r>=9?3:r>=7?2:r>=5?1:0;
+ if(s>(stars[state.lv.id]||0)){stars[state.lv.id]=s;saveStars();}
+ $("lbl").textContent=state.lv.name;$("qn").textContent="Klart!";$("prog").style.width="100%";
+ var msg=s===3?"Snyggt! Du har koll på mönstren.":s===2?"Bra jobbat! Lite till så sitter det.":s===1?"Bra början. Läs rutorna nedanför och försök igen.":"Läs rutorna nedanför och prova igen, det blir lättare.";
+ $("body").innerHTML='<div class="done"><h2>'+"★★★".slice(0,s)+"☆☆☆".slice(0,3-s)+'</h2><div class="big">'+r+' / '+ROUND+'</div><p>'+msg+'</p><button class="btn alg" type="button" id="again">Spela igen</button> <button class="btn ghost" type="button" id="nextlv">Nästa övning</button></div>';
+ renderLevels();
+ $("again").addEventListener("click",function(){start(state.lv);});
+ $("nextlv").addEventListener("click",function(){var i=LEVELS.indexOf(state.lv);start(LEVELS[(i+1)%LEVELS.length]);});
+}
+start(LEVELS[0]);
+})();
+</script>
+</body>
+</html>
